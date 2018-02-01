@@ -15,16 +15,29 @@ module.exports = async() => {
 
   var coordinator = TokenDistributionCoordinator.at(config.coordinator);
 
-  events = coordinator.SAFTAllocation({}, {
+  e1 = coordinator.SAFTAllocation({}, {
     fromBlock: 0,
     toBlock: 'latest'
   })
   console.log(`Beneficiary, Vesting contract`);
 
-  events.watch((err, res) => {
+  e2 = coordinator.AdvisorAllocation({}, {
+    fromBlock: 0,
+    toBlock: 'latest'
+  })
+
+  e1.watch((err, res) => {
+    if (res.args.vestingContract != "0x0000000000000000000000000000000000000000") {
+      const log = `${res.args.beneficiary}, ${res.args.vestingContract}`
+      console.log(`${log}`);
+    }
+  });
+
+  e2.watch((err, res) => {
     if (res.args.vestingContract != "0x0000000000000000000000000000000000000000") {
       const log = `${res.args.beneficiary}, ${res.args.vestingContract}`
       console.log(`${log}`);
     }
   })
+
 }

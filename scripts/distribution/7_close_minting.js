@@ -12,14 +12,18 @@ module.exports = async() => {
     wallet: config.wallet,
     coordinator: config.coordinator,
     transaction: coordinator => coordinator
-      .releaseToken
-      .request()
+      .closeMinting
+      .request(),
+    from: config.luna
   });
 
-  const log = `Token ${config.token} unpaused and ownership killed`
+  const log = `Closing minting for token ${config.token}`
   console.log(`✔︎ ${log}`);
   config
     .transactions
-    .push({payload: tx.payload, log: log});
+    .push({
+      payload: tx.payload,
+      log: log
+    });
   saveConfig(config);
 }
