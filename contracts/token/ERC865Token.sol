@@ -13,7 +13,7 @@ import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 contract ERC865Token is StandardToken {
 
     /* Nonces of transfers performed */
-    mapping(address => uint256) nonces;
+    mapping(bytes32 => bool) transactions;
 
     event DelegatedTransfer(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
 
@@ -33,9 +33,10 @@ contract ERC865Token is StandardToken {
       require(_from != address(0));
       require(_to != address(0));
       require(total <= balances[_from]);
-      require(_nonce > nonces[_from]);
 
       bytes32 hashedTx = delegatedTransferHash(address(this), _nonce, _from, _to, msg.sender, _amount, _fee);
+      require(transactions[hashedTx] == false);
+
       address signatory = ecrecover(hashedTx, _v, _r, _s);
 
       require(signatory == _from);
@@ -43,7 +44,7 @@ contract ERC865Token is StandardToken {
       balances[signatory] = balances[signatory].sub(total);
       balances[_to] = balances[_to].add(_amount);
       balances[msg.sender] = balances[msg.sender].add(_fee);
-      nonces[_from] = _nonce;
+      transactions[hashedTx] = true;
 
       DelegatedTransfer(_from, _to, msg.sender, _amount, _fee);
       Transfer(_from, _to, _amount);
