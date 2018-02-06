@@ -35,4 +35,49 @@ contract PropsToken is ERC865Token, ERC827Token, PausableToken, MintableToken {
 
     /* 1 Billion PROPS specified in AttoPROPS */
     uint256 public constant amountOfTokenToMint = 1000000000 * 10**uint256(decimals);
+
+
+    /**
+     * @notice Include a presigned `"a9059cbb": "transfer(address,uint256)"`
+     * @param _signature Signed transfer
+     * @param _to The address of the recipient
+     * @param _value The value of tokens to be transferred
+     * @param _gasPrice How much tokens willing to pay per gas
+     * @param _nonce Presigned transaction number.
+     */
+    function transferPreSigned(
+        bytes _signature,
+        address _to,
+        uint256 _value,
+        uint256 _gasPrice,
+        uint256 _nonce
+    )
+        whenNotPaused
+        public
+        returns (bool)
+    {
+        return super.transferPreSigned(_signature, _to, _value, _gasPrice, _nonce);
+    }
+
+    /**
+     * @notice Include a presigned `""095ea7b3": "approve(address,uint256)"`
+     * @param _signature Signed transfer
+     * @param _spender The address of the recipient
+     * @param _value The value of tokens to be transferred
+     * @param _gasPrice How much tokens willing to pay per gas
+     * @param _nonce Presigned transaction number.
+     */
+    function approvePreSigned(
+        bytes _signature,
+        address _spender,
+        uint256 _value,
+        uint256 _gasPrice,
+        uint256 _nonce
+    )
+        whenNotPaused
+        public
+        returns (bool)
+    {
+        return super.approvePreSigned(_signature, _spender, _value, _gasPrice, _nonce);
+    }
 }

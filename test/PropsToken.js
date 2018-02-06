@@ -39,7 +39,7 @@ contract('PropsToken', ([
 
   describe('Delegated transfers', () => {
     beforeEach(async () => {
-      await this.token.mint(alice, 150, {from: owner});
+      await this.token.mint(alice, 1500000, {from: owner});
     });
 
     it('Charlie performs a transfer of 100 tokens from Alice to Bob, taking 10 in fees', async () => {
@@ -47,36 +47,36 @@ contract('PropsToken', ([
       const from = alice;
       const to = bob;
       const delegate = charlie;
-      const fee = 10;
+      const gasPrice = 1;
       const amount = 100;
       const alicePrivateKey = Buffer.from('c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3', 'hex');
 
       const components = [
-        Buffer.from('6e74f5d1', 'hex'),
+        Buffer.from('48664c16', 'hex'),
         formattedAddress(this.token.address),
-        formattedInt(nonce),
-        formattedAddress(from),
         formattedAddress(to),
-        formattedAddress(delegate),
         formattedInt(amount),
-        formattedInt(fee)
+        formattedInt(gasPrice),
+        formattedInt(nonce)
       ];
 
       const tightPack = Buffer.concat(components);
 
       const hashedTightPack = ethUtil.sha3(tightPack);
 
-      const sig = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
+      const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s)
 
-      const tx = await this.token.delegatedTransfer(
-        nonce,
-        from,
+      const tx = await this.token.transferPreSigned(
+        sig,
         to,
         amount,
-        fee,
-        sig.v,
-        formattedBytes32(sig.r),
-        formattedBytes32(sig.s), {from: charlie});
+        gasPrice,
+        nonce
+        , {from: charlie});
+
+      console.log(tx);
+      console.log(tx.logs[3].args);
     });
   });
 });

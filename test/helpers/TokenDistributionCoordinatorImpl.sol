@@ -7,6 +7,7 @@ contract TokenDistributionCoordinatorImpl is TokenDistributionCoordinator {
 
   function TokenDistributionCoordinatorImpl()
       TokenDistributionCoordinator()
+      public
   {
   }
 }
