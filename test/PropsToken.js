@@ -26,6 +26,7 @@ contract('PropsToken', ([
   alice,
   bob,
   charlie,
+  damiens,
   owner
 ]) => {
 
@@ -37,46 +38,85 @@ contract('PropsToken', ([
     this.token = await PropsToken.new({from: owner});
   });
 
-  describe('Delegated transfers', () => {
+  describe(`When considering pre-paid transfers,`, () => {
     beforeEach(async () => {
-      await this.token.mint(alice, 1500000, {from: owner});
+      await this.token.mint(alice, 200, {from: owner});
     });
 
-    it('Charlie performs a transfer of 100 tokens from Alice to Bob, taking 10 in fees', async () => {
-      const nonce = 32;
-      const from = alice;
-      const to = bob;
-      const delegate = charlie;
-      const gasPrice = 1;
-      const amount = 100;
-      const alicePrivateKey = Buffer.from('c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3', 'hex');
+    describe(`if Charlie performs a transaction T, transfering 100 tokens from Alice to Bob, taking 10 in fees`, () => {
+      beforeEach(async () => {
+        const nonce = 32;
+        const from = alice;
+        const to = bob;
+        const delegate = charlie;
+        const fee = 10;
+        const amount = 100;
+        const alicePrivateKey = Buffer.from('c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3', 'hex');
 
-      const components = [
-        Buffer.from('48664c16', 'hex'),
-        formattedAddress(this.token.address),
-        formattedAddress(to),
-        formattedInt(amount),
-        formattedInt(gasPrice),
-        formattedInt(nonce)
-      ];
+        const components = [
+          Buffer.from('48664c16', 'hex'),
+          formattedAddress(this.token.address),
+          formattedAddress(to),
+          formattedInt(amount),
+          formattedInt(fee),
+          formattedInt(nonce)
+        ];
+        const tightPack = Buffer.concat(components);
+        const hashedTightPack = ethUtil.sha3(tightPack);
+        const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
+        const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s)
+        await this.token.transferPreSigned(
+          sig,
+          to,
+          amount,
+          fee,
+          nonce
+          , {from: charlie}).should.be.fulfilled;
+      });
 
-      const tightPack = Buffer.concat(components);
+      describe(`it should:`, () => {
+        it('decrements Alice balance of 90', async () => {
+          let balance = (await this.token.balanceOf(alice)).toNumber();
+          balance.should.be.equal(90);
+        });
+        it('increments Bob balance of 100', async () => {
+          let balance = (await this.token.balanceOf(bob)).toNumber();
+          balance.should.be.equal(100);
+        });
+        it('increments Charlie balance of 10', async () => {
+          let balance = (await this.token.balanceOf(charlie)).toNumber();
+          balance.should.be.equal(10);
+        });
+        it('fails if Damiens tries to replay the same transaction', async () => {
+          const nonce = 32;
+          const from = alice;
+          const to = bob;
+          const delegate = charlie;
+          const fee = 10;
+          const amount = 100;
+          const alicePrivateKey = Buffer.from('c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3', 'hex');
 
-      const hashedTightPack = ethUtil.sha3(tightPack);
-
-      const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
-      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s)
-
-      const tx = await this.token.transferPreSigned(
-        sig,
-        to,
-        amount,
-        gasPrice,
-        nonce
-        , {from: charlie});
-
-      console.log(tx);
-      console.log(tx.logs[3].args);
+          const components = [
+            Buffer.from('48664c16', 'hex'),
+            formattedAddress(this.token.address),
+            formattedAddress(to),
+            formattedInt(amount),
+            formattedInt(fee),
+            formattedInt(nonce)
+          ];
+          const tightPack = Buffer.concat(components);
+          const hashedTightPack = ethUtil.sha3(tightPack);
+          const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
+          const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s)
+          await this.token.transferPreSigned(
+            sig,
+            to,
+            amount,
+            fee,
+            nonce
+            , {from: charlie}).should.be.fulfilled;
+        });
+      });
     });
   });
 });
