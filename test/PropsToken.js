@@ -40,7 +40,7 @@ contract('PropsToken', ([
 
   describe(`When considering pre-paid transfers,`, () => {
     beforeEach(async () => {
-      await this.token.mint(alice, 200, {from: owner});
+      await this.token.mint(alice, 1200, {from: owner});
     });
 
     describe(`if Charlie performs a transaction T, transfering 100 tokens from Alice to Bob, taking 10 in fees`, () => {
@@ -63,8 +63,8 @@ contract('PropsToken', ([
         ];
         const tightPack = Buffer.concat(components);
         const hashedTightPack = ethUtil.sha3(tightPack);
-        const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
-        const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s)
+        const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey);
+        const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
         await this.token.transferPreSigned(
           sig,
           to,
@@ -75,9 +75,9 @@ contract('PropsToken', ([
       });
 
       describe(`it should:`, () => {
-        it('decrements Alice balance of 90', async () => {
+        it('decrements Alice balance of 1090', async () => {
           let balance = (await this.token.balanceOf(alice)).toNumber();
-          balance.should.be.equal(90);
+          balance.should.be.equal(1090);
         });
         it('increments Bob balance of 100', async () => {
           let balance = (await this.token.balanceOf(bob)).toNumber();
@@ -106,15 +106,16 @@ contract('PropsToken', ([
           ];
           const tightPack = Buffer.concat(components);
           const hashedTightPack = ethUtil.sha3(tightPack);
-          const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
-          const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s)
-          await this.token.transferPreSigned(
+          const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey);
+          const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
+          const tx = await this.token.transferPreSigned(
             sig,
             to,
             amount,
             fee,
             nonce
-            , {from: charlie}).should.be.fulfilled;
+            , {from: charlie});
+          tx.receipt.status.should.be.equal('0x00');
         });
       });
     });
