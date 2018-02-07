@@ -20,7 +20,7 @@ contract ERC865Token is ERC865, StandardToken {
     event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
 
     /**
-     * @notice Include a presigned `"a9059cbb": "transfer(address,uint256)"`
+     * @notice Submit a presigned transfer
      * @param _signature Signed transfer
      * @param _to The address of the recipient
      * @param _value The value of tokens to be transferred
@@ -57,8 +57,8 @@ contract ERC865Token is ERC865, StandardToken {
     }
 
     /**
-     * @notice Include a presigned `""095ea7b3": "approve(address,uint256)"`
-     * @param _signature Signed transfer
+     * @notice Submit a presigned approval
+     * @param _signature Signed approval
      * @param _spender The address of the recipient
      * @param _value The value of tokens to approve
      * @param _fee How much tokens will be transfered to the sender
@@ -92,9 +92,7 @@ contract ERC865Token is ERC865, StandardToken {
     }
 
     /**
-    * @dev returns the value of the original keccak256, signed by sender.
-    * By having this signature and this order with hashing, generating the
-    * data of this function returns (almost) the data to hash.
+    * @notice Compute sha3 for transferPreSigned
     * @param _token Address of the token
     * @param _to Address of recipient
     * @param _value Amount of tokens to send to the recipient
@@ -118,7 +116,7 @@ contract ERC865Token is ERC865, StandardToken {
 
 
     /**
-     * @notice Include a presigned `""095ea7b3": "approve(address,uint256)"`
+     * @notice Compute sha3 for approvePreSigned
      * @param _token Address of the token
      * @param _spender Address of recipient
      * @param _value The value of tokens to be transferred

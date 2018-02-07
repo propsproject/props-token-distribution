@@ -1,6 +1,5 @@
 const TokenDistributionCoordinator = artifacts.require("./TokenDistributionCoordinator.sol");
 const helpers = require('./helpers');
-const PropsCrowdsale = artifacts.require('./crowdsale/PropsCrowdsale.sol')
 const MultiSigWallet = artifacts.require('./wallet/MultiSigWallet.sol')
 const submitMultiSigTransaction = helpers.submitMultiSigTransaction;
 const network = helpers.network;

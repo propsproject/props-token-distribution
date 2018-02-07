@@ -32,7 +32,7 @@ const loadConfig = function () {
 const saveConfig = function (keys) {
   const config = JSON.stringify(keys, null, "\t");
 
-  fs.writeFile(`./scripts/coordinator/config.${detectNetwork()}.json`, config, 'utf8', function (err) {
+  fs.writeFile(`./scripts/distribution/config.${detectNetwork()}.json`, config, 'utf8', function (err) {
     if (err) {
       return console.log(err);
     }
