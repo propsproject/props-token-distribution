@@ -21,6 +21,9 @@ const formattedInt = (int) => {
 const formattedBytes32 = (bytes) => {
   return ethUtil.addHexPrefix(bytes.toString('hex'));
 };
+const hashedTightPacked = (args) => {
+  return ethUtil.sha3(Buffer.concat(args));
+};
 
 contract('PropsToken', ([
   alice,
@@ -61,9 +64,7 @@ contract('PropsToken', ([
           formattedInt(fee),
           formattedInt(nonce)
         ];
-        const tightPack = Buffer.concat(components);
-        const hashedTightPack = ethUtil.sha3(tightPack);
-        const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey);
+        const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
         const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
         await this.token.transferPreSigned(
           sig,
@@ -104,9 +105,7 @@ contract('PropsToken', ([
             formattedInt(fee),
             formattedInt(nonce)
           ];
-          const tightPack = Buffer.concat(components);
-          const hashedTightPack = ethUtil.sha3(tightPack);
-          const vrs = ethUtil.ecsign(hashedTightPack, alicePrivateKey);
+          const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
           const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
           const tx = await this.token.transferPreSigned(
             sig,
@@ -121,29 +120,3 @@ contract('PropsToken', ([
     });
   });
 });
-
-
-/*
-const fee = 10;
-const amount = 100;
-const token = this.token.address;
-const from = alice;
-const to = bob;
-const delegate = charlie;
-const nonce = 32;
-const alicePrivateKey = Buffer.from('c88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c', 'hex');
-
-const tightPack = (await this.token.delegatedTransferHash.request(token, nonce, from, to, delegate, amount, fee)).params[0].data;
-const hashedTightPack = ethUtil.sha3(tightPack);
-const sig = ethUtil.ecsign(hashedTightPack, alicePrivateKey)
-const tx = await this.token.delegatedTransfer(
-  nonce,
-  from,
-  to,
-  amount,
-  fee,
-  sig.v,
-  ethUtil.addHexPrefix(sig.r.toString('hex')),
-  ethUtil.addHexPrefix(sig.s.toString('hex')),
-  {from: charlie});
-*/

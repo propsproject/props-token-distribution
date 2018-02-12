@@ -2,7 +2,6 @@ pragma solidity ^0.4.18;
 
 import "zeppelin-solidity/contracts/token/ERC20/PausableToken.sol";
 import "zeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
-import "zeppelin-solidity/contracts/token/ERC827/ERC827Token.sol";
 import "./ERC865Token.sol";
 
 /**
@@ -22,7 +21,7 @@ import "./ERC865Token.sol";
  *
  */
 
-contract PropsToken is ERC865Token, ERC827Token, PausableToken, MintableToken {
+contract PropsToken is ERC865Token, PausableToken, MintableToken {
 
     /* Set the token name for display */
     string public constant symbol = "PROPS";
