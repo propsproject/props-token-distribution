@@ -150,6 +150,35 @@ contract TokenDistributionCoordinator is Ownable {
         AdvisorAllocation(_investor, _tokensVolume, vestingContract);
     }
 
+    /**
+     * @dev Enabling / Disabling transfers of non whitelisted users
+     */
+    function setWhitelistedOnly(bool _isWhitelistOnly) onlyOwner public {
+        token.setWhitelistedOnly(_isWhitelistOnly);
+    }
+
+    /**
+     * @dev Adding a user to the whitelist
+     */
+    function whitelistUserForTransfers(address _user) onlyOwner public {
+        token.whitelistUserForTransfers(_user);
+    }
+
+    /**
+     * @dev Remove a user from the whitelist
+     */
+    function blacklistUserForTransfers(address _user) onlyOwner public {
+        token.blacklistUserForTransfers(_user);
+    }
+
+    function unpauseToken() public onlyOwner {
+        token.unpause();
+    }
+
+    function pauseToken() public onlyOwner {
+        token.pause();
+    }
+
     function closeMinting() public onlyOwner {
         token.finishMinting();
     }

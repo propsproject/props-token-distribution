@@ -41,6 +41,42 @@ contract('PropsToken', ([
     this.token = await PropsToken.new({from: owner});
   });
 
+  describe(`When considering the token in his whitelisted transfer phase,`, () => {
+    beforeEach(async () => {
+      await this.token.setWhitelistedOnly(true, {from: owner});
+    });
+
+    describe(`with Alice being the only user whitelisted`, () => {
+      beforeEach(async () => {
+        await this.token.mint(alice, 1200, {from: owner});
+        await this.token.mint(bob, 1000, {from: owner});
+        await this.token.whitelistUserForTransfers(alice, {from: owner});
+      });
+
+      describe(`it should fail when:`, () => {
+        it('Bob transfers to Alice', async () => {
+          await this.token.transfer(alice, 100, {from: bob});
+          let balance = (await this.token.balanceOf(alice)).toNumber();
+          balance.should.be.equal(1200);
+        });
+      });
+
+      describe(`it should succeed when:`, () => {
+        it('Alice transfers to Bob', async () => {
+          await this.token.transfer(bob, 100, {from: alice});
+          let balance = (await this.token.balanceOf(bob)).toNumber();
+          balance.should.be.equal(1100);
+        });
+        it('Bob transfers to Alice once the whitelist phase is disabled', async () => {
+          await this.token.setWhitelistedOnly(false, {from: owner});
+          await this.token.transfer(alice, 100, {from: bob});
+          let balance = (await this.token.balanceOf(alice)).toNumber();
+          balance.should.be.equal(1300);
+        });
+      });
+    });
+  });
+
   describe(`When considering pre-paid transfers,`, () => {
     beforeEach(async () => {
       await this.token.mint(alice, 1200, {from: owner});
