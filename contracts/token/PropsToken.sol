@@ -74,7 +74,7 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
      * @dev Remove a user from the whitelist
      */
     function blacklistUserForTransfers(address _user) onlyOwner public {
-        require(!isUserAllowedToTransfer(_user));
+        require(isUserAllowedToTransfer(_user));
         usersAllowedToTransfer[_user] = false;
         UserAllowedToTransfer(_user);
     }
