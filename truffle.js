@@ -3,8 +3,7 @@ module.exports = {
     test: {
       host: "localhost",
       port: 9545,
-      network_id: "*",
-      gas: 4712388
+      network_id: "*"
     },
     production: {
       host: "localhost",
@@ -16,9 +15,7 @@ module.exports = {
     development: {
       host: "localhost",
       port: 9545,
-      network_id: "4",
-      gas: 4e6,
-      gasPrice: 2e10
+      network_id: "4"
     }
   },
   mocha: {
