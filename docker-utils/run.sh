@@ -20,5 +20,5 @@ recipient=$3
 balance=$(( 10 ** 20 ))
 
 nohup ganache-cli -p 9000 -i 8000 --account="$owner, $balance" --account="$sender, $balance" --account="$recipient, $balance" &
-truffle exec ./deploy.js --network docker
+truffle exec ./deploy.js --network docker --config ./truffle.js
 node ./server.js 
