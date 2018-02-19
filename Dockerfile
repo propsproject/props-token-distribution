@@ -11,4 +11,4 @@ RUN npm install -g ganache-cli
 RUN npm install -g truffle
 
 EXPOSE 8000 3000
-ENTRYPOINT [ "./docker-utils/run.sh" ]
+ENTRYPOINT [ "echo start" ]
