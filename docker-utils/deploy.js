@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { exec } = require('child_process');
 const getTestPayload = require('./scripts').getTestPayload;
-const PropsToken = artifacts.require('../build/contracts/PropsToken.sol')
+const PropsToken = artifacts.require('../build/contracts/PropsToken.json')
 
 module.exports = async() => {
     const owner = PropsToken.web3.eth.accounts[0];
