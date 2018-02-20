@@ -2,8 +2,12 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const getTestPayload = require('./scripts').getTestPayload;
 const PropsToken = artifacts.require('PropsToken.sol')
-
+const  sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+    
 module.exports = async() => {
+    await sleep(20);
     const owner = PropsToken.web3.eth.accounts[0];
     try {
         const token = await PropsToken.new({from: owner});
