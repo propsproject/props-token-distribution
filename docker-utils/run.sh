@@ -11,15 +11,14 @@ if [[ $ganachePID ]]; then
     kill $ganachePID
 fi
 
-parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-cd "$parent_path"
+# parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+# cd "$parent_path"
 
 owner=$1
 sender=$2
 recipient=$3
 balance=$(( 10 ** 20 ))
-nohup ganache-cli -i 8000 --network docker --account="$owner, $balance" --account="$sender, $balance" --account="$recipient, $balance" &
-cd ..
-truffle exec ./docker-utils/deploy.js --network docker 
+forever start --workingDir . --silent -l ./forever.ganache.log -o ./std.ganache.log -e ./sterr.ganache.log /usr/local/bin/ganache-cli -i 8000 --network docker --account="$owner, $balance" --account="$sender, $balance" --account="$recipient, $balance" 
+truffle exec ./deploy.js --network docker 
 node ./server.js 
-tail ./nohup.out
+# forever start --workingDir . -l ./forever.express.log -o ./std.express.log -e ./sterr.express.log ./server.js 
