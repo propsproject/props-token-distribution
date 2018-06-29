@@ -16,6 +16,11 @@ module.exports = {
       host: "localhost",
       port: 9545,
       network_id: "4"
+    }, 
+    docker: {
+        host: "localhost",
+        port: 9000,
+        network_id: "8000"
     }
   },
   mocha: {
@@ -27,3 +32,4 @@ module.exports = {
     }
   }
 };
+
