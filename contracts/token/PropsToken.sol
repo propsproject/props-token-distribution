@@ -36,7 +36,7 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
     uint256 public constant amountOfTokenToMint = 10**9 * 10**uint256(decimals);
 
     /* Is crowdsale filtering non registered users. True by default */
-    bool public isTransferWhitelistOnly;
+    bool public isTransferWhitelistOnly = true;
 
     /* Mapping of whitelisted users */
     mapping (address => bool) transfersWhitelist;

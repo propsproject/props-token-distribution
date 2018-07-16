@@ -2,8 +2,8 @@ const TokenDistributionCoordinator = artifacts.require("./TokenDistributionCoord
 const saveConfig = require('./helpers').saveConfig;
 
 module.exports = async() => {
-  const luna = "0xff32622d83bbE587d6498f10CC9890EC2CAD28A3";
-  const walletAddress = "0x32164db7a8fe14db4953eaf9b307ed2696ec7709";
+  const luna = "0xF483941E3CF2ded6D9eB2b674D53e5a556e03081"; //devops account
+  const walletAddress = "0xd9f880f8633cd0b807d2d7bb3ced7488c08237be"; //multisig wallet owning the contract(s)
 
   const coordinator = await TokenDistributionCoordinator.new({
     from: luna

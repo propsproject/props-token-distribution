@@ -12,10 +12,10 @@ module.exports = {
       gas: 3000000,
       network_id: '1'
     },
-    development: {
+    rinkeby: {
       host: "localhost",
-      port: 9545,
-      network_id: "4"
+      port: 8545,
+      network_id: "*"
     }, 
     docker: {
         host: "localhost",

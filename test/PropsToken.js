@@ -1,5 +1,4 @@
 const helpers = require('./helpers');
-const ethUtil = require('ethereumjs-util')
 const should =  helpers.should;
 const duration = helpers.duration;
 const latestTime = helpers.latestTime;
