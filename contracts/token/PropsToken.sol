@@ -23,10 +23,10 @@ import "./ERC865Token.sol";
 
 contract PropsToken is ERC865Token, PausableToken, MintableToken {
 
-    /* Set the token name for display */
+    /* Set the token symbol for display */
     string public constant symbol = "TOKEN";
 
-    /* Set the token symbol for display */
+    /* Set the token name for display */
     string public constant name = "Token";
 
     /* Set the number of decimals for display */
