@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
-import "./ERC865.sol";
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "./ERC865.sol";
 
 /**
  * @title ERC865Token Token
