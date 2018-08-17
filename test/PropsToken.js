@@ -8,6 +8,7 @@ const EVMThrow = helpers.EVMThrow;
 const ether = helpers.ether;
 const buyTokens = helpers.buyTokens;
 const advanceBlock = helpers.advanceBlock;
+const ethUtil = require("ethereumjs-util");
 
 const PropsToken = artifacts.require('./helpers/PropsTokenImpl.sol')
 
