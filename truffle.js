@@ -23,7 +23,7 @@ module.exports = {
       network_id: "*",      
     }, 
     docker: {
-        host: "localhost",
+        host: "127.0.0.1",
         port: 9000,
         network_id: "8000"
     }

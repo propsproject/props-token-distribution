@@ -45,6 +45,14 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
 
     event TransferWhitelistOnly(bool flag);
 
+    event TransferDetails(
+        address from,
+        uint256 fromBalance,
+        address to,
+        uint256 toBalance,
+        uint256 amount
+    );
+
     /**
      * @notice Is the address allowed to transfer
      * @return true if the sender can transfer
@@ -91,7 +99,13 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
       if (isTransferWhitelistOnly) {
         require(isUserAllowedToTransfer(msg.sender));
       }
-      return super.transfer(_to, _value);
+
+      if (super.transfer(_to, _value)) {
+          TransferDetails(msg.sender, super.balanceOf(msg.sender), _to, super.balanceOf(_to), _value);
+          return true;
+      } 
+
+      return false;
     }
 
     /**
@@ -104,7 +118,13 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
       if (isTransferWhitelistOnly) {
         require(isUserAllowedToTransfer(_from));
       }
-      return super.transferFrom(_from, _to, _value);
+
+      if (super.transferFrom(_from, _to, _value)) {
+          TransferDetails(_from, super.balanceOf(_from), _to, super.balanceOf(_to), _value);
+          return true;
+      } 
+
+      return false;
     }
 
     /**
@@ -131,7 +151,13 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
             address from = recover(hashedTx, _signature);
             require(isUserAllowedToTransfer(from));
         }
-        return super.transferPreSigned(_signature, _to, _value, _fee, _nonce);
+
+        if (super.transferPreSigned(_signature, _to, _value, _fee, _nonce)) {
+          TransferDetails(from, super.balanceOf(from), _to, super.balanceOf(_to), _value);
+          return true;
+      } 
+
+        return false;
     }
 
     /**
