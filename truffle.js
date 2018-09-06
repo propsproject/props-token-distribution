@@ -17,6 +17,11 @@ module.exports = {
       port: 8545,
       network_id: "*",      
     }, 
+    rinkebydev: {
+      host: "localhost",
+      port: 8545,
+      network_id: "*",      
+    }, 
     docker: {
         host: "localhost",
         port: 9000,
