@@ -1,13 +1,13 @@
 module.exports = {
   networks: {
     test: {
-      host: "localhost",
-      port: 9545,
-      network_id: "*"
+      host: "0.0.0.0",
+      port: 8545,
+      network_id: "4000"
     },
     production: {
       host: "localhost",
-      port: 9545,
+      port: 8545,
       gasPrice: 5000000000,
       gas: 3000000,
       network_id: '1'
@@ -18,7 +18,7 @@ module.exports = {
       network_id: "*"
     }, 
     docker: {
-        host: "localhost",
+        host: "127.0.0.1",
         port: 9000,
         network_id: "8000"
     }
