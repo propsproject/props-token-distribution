@@ -53,6 +53,13 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
         uint256 amount
     );
 
+    event Settlement(
+        uint256 timestamp,
+        address from, 
+        address recipient,
+        uint256 amount
+    );
+
     /**
      * @notice Is the address allowed to transfer
      * @return true if the sender can transfer
@@ -101,6 +108,25 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
       }
 
       if (super.transfer(_to, _value)) {
+          TransferDetails(msg.sender, super.balanceOf(msg.sender), _to, super.balanceOf(_to), _value);
+          return true;
+      } 
+
+      return false;
+    }
+
+    /**
+    * @notice settle pending earnings on the PROPS-Chain by using this settlement method to transfer and emit a settlement Event
+    * @param _to The address to transfer to.
+    * @param _value The amount to be transferred.
+    */
+    function settle(address _to, uint256 _value) public returns (bool) {
+      if (isTransferWhitelistOnly) {
+        require(isUserAllowedToTransfer(msg.sender));
+      }
+
+      if (super.transfer(_to, _value)) {
+          Settlement(block.timestamp, msg.sender, _to, _value);
           TransferDetails(msg.sender, super.balanceOf(msg.sender), _to, super.balanceOf(_to), _value);
           return true;
       } 
