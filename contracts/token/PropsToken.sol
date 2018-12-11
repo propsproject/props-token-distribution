@@ -1,7 +1,9 @@
 pragma solidity ^0.4.18;
 
-import "zeppelin-solidity/contracts/token/ERC20/PausableToken.sol";
-import "zeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
+import "zos-lib/contracts/Initializable.sol";
+import "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol";
+import "openzeppelin-eth/contracts/token/ERC20/ERC20Pausable.sol";
+import "openzeppelin-eth/contracts/token/ERC20/ERC20Mintable.sol";
 import "./ERC865Token.sol";
 
 /**
@@ -21,7 +23,7 @@ import "./ERC865Token.sol";
  *
  */
 
-contract PropsToken is ERC865Token, PausableToken, MintableToken {
+contract PropsToken is Initializable, ERC865Token, ERC20Detailed, ERC20Pausable, ERC20Mintable {
 
     /* Set the token symbol for display */
     string public constant symbol = "TOKEN_DEV";
@@ -35,16 +37,6 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
     /* 1 Billion PROPS specified in AttoPROPS */
     uint256 public constant amountOfTokenToMint = 10**9 * 10**uint256(decimals);
 
-    /* Is crowdsale filtering non registered users. True by default */
-    bool public isTransferWhitelistOnly = true;
-
-    /* Mapping of whitelisted users */
-    mapping (address => bool) transfersWhitelist;
-
-    event UserAllowedToTransfer(address user);
-
-    event TransferWhitelistOnly(bool flag);
-
     event TransferDetails(
         address from,
         uint256 fromBalance,
@@ -55,46 +47,19 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
 
     event Settlement(
         uint256 timestamp,
-        address from, 
+        address from,
         address recipient,
         uint256 amount
     );
 
-    /**
-     * @notice Is the address allowed to transfer
-     * @return true if the sender can transfer
-     */
-    function isUserAllowedToTransfer(address _user) public constant returns (bool) {
-        require(_user != 0x0);
-        return transfersWhitelist[_user];
-    }
+    function initialize(string _name, string _symbol, uint8 _decimals) public initializer {
+        ERC20Detailed.initialize(_name, _symbol, _decimals);
 
-    /**
-     * @notice Enabling / Disabling transfers of non whitelisted users
-     */
-    function setWhitelistedOnly(bool _isWhitelistOnly) onlyOwner public {
-        if (isTransferWhitelistOnly != _isWhitelistOnly) {
-            isTransferWhitelistOnly = _isWhitelistOnly;
-            TransferWhitelistOnly(_isWhitelistOnly);
-        }
-    }
+        amountOfTokenToMint = 10**9 * 10**uint256(_decimals);
 
-    /**
-     * @notice Adding a user to the whitelist
-     */
-    function whitelistUserForTransfers(address _user) onlyOwner public {
-        require(!isUserAllowedToTransfer(_user));
-        transfersWhitelist[_user] = true;
-        UserAllowedToTransfer(_user);
-    }
-
-    /**
-     * @notice Remove a user from the whitelist
-     */
-    function blacklistUserForTransfers(address _user) onlyOwner public {
-        require(isUserAllowedToTransfer(_user));
-        transfersWhitelist[_user] = false;
-        UserAllowedToTransfer(_user);
+        // Initialize the minter and pauser roles
+        ERC20Mintable.initialize(address(this));
+        ERC20Pausable.initialize(address(this));
     }
 
     /**
@@ -103,16 +68,12 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
     * @param _value The amount to be transferred.
     */
     function transfer(address _to, uint256 _value) public returns (bool) {
-      if (isTransferWhitelistOnly) {
-        require(isUserAllowedToTransfer(msg.sender));
-      }
+        if (super.transfer(_to, _value)) {
+            emit TransferDetails(msg.sender, super.balanceOf(msg.sender), _to, super.balanceOf(_to), _value);
+            return true;
+        }
 
-      if (super.transfer(_to, _value)) {
-          TransferDetails(msg.sender, super.balanceOf(msg.sender), _to, super.balanceOf(_to), _value);
-          return true;
-      } 
-
-      return false;
+        return false;
     }
 
     /**
@@ -121,17 +82,13 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
     * @param _value The amount to be transferred.
     */
     function settle(address _to, uint256 _value) public returns (bool) {
-      if (isTransferWhitelistOnly) {
-        require(isUserAllowedToTransfer(msg.sender));
-      }
+        if (super.transfer(_to, _value)) {
+            emit Settlement(block.timestamp, msg.sender, _to, _value);
+            emit TransferDetails(msg.sender, super.balanceOf(msg.sender), _to, super.balanceOf(_to), _value);
+            return true;
+        }
 
-      if (super.transfer(_to, _value)) {
-          Settlement(block.timestamp, msg.sender, _to, _value);
-          TransferDetails(msg.sender, super.balanceOf(msg.sender), _to, super.balanceOf(_to), _value);
-          return true;
-      } 
-
-      return false;
+        return false;
     }
 
     /**
@@ -141,16 +98,12 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
      * @param _value uint256 the amount of tokens to be transferred
      */
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-      if (isTransferWhitelistOnly) {
-        require(isUserAllowedToTransfer(_from));
-      }
+        if (super.transferFrom(_from, _to, _value)) {
+            emit TransferDetails(_from, super.balanceOf(_from), _to, super.balanceOf(_to), _value);
+            return true;
+        }
 
-      if (super.transferFrom(_from, _to, _value)) {
-          TransferDetails(_from, super.balanceOf(_from), _to, super.balanceOf(_to), _value);
-          return true;
-      } 
-
-      return false;
+        return false;
     }
 
     /**
@@ -168,48 +121,16 @@ contract PropsToken is ERC865Token, PausableToken, MintableToken {
         uint256 _fee,
         uint256 _nonce
     )
-        whenNotPaused
         public
+        whenNotPaused
         returns (bool)
     {
-        if (isTransferWhitelistOnly) {
-            bytes32 hashedTx = super.transferPreSignedHashing(address(this), _to, _value, _fee, _nonce);
-            address from = recover(hashedTx, _signature);
-            require(isUserAllowedToTransfer(from));
-        }
-
         if (super.transferPreSigned(_signature, _to, _value, _fee, _nonce)) {
-          TransferDetails(from, super.balanceOf(from), _to, super.balanceOf(_to), _value);
-          return true;
-      } 
+            emit TransferDetails(from, super.balanceOf(from), _to, super.balanceOf(_to), _value);
+            return true;
+        }
 
         return false;
     }
 
-    /**
-     * @notice Submit a presigned approval
-     * @param _signature bytes The signature, issued by the owner.
-     * @param _spender address The address which will spend the funds.
-     * @param _value uint256 The amount of tokens to allow.
-     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
-     * @param _nonce uint256 Presigned transaction number.
-     */
-    function approvePreSigned(
-        bytes _signature,
-        address _spender,
-        uint256 _value,
-        uint256 _fee,
-        uint256 _nonce
-    )
-        whenNotPaused
-        public
-        returns (bool)
-    {
-        if (isTransferWhitelistOnly) {
-            bytes32 hashedTx = super.approvePreSignedHashing(address(this), _spender, _value, _fee, _nonce);
-            address from = recover(hashedTx, _signature);
-            require(isUserAllowedToTransfer(from));
-        }
-        return super.approvePreSigned(_signature, _spender, _value, _fee, _nonce);
-    }
 }

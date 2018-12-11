@@ -1,6 +1,5 @@
 pragma solidity ^0.4.18;
 
-import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "./ERC865.sol";
 
 /**
@@ -11,7 +10,7 @@ import "./ERC865.sol";
  *
  */
 
-contract ERC865Token is ERC865, StandardToken {
+contract ERC865Token is ERC865 {
 
     /* Nonces of transfers performed */
     mapping(bytes => bool) signatures;
@@ -50,9 +49,10 @@ contract ERC865Token is ERC865, StandardToken {
         balances[msg.sender] = balances[msg.sender].add(_fee);
         signatures[_signature] = true;
 
-        Transfer(from, _to, _value);
-        Transfer(from, msg.sender, _fee);
-        TransferPreSigned(from, _to, msg.sender, _value, _fee);
+        emit Transfer(from, _to, _value);
+        emit Transfer(from, msg.sender, _fee);
+        emit TransferPreSigned(from, _to, msg.sender, _value, _fee);
+
         return true;
     }
 
@@ -86,9 +86,10 @@ contract ERC865Token is ERC865, StandardToken {
         balances[msg.sender] = balances[msg.sender].add(_fee);
         signatures[_signature] = true;
 
-        Approval(from, _spender, _value);
-        Transfer(from, msg.sender, _fee);
-        ApprovalPreSigned(from, _spender, msg.sender, _value, _fee);
+        emit Approval(from, _spender, _value);
+        emit Transfer(from, msg.sender, _fee);
+        emit ApprovalPreSigned(from, _spender, msg.sender, _value, _fee);
+
         return true;
     }
 
@@ -122,9 +123,10 @@ contract ERC865Token is ERC865, StandardToken {
         balances[msg.sender] = balances[msg.sender].add(_fee);
         signatures[_signature] = true;
 
-        Approval(from, _spender, allowed[from][_spender]);
-        Transfer(from, msg.sender, _fee);
-        ApprovalPreSigned(from, _spender, msg.sender, allowed[from][_spender], _fee);
+        emit Approval(from, _spender, allowed[from][_spender]);
+        emit Transfer(from, msg.sender, _fee);
+        emit ApprovalPreSigned(from, _spender, msg.sender, allowed[from][_spender], _fee);
+
         return true;
     }
 
@@ -163,9 +165,10 @@ contract ERC865Token is ERC865, StandardToken {
         balances[msg.sender] = balances[msg.sender].add(_fee);
         signatures[_signature] = true;
 
-        Approval(from, _spender, _subtractedValue);
-        Transfer(from, msg.sender, _fee);
-        ApprovalPreSigned(from, _spender, msg.sender, allowed[from][_spender], _fee);
+        emit Approval(from, _spender, _subtractedValue);
+        emit Transfer(from, msg.sender, _fee);
+        emit ApprovalPreSigned(from, _spender, msg.sender, allowed[from][_spender], _fee);
+
         return true;
     }
 
@@ -334,33 +337,33 @@ contract ERC865Token is ERC865, StandardToken {
      * @param sig bytes signature, the signature is generated using web3.eth.sign()
      */
     function recover(bytes32 hash, bytes sig) public pure returns (address) {
-      bytes32 r;
-      bytes32 s;
-      uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
 
-      //Check the signature length
-      if (sig.length != 65) {
-        return (address(0));
-      }
+        //Check the signature length
+        if (sig.length != 65) {
+            return (address(0));
+        }
 
-      // Divide the signature in r, s and v variables
-      assembly {
+        // Divide the signature in r, s and v variables
+        assembly {
         r := mload(add(sig, 32))
         s := mload(add(sig, 64))
         v := byte(0, mload(add(sig, 96)))
-      }
+        }
 
-      // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
-      if (v < 27) {
-        v += 27;
-      }
+        // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
+        if (v < 27) {
+            v += 27;
+        }
 
-      // If the version is correct return the signer address
-      if (v != 27 && v != 28) {
-        return (address(0));
-      } else {
-        return ecrecover(hash, v, r, s);
-      }
+        // If the version is correct return the signer address
+        if (v != 27 && v != 28) {
+            return (address(0));
+        } else {
+            return ecrecover(hash, v, r, s);
+        }
     }
 
 }
