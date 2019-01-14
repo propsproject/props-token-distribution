@@ -43,8 +43,12 @@ contract('PropsToken', ([
 
   describe(`When considering the token in his whitelisted transfer phase,`, () => {
     beforeEach(async () => {
-      await this.token.setWhitelistedOnly(true, {from: owner});
+      // await this.token.setWhitelistedOnly(true, {from: owner});
     });
+
+    describe(`Can't transfer to a non validated address`, () => {
+      
+    })
 
     describe(`with Alice being the only user whitelisted`, () => {
       beforeEach(async () => {

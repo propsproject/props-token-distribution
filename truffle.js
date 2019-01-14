@@ -2,7 +2,12 @@ module.exports = {
   networks: {
     test: {
       host: "localhost",
-      port: 8545,
+      port: 9545,
+      network_id: "*"
+    },
+    local: {
+      host: "localhost",
+      port: 9545,
       network_id: "*"
     },
     production: {
@@ -34,6 +39,13 @@ module.exports = {
     reporterOptions: {
       'mocha-osx-reporter': '-',
       'spec': '-'
+    }
+  },
+  solc: {
+    version: "0.4.24",
+    optimizer: {
+      enabled: true,
+      runs: 500
     }
   }
 };

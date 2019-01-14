@@ -1,0 +1,893 @@
+{
+  "contractName": "AttributeRegistryInterface",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "name": "attributeTypeID",
+          "type": "uint256"
+        }
+      ],
+      "name": "hasAttribute",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "name": "attributeTypeID",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAttributeValue",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "countAttributeTypes",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAttributeTypeID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title Attribute Registry interface. EIP-165 ID: 0x5f46473f\n */\ninterface AttributeRegistryInterface {\n  /**\n   * @notice Check if an attribute of the type with ID `attributeTypeID` has\n   * been assigned to the account at `account` and is still valid.\n   * @param account address The account to check for a valid attribute.\n   * @param attributeTypeID uint256 The ID of the attribute type to check for.\n   * @return True if the attribute is assigned and valid, false otherwise.\n   */\n  function hasAttribute(\n    address account,\n    uint256 attributeTypeID\n  ) external view returns (bool);\n\n  /**\n   * @notice Retrieve the value of the attribute of the type with ID\n   * `attributeTypeID` on the account at `account`, assuming it is valid.\n   * @param account address The account to check for the given attribute value.\n   * @param attributeTypeID uint256 The ID of the attribute type to check for.\n   * @return The attribute value if the attribute is valid, reverts otherwise.\n   */\n  function getAttributeValue(\n    address account,\n    uint256 attributeTypeID\n  ) external view returns (uint256);\n\n  /**\n   * @notice Count the number of attribute types defined by the registry.\n   * @return The number of available attribute types.\n   */\n  function countAttributeTypes() external view returns (uint256);\n\n  /**\n   * @notice Get the ID of the attribute type at index `index`.\n   * @param index uint256 The index of the attribute type in question.\n   * @return The ID of the attribute type.\n   */\n  function getAttributeTypeID(uint256 index) external view returns (uint256);\n}",
+  "sourcePath": "tpl-contracts-eth/contracts/AttributeRegistryInterface.sol",
+  "ast": {
+    "absolutePath": "tpl-contracts-eth/contracts/AttributeRegistryInterface.sol",
+    "exportedSymbols": {
+      "AttributeRegistryInterface": [
+        1225
+      ]
+    },
+    "id": 1226,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1194,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": "@title Attribute Registry interface. EIP-165 ID: 0x5f46473f",
+        "fullyImplemented": false,
+        "id": 1225,
+        "linearizedBaseContracts": [
+          1225
+        ],
+        "name": "AttributeRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@notice Check if an attribute of the type with ID `attributeTypeID` has\nbeen assigned to the account at `account` and is still valid.\n@param account address The account to check for a valid attribute.\n@param attributeTypeID uint256 The ID of the attribute type to check for.\n@return True if the attribute is assigned and valid, false otherwise.",
+            "id": 1203,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "hasAttribute",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1199,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1196,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1203,
+                  "src": "548:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1195,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "548:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1198,
+                  "name": "attributeTypeID",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1203,
+                  "src": "569:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1197,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "569:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "542:54:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1202,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1201,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1203,
+                  "src": "620:4:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 1200,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "620:4:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "619:6:9"
+            },
+            "scope": 1225,
+            "src": "521:105:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Retrieve the value of the attribute of the type with ID\n`attributeTypeID` on the account at `account`, assuming it is valid.\n@param account address The account to check for the given attribute value.\n@param attributeTypeID uint256 The ID of the attribute type to check for.\n@return The attribute value if the attribute is valid, reverts otherwise.",
+            "id": 1212,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getAttributeValue",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1208,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1205,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1212,
+                  "src": "1055:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1204,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1055:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1207,
+                  "name": "attributeTypeID",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1212,
+                  "src": "1076:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1206,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1076:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1049:54:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1211,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1210,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1212,
+                  "src": "1127:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1209,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1127:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1126:9:9"
+            },
+            "scope": 1225,
+            "src": "1023:113:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Count the number of attribute types defined by the registry.\n@return The number of available attribute types.",
+            "id": 1217,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "countAttributeTypes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1213,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1308:2:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1216,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1215,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1217,
+                  "src": "1334:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1214,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1334:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1333:9:9"
+            },
+            "scope": 1225,
+            "src": "1280:63:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Get the ID of the attribute type at index `index`.\n@param index uint256 The index of the attribute type in question.\n@return The ID of the attribute type.",
+            "id": 1224,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getAttributeTypeID",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1220,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1219,
+                  "name": "index",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1224,
+                  "src": "1565:13:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1218,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1565:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1564:15:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1223,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1222,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1224,
+                  "src": "1603:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1221,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1603:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1602:9:9"
+            },
+            "scope": 1225,
+            "src": "1537:75:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1226,
+        "src": "98:1516:9"
+      }
+    ],
+    "src": "0:1614:9"
+  },
+  "legacyAST": {
+    "absolutePath": "tpl-contracts-eth/contracts/AttributeRegistryInterface.sol",
+    "exportedSymbols": {
+      "AttributeRegistryInterface": [
+        1225
+      ]
+    },
+    "id": 1226,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1194,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": "@title Attribute Registry interface. EIP-165 ID: 0x5f46473f",
+        "fullyImplemented": false,
+        "id": 1225,
+        "linearizedBaseContracts": [
+          1225
+        ],
+        "name": "AttributeRegistryInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@notice Check if an attribute of the type with ID `attributeTypeID` has\nbeen assigned to the account at `account` and is still valid.\n@param account address The account to check for a valid attribute.\n@param attributeTypeID uint256 The ID of the attribute type to check for.\n@return True if the attribute is assigned and valid, false otherwise.",
+            "id": 1203,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "hasAttribute",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1199,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1196,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1203,
+                  "src": "548:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1195,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "548:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1198,
+                  "name": "attributeTypeID",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1203,
+                  "src": "569:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1197,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "569:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "542:54:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1202,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1201,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1203,
+                  "src": "620:4:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 1200,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "620:4:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "619:6:9"
+            },
+            "scope": 1225,
+            "src": "521:105:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Retrieve the value of the attribute of the type with ID\n`attributeTypeID` on the account at `account`, assuming it is valid.\n@param account address The account to check for the given attribute value.\n@param attributeTypeID uint256 The ID of the attribute type to check for.\n@return The attribute value if the attribute is valid, reverts otherwise.",
+            "id": 1212,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getAttributeValue",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1208,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1205,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1212,
+                  "src": "1055:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1204,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1055:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1207,
+                  "name": "attributeTypeID",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1212,
+                  "src": "1076:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1206,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1076:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1049:54:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1211,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1210,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1212,
+                  "src": "1127:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1209,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1127:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1126:9:9"
+            },
+            "scope": 1225,
+            "src": "1023:113:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Count the number of attribute types defined by the registry.\n@return The number of available attribute types.",
+            "id": 1217,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "countAttributeTypes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1213,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1308:2:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1216,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1215,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1217,
+                  "src": "1334:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1214,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1334:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1333:9:9"
+            },
+            "scope": 1225,
+            "src": "1280:63:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Get the ID of the attribute type at index `index`.\n@param index uint256 The index of the attribute type in question.\n@return The ID of the attribute type.",
+            "id": 1224,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getAttributeTypeID",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1220,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1219,
+                  "name": "index",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1224,
+                  "src": "1565:13:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1218,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1565:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1564:15:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1223,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1222,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1224,
+                  "src": "1603:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1221,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1603:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1602:9:9"
+            },
+            "scope": 1225,
+            "src": "1537:75:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1226,
+        "src": "98:1516:9"
+      }
+    ],
+    "src": "0:1614:9"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2019-01-14T11:08:43.576Z"
+}
