@@ -1,3 +1,6 @@
+var PrivateKeyProvider = require("truffle-privatekey-provider");
+var fs = require('fs');
+
 module.exports = {
   networks: {
     test: {
@@ -17,10 +20,19 @@ module.exports = {
       gas: 3000000,
       network_id: '1'
     },
-    rinkeby: {
-      host: "localhost",
-      port: 8545,
-      network_id: "*",      
+    rinkeby0: {
+      provider: function() {
+        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK0.txt','utf8');
+        return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+      },
+      network_id: "4",      
+    }, 
+    rinkeby1: {
+      provider: function() {
+        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK1.txt','utf8');
+        return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+      },
+      network_id: "4",      
     }, 
     rinkebydev: {
       host: "localhost",
