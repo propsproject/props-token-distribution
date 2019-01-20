@@ -4,7 +4,7 @@ import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol";
 import "tpl-contracts-eth/contracts/token/TPLRestrictedReceiverToken.sol";
 import "./PropsSidechainCompatible.sol";
-import "./ERC865Token.sol";
+// import "./ERC865Token.sol";
 
 /**
  * @title PROPSToken
@@ -12,7 +12,7 @@ import "./ERC865Token.sol";
  * The TPLToken integration causes tokens to only be transferrable to addresses
  * which have the validRecipient attribute in the jurisdiction.
  */
-contract PropsToken is Initializable, TPLRestrictedReceiverToken, ERC20Detailed, PropsSidechainCompatible, ERC865Token {
+contract PropsToken is Initializable, TPLRestrictedReceiverToken, ERC20Detailed, PropsSidechainCompatible { /*, ERC865Token {*/
 
   /**
    * @dev Initializer function. Called only once when a proxy for the contract is created.
@@ -31,7 +31,7 @@ contract PropsToken is Initializable, TPLRestrictedReceiverToken, ERC20Detailed,
     uint8 decimals = 18;
     uint256 totalSupply = 1e9 * (10 ** uint256(decimals));
     
-    ERC20Detailed.initialize("DEV Token", "DEV_TOKEN", decimals);
+    ERC20Detailed.initialize("DEV_Token", "DEV_TOKEN", decimals);
     TPLRestrictedReceiverToken.initialize(_jurisdictionAddress, _validRecipientAttributeId);
     _mint(_holder, totalSupply);
   }
