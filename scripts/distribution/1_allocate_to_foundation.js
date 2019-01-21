@@ -12,6 +12,7 @@ let addressInUse;
 let cmd;
 let web3;
 let zosData;
+const allocateTo = typeof(allocationType) === 'undefined' ? 'foundation' : allocationType;
 
 const duration = {
     seconds: function (val) { return val; },
@@ -20,7 +21,17 @@ const duration = {
     days: function (val) { return val * this.hours(24); },
     weeks: function (val) { return val * this.days(7); },
     years: function (val) { return val * this.days(365); },
-  };
+};
+
+const nonces = {};
+
+const getAndIncrementNonce = function(address) {
+    nonce = nonces[address];
+    nonces[address] = nonces[address] + 1; 
+    console.log(`Got nonce ${nonce} for ${address} and incremented to ${nonces[address]}`);
+    return nonce;
+}
+
 
 if (typeof(networkProvider) === 'undefined') {
     console.log("Must supply networkProvider");
@@ -40,7 +51,7 @@ if (typeof(addressesCSV) === 'undefined') {
     process.exit(0);
 }
 const timestamp = Math.round((new Date()).getTime() / 1000);
-const allocationMetadataFilename = `build/allocation-foundation-${networkProvider}-${timestamp}.json`;
+const allocationMetadataFilename = `build/allocation-${allocateTo}-${networkProvider}-${timestamp}.json`;
 allocationsData = {};
 allocationsData.allocations = [];
 zosData = JSON.parse(fs.readFileSync(`zos.${networkProvider}.json`, 'utf8'));
@@ -55,7 +66,8 @@ async function main() {
     providerTransferrer = connectionConfig.networks[networkInUse].provider();        
     web3 = new Web3(providerTransferrer);    
     const propsContractInstance = new web3.eth.Contract(propsContractABI.abi,PropsTokenContractAddress);    
-    // console.log(propsContractInstance.methods);
+    nonces[tokenHolderAddress] = await web3.eth.getTransactionCount(tokenHolderAddress);
+    
     
     
     // instantiate jurisdiction
@@ -66,30 +78,23 @@ async function main() {
     providerValidator = connectionConfig.networks[networkInUse].provider();    
     web3 = new Web3(providerValidator);
     const jurisdictionContractInstance = new web3.eth.Contract(jurisdictionContractABI.abi,jurisdictionContractAddress);
-    
-    
+    nonces[validatorAddress] = await web3.eth.getTransactionCount(validatorAddress);    
+        
     // read csv
     const allocationContents = fs.readFileSync(addressesCSV, 'utf8');  
     const allocationArray = allocationContents.split(/\r?\n/)
     for (let i=0; i< allocationArray.length; ++i) {
-        if (i <= 0 || i>1) continue;
+        if (i <= 0) continue;
         console.log("Working on row:"+allocationArray[i]);
         const allocationData = allocationArray[i].split(",");
         // Address,Tokens,Vesting Duration,Vesting Cliff,Percentage Vested
         const _address = allocationData[0];
-        
         const _tokensRead = new BigNumber(allocationData[1]);
-        
         // const _tokensMultiplier = new BigNumber(1 * 10 ** 18);
-        
         const _tokens = _tokensRead; // .multipliedBy(_tokensMultiplier);
-        
         const _duration = new BigNumber(allocationData[2]);
-        
         const _cliff = new BigNumber(allocationData[3]);
-        
         const _percent = new BigNumber(allocationData[4]);
-        
         //deploy proxy contract per address        
         networkInUse = `${networkProvider}1`;
         addressInUse = connectionConfig.networks[networkInUse].wallet_address;
@@ -112,15 +117,16 @@ async function main() {
         allocationOutput.vestingDuration = _duration;
         allocationOutput.cliffDuration = _cliff;
 
-
         if (tokensToVest > 0) {
             cmd = `zos create TokenVesting -v --init initialize --args ${beneficiary},${start},${cliffDuration},${vestingDuration},${recovable},${addressInUse} --network ${networkInUse} --from ${addressInUse}`
-            try {      
+            try {
+                // create token vesting contract      
                 console.log(`Executing ${cmd}`);  
                 tokenVestingProxyContractAddress = execSync(cmd).toString().replace(/\n$/, '');                                
                 allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;
                 
-                
+                // whitelist the vesting contract
+                console.log(`Issuing attribute for vesting contract ${tokenVestingProxyContractAddress}`);
                 await jurisdictionContractInstance.methods.issueAttribute(
                     tokenVestingProxyContractAddress,
                     1,
@@ -128,50 +134,72 @@ async function main() {
                 ).send({
                     from: validatorAddress,
                     gas: 6000000,
-                    gasPrice: 10 ** 9
+                    gasPrice: 10 ** 9,
+                    nonce: getAndIncrementNonce(validatorAddress)
                 }).then(function(receipt){                    
                     allocationOutput.validatedVestingContract = true;
-                    allocationOutput.validationVestingTx = receipt.transactionHash;                                        
+                    allocationOutput.validationVestingTx = receipt.transactionHash;  
+                    console.log(`Attribute set for vesting contract ${tokenVestingProxyContractAddress}`);
                   }).catch((error) => {        
-                    console.log("error="+error);    
-                  })
-                if (tokensToGrant > 0) {
-                    await jurisdictionContractInstance.methods.issueAttribute(
-                        beneficiary,
-                        1,
-                        0
-                    ).send({
-                        from: validatorAddress,
-                        gas: 6000000,
-                        gasPrice: 10 ** 9
-                    }).then(function(receipt){                    
-                        allocationOutput.validatedBeneficiary = true;
-                        allocationOutput.validatedBeneficiaryTx = receipt.transactionHash;                                            
-                      }).catch((error) => {        
-                        console.log("error="+error);    
-                      })      
-                }                  
-
-
+                    console.log(`Error setting attribute for vesting contract ${tokenVestingProxyContractAddress}:${error}`);
+                })                
+                // transfer to vesting contract
+                console.log(`Transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}`);
+                await propsContractInstance.methods.transfer(
+                    tokenVestingProxyContractAddress,
+                    web3.utils.toWei(tokensToVest.toString())
+                ).send({
+                    from: tokenHolderAddress,
+                    gas: 6000000,
+                    gasPrice: 10 ** 9,
+                    nonce: getAndIncrementNonce(tokenHolderAddress)
+                }).then(function(receipt){                    
+                    allocationOutput.vestingTransferTx = receipt.transactionHash;
+                    console.log(`Transferred ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress} (tx=${receipt.transactionHash})`);
+                    }).catch((error) => {        
+                        console.log(`Error transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}:${error}`);
+                })                   
             } catch (err) {
                 console.warn(err);
             }            
         }
         
+        // whitelist beneficianry
+        console.log(`Issuing attribute for beneficiary ${beneficiary}`);
+        await jurisdictionContractInstance.methods.issueAttribute(
+            beneficiary,
+            1,
+            0
+        ).send({
+            from: validatorAddress,
+            gas: 6000000,
+            gasPrice: 10 ** 9,
+            nonce: getAndIncrementNonce(validatorAddress)
+        }).then(function(receipt){                    
+            allocationOutput.validatedBeneficiary = true;
+            allocationOutput.validatedBeneficiaryTx = receipt.transactionHash;                                            
+            console.log(`Attribute set for beneficiary ${beneficiary}`);
+            }).catch((error) => {
+                console.log(`Error setting attribute for beneficiary ${beneficiary}:${error}`);            
+        });        
         if (tokensToGrant > 0) {
             try {
+                // transfer to beneficiary
+                console.log(`Transferring ${tokensToGrant.toString()} to beneficiary ${beneficiary} from ${tokenHolderAddress}`);
                 await propsContractInstance.methods.transfer(
                     beneficiary,
                     web3.utils.toWei(tokensToGrant.toString())
                 ).send({
                     from: tokenHolderAddress,
                     gas: 6000000,
-                    gasPrice: 10 ** 9
+                    gasPrice: 10 ** 9,
+                    nonce: getAndIncrementNonce(tokenHolderAddress)
                 }).then(function(receipt){                    
-                    allocationOutput.beneficiaryTransferTx = receipt.transactionHash;                            
-                  }).catch((error) => {        
-                    console.log("error="+error);    
-                  })
+                    allocationOutput.beneficiaryTransferTx = receipt.transactionHash; 
+                    console.log(`Transferred ${tokensToGrant.toString()} to beneficiary ${beneficiary} from ${tokenHolderAddress} (tx=${receipt.transactionHash})`);                           
+                }).catch((error) => {
+                    console.log(`Error transferring ${tokensToGrant.toString()} to beneficiary ${beneficiary} from ${tokenHolderAddress}:${error}`);                    
+                })                
             } catch (err) {
                 console.warn(err);
             }                        
