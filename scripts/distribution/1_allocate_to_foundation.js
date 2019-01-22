@@ -13,6 +13,11 @@ let networkInUse;
 let addressInUse;
 let cmd;
 let web3;
+let countValidatedVestingContracts = 0;
+let countValidatedBeneficiaryWallets = 0;
+let countWallets = 0;
+let totalTransferred = new BigNumber(0);
+let totalTransferredToVestingContracts = new BigNumber(0);
 const nonces = {};
 // eslint-disable-next-line no-undef
 const allocateTo = typeof (allocationType) === 'undefined' ? 'foundation' : global.allocationType;
@@ -39,6 +44,19 @@ if (typeof (addressesCSV) === 'undefined') {
 }
 const timestamp = Math.round((new Date()).getTime() / 1000);
 const allocationMetadataFilename = `output/allocation-${allocateTo}-${networkProvider}.json`;
+const distributionMetadataFilename = `output/distribution-summary-${networkProvider}.json`;
+let distributionData;
+try {
+  // eslint-disable-next-line import/no-dynamic-require,global-require
+  distributionData = require(`../../${distributionMetadataFilename}`);
+} catch (error) {
+  distributionData = {};
+}
+
+if (typeof (distributionData.steps) === 'undefined') {
+  distributionData.steps = [];
+}
+
 let allocationsData;
 try {
   // eslint-disable-next-line import/no-dynamic-require,global-require
@@ -46,7 +64,10 @@ try {
 } catch (error) {
   allocationsData = {};
 }
-allocationsData.allocations = [];
+if (typeof (allocationsData.allocations) === 'undefined') {
+  allocationsData.allocations = [];
+}
+
 const zosData = JSON.parse(fs.readFileSync(`zos.${networkProvider}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
@@ -113,7 +134,6 @@ async function main() {
         console.log(`Executing ${cmd}`);
         const tokenVestingProxyContractAddress = execSync(cmd).toString().replace(/\n$/, '');
         allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;
-
         // whitelist the vesting contract
         console.log(`Issuing attribute for vesting contract ${tokenVestingProxyContractAddress}`);
         // eslint-disable-next-line no-await-in-loop
@@ -126,9 +146,11 @@ async function main() {
           gas: utils.gasLimit('attribute'),
           gasPrice: utils.gasPrice(),
           nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
+        // eslint-disable-next-line no-loop-func
         }).then((receipt) => {
           allocationOutput.validatedVestingContract = true;
           allocationOutput.validationVestingTx = receipt.transactionHash;
+          countValidatedVestingContracts = totalTransferredToVestingContracts + 1;
           console.log(`Attribute set for vesting contract ${tokenVestingProxyContractAddress}`);
         }).catch((error) => {
           console.warn(`Error setting attribute for vesting contract ${tokenVestingProxyContractAddress}:${error}`);
@@ -144,8 +166,11 @@ async function main() {
           gas: utils.gasLimit('transfer'),
           gasPrice: utils.gasPrice(),
           nonce: utils.getAndIncrementNonce(nonces, tokenHolderAddress),
+        // eslint-disable-next-line no-loop-func
         }).then((receipt) => {
           allocationOutput.vestingTransferTx = receipt.transactionHash;
+          totalTransferredToVestingContracts = totalTransferredToVestingContracts.plus(tokensToVest);
+          totalTransferred = totalTransferred.plus(tokensToVest);
           console.log(`Transferred ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress} (tx=${receipt.transactionHash})`);
         }).catch((error) => {
           console.warn(`Error transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}:${error}`);
@@ -177,9 +202,11 @@ async function main() {
         gas: utils.gasLimit('attribute'),
         gasPrice: utils.gasPrice(),
         nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
+      // eslint-disable-next-line no-loop-func
       }).then((receipt) => {
         allocationOutput.validatedBeneficiary = true;
         allocationOutput.validatedBeneficiaryTx = receipt.transactionHash;
+        countValidatedBeneficiaryWallets += 1;
         console.log(`Attribute set for beneficiary ${beneficiary}`);
       }).catch((error) => {
         console.warn(`Error setting attribute for beneficiary ${beneficiary}:${error}`);
@@ -198,8 +225,11 @@ async function main() {
           gas: utils.gasLimit('transfer'),
           gasPrice: utils.gasPrice(),
           nonce: utils.getAndIncrementNonce(nonces, tokenHolderAddress),
+        // eslint-disable-next-line no-loop-func
         }).then((receipt) => {
           allocationOutput.beneficiaryTransferTx = receipt.transactionHash;
+          totalTransferred = totalTransferred.plus(tokensToGrant);
+          countWallets += 1;
           console.log(`Transferred ${tokensToGrant.toString()} to beneficiary ${beneficiary} from ${tokenHolderAddress} (tx=${receipt.transactionHash})`);
         }).catch((error) => {
           console.warn(`Error transferring ${tokensToGrant.toString()} to beneficiary ${beneficiary} from ${tokenHolderAddress}:${error}`);
@@ -212,18 +242,41 @@ async function main() {
     allocationsData.allocations.push(allocationOutput);
   }
 
+  distributionData.steps.push({
+    name: allocateTo,
+    tokenContract: PropsTokenContractAddress,
+    countWallets,
+    countValidatedBeneficiaryWallets,
+    countValidatedVestingContracts,
+    totalTransferred,
+    totalTransferredToVestingContracts,
+    date: utils.timeStamp(),
+  });
   fs.writeFile(
-    allocationMetadataFilename,
-    JSON.stringify(allocationsData),
+    distributionMetadataFilename,
+    JSON.stringify(distributionData),
     { flag: 'w' },
     (err) => {
       if (err) {
         console.error(err);
         process.exit(1);
       }
-      console.log(`metadata written to ${allocationMetadataFilename}`);
-      console.log(JSON.stringify(allocationsData, null, 2));
-      process.exit(0);
+      console.log(`metadata written to ${distributionMetadataFilename}`);
+      console.log(JSON.stringify(distributionData, null, 2));
+      fs.writeFile(
+        allocationMetadataFilename,
+        JSON.stringify(allocationsData),
+        { flag: 'w' },
+        (err2) => {
+          if (err2) {
+            console.error(err2);
+            process.exit(1);
+          }
+          console.log(`metadata written to ${allocationMetadataFilename}`);
+          console.log(JSON.stringify(allocationsData, null, 2));
+          process.exit(0);
+        },
+      );
     },
   );
 }
