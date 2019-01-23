@@ -150,7 +150,7 @@ async function main() {
         }).then((receipt) => {
           allocationOutput.validatedVestingContract = true;
           allocationOutput.validationVestingTx = receipt.transactionHash;
-          countValidatedVestingContracts = totalTransferredToVestingContracts + 1;
+          countValidatedVestingContracts += 1;
           console.log(`Attribute set for vesting contract ${tokenVestingProxyContractAddress}`);
         }).catch((error) => {
           console.warn(`Error setting attribute for vesting contract ${tokenVestingProxyContractAddress}:${error}`);
@@ -244,7 +244,7 @@ async function main() {
 
   distributionData.steps.push({
     name: allocateTo,
-    tokenContract: PropsTokenContractAddress,
+    tokenAddress: PropsTokenContractAddress,
     countWallets,
     countValidatedBeneficiaryWallets,
     countValidatedVestingContracts,
