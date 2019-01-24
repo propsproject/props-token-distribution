@@ -1,10 +1,12 @@
-const gasPrice = () => 1 * (10 ** 9);
+const gasPrice = () => 9 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
     case 'attribute':
       return 60000;
     case 'transfer':
       return 70000;
+    case 'multisig':
+      return 250000;
     default:
       return 100000;
   }

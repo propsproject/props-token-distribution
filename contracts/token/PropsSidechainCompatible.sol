@@ -62,8 +62,8 @@ contract PropsSidechainCompatible is ERC20 {
     ) public returns (bool)
     {
         if (super.transfer(to, value)) {
-            emit Settlement(block.timestamp, msg.sender, to, value);
             emit TransferDetails(msg.sender, super.balanceOf(msg.sender), to, super.balanceOf(to), value);
+            emit Settlement(block.timestamp, msg.sender, to, value);            
             return true;
         } 
         return false;

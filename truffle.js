@@ -1,7 +1,7 @@
 // Must set three networks for each deployed network
 // See examples below for rinkeby0,1,2
 // 0 - Deployer/Owner of Logic contract, Deployer/Owner of vesting contracts,
-// 1 - Deployer/Owner(temp) of Proxy contract
+// 1 - Deployer/Owner(temp) of Proxy contract 
 // 2 - Owner(temp) of all props, Handling allocations
 // 3 - Valid Validator
 

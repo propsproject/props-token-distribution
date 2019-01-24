@@ -93,7 +93,7 @@ async function main() {
     // check if not validated already
     let isBeneficiaryValidated = false;
     // eslint-disable-next-line no-await-in-loop
-    await jurisdictionContractInstance.methods.hasAttribute(multisigWalletForRemaningProps, 1)
+    await jurisdictionContractInstance.methods.owner()
       .call()
       .then((val) => {
         isBeneficiaryValidated = val;
