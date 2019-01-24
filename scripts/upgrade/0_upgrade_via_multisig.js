@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+const zos = require('zos-lib');
 // const BigNumber = require('bignumber.js');
 const fs = require('fs');
 // eslint-disable-next-line prefer-destructuring
@@ -58,16 +59,17 @@ async function main() {
   web3 = new Web3(providerDevOps1);
   const multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
   const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
-  const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress).encodeABI();
-  console.log(`upgradeToEncoded=${upgradeToEncoded}`);
-  // process.exit(0);
+  // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();
+  const upgradeToEncoded = zos.encodeCall('upgradeTo', ['address'], [NewPropsTokenLogicContractAddress]);
+  console.log(`upgradeToEncoded=${upgradeToEncoded}`);  
+  // 0x3659cfe6000000000000000000000000d848527867b66b29f87708c3cc1d9c39bc56d340
 
 
   // whitelist beneficianry
   console.log(`Issuing upgradeTo to ${NewPropsTokenLogicContractAddress} via multisig wallet ${multisigWalletForPropsTokenProxy}`);
   // eslint-disable-next-line no-await-in-loop
   await multiSigContractInstance.methods.submitTransaction(
-    NewPropsTokenLogicContractAddress,
+    PropsTokenContractAddress,
     0,
     upgradeToEncoded,
   ).send({

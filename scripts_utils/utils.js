@@ -1,12 +1,20 @@
 const gasPrice = () => 9 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
-    case 'attribute':
+    case 'attribute': // assign attribute to specific address
       return 60000;
     case 'transfer':
       return 70000;
     case 'multisig':
       return 250000;
+    case 'deployJurisdiction':
+      return 3000000;
+    case 'addAttribute': // add attribute to jurisdiction contract
+      return 150000;
+    case 'addValidator': // add attribute to jurisdiction contract
+      return 120000;
+    case 'allowValidatorAttribute': // allow validator to assign attribute
+      return 100000;
     default:
       return 100000;
   }

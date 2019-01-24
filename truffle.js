@@ -1,15 +1,37 @@
 // Must set three networks for each deployed network
 // See examples below for rinkeby0,1,2
-// 0 - Deployer/Owner of Logic contract, Deployer/Owner of vesting contracts,
-// 1 - Deployer/Owner(temp) of Proxy contract 
+// 0 - Deployer/Owner of Logic contract, Deployer/Owner of vesting contracts, Deployer/Owner(temp) of TPL contract
+// 1 - Deployer/Owner(temp) of Proxy contract
 // 2 - Owner(temp) of all props, Handling allocations
 // 3 - Valid Validator
-
+const Web3 = require('web3');
 const PrivateKeyProvider = require('truffle-privatekey-provider');
 const fs = require('fs');
 
+const web3 = new Web3();
 module.exports = {
   networks: {
+    test0: {
+      provider() {
+        return new web3.providers.HttpProvider('http://localhost:9545');
+      },
+      network_id: '*',
+    },
+    test1: {
+      host: 'localhost',
+      port: 9545,
+      network_id: '*',
+    },
+    test2: {
+      host: 'localhost',
+      port: 9545,
+      network_id: '*',
+    },
+    testValidator: {
+      host: 'localhost',
+      port: 9545,
+      network_id: '*',
+    },
     test: {
       host: 'localhost',
       port: 9545,
@@ -29,7 +51,7 @@ module.exports = {
     },
     rinkeby0: {
       provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK0.txt','utf8');
+        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK0.txt', 'utf8');
         return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
       },
       network_id: '4',
@@ -37,7 +59,7 @@ module.exports = {
     },
     rinkeby1: {
       provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK1.txt','utf8');
+        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK1.txt', 'utf8');
         return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
       },
       network_id: '4',
@@ -45,7 +67,7 @@ module.exports = {
     },
     rinkeby2: {
       provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK2.txt','utf8');
+        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK2.txt', 'utf8');
         return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
       },
       network_id: '4',
@@ -53,7 +75,7 @@ module.exports = {
     },
     rinkebyValidator: {
       provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevValidator-PK.txt','utf8');
+        const pk = fs.readFileSync('/Users/jretina/DevValidator-PK.txt', 'utf8');
         return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
       },
       network_id: '4',
