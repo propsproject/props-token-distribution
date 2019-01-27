@@ -29,8 +29,8 @@ contract PropsTimeBasedTransfers is ERC20 {
         canTransferBeforeStartTime = account;
     }
 
-    function _canTransfer() internal view returns (bool) {
-        return (now > transfersStartTime || msg.sender==canTransferBeforeStartTime);
+    function canTransfer(address account) public view returns (bool) {
+        return (now > transfersStartTime || account==canTransferBeforeStartTime);
     }
 
     function transfer(
@@ -41,7 +41,7 @@ contract PropsTimeBasedTransfers is ERC20 {
     returns (bool)
     {
         require(
-            _canTransfer(),
+            canTransfer(msg.sender),
             "Transfers are not yet active"
         );
         return super.transfer(to, value);        
@@ -56,7 +56,7 @@ contract PropsTimeBasedTransfers is ERC20 {
     returns (bool)
     {
         require(
-            _canTransfer(),
+            canTransfer(msg.sender),
             "Transfers are not yet active"
         );
         return super.transferFrom(from, to, value);        
