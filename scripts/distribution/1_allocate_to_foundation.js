@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 const Web3 = require('web3');
 const BigNumber = require('bignumber.js');
 const fs = require('fs');
@@ -26,13 +27,10 @@ const allocateTo = typeof (allocationType) === 'undefined' ? 'foundation' : glob
 if (typeof (networkProvider) === 'undefined') {
   console.warn('Must supply networkProvider');
   process.exit(0);
-} else { // default provider
-  networkInUse = `${networkProvider}0`;
-  web3 = connectionConfig.networks[networkInUse].provider;
 }
 
 // validate jurisdiction contract address
-if (typeof (jurisdictionContractAddress) === 'undefined') {
+if (utils.hasTPLContract() && typeof (jurisdictionContractAddress) === 'undefined') {
   console.warn('Must supply jurisdictionContractAddress');
   process.exit(0);
 }
@@ -68,27 +66,54 @@ if (typeof (allocationsData.allocations) === 'undefined') {
   allocationsData.allocations = [];
 }
 
-const zosData = JSON.parse(fs.readFileSync(`zos.${networkProvider}.json`, 'utf8'));
+const fileNetworkName = networkProvider === 'test' ? 'dev-5777' : networkProvider;
+const zosData = JSON.parse(fs.readFileSync(`zos.${fileNetworkName}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
 const jurisdictionContractABI = require('../../build/contracts/BasicJurisdiction.json');
 
+let accounts;
 async function main() {
   // instantiate propstoken
+  let providerOwner;
   networkInUse = `${networkProvider}2`;
-  const tokenHolderAddress = connectionConfig.networks[networkInUse].wallet_address;
-  const providerTransferrer = connectionConfig.networks[networkInUse].provider();
-  web3 = new Web3(providerTransferrer);
+  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+    providerOwner = connectionConfig.networks[networkInUse].provider();
+    web3 = new Web3(providerOwner);
+  }
+  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+    accounts = await web3.eth.getAccounts();
+    addressInUse = accounts[2];
+  } else {
+    addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+  }
+
+
+  const tokenHolderAddress = addressInUse;
   const propsContractInstance = new web3.eth.Contract(propsContractABI.abi, PropsTokenContractAddress);
   nonces[tokenHolderAddress] = await web3.eth.getTransactionCount(tokenHolderAddress);
 
-  // instantiate jurisdiction
-  networkInUse = `${networkProvider}Validator`;
-  const validatorAddress = connectionConfig.networks[networkInUse].wallet_address;
-  const providerValidator = connectionConfig.networks[networkInUse].provider();
-  web3 = new Web3(providerValidator);
-  const jurisdictionContractInstance = new web3.eth.Contract(jurisdictionContractABI.abi, jurisdictionContractAddress);
-  nonces[validatorAddress] = await web3.eth.getTransactionCount(validatorAddress);
+  let jurisdictionContractInstance;
+  let validatorAddress;
+  if (utils.hasTPLContract()) {
+    // instantiate jurisdiction
+    networkInUse = `${networkProvider}Validator`;
+    if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+      providerOwner = connectionConfig.networks[networkInUse].provider();
+      web3 = new Web3(providerOwner);
+    }
+    if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+      web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+      accounts = await web3.eth.getAccounts();
+      addressInUse = accounts[3];
+    } else {
+      addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+    }
+    validatorAddress = addressInUse;
+    jurisdictionContractInstance = new web3.eth.Contract(jurisdictionContractABI.abi, jurisdictionContractAddress);
+    nonces[validatorAddress] = await web3.eth.getTransactionCount(validatorAddress);
+  }
 
   // read csv
   const allocationContents = fs.readFileSync(addressesCSV, 'utf8');
@@ -106,7 +131,11 @@ async function main() {
     const percent = new BigNumber(allocationData[4]);
     // deploy proxy contract per address
     networkInUse = `${networkProvider}1`;
-    addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+    if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+      addressInUse = accounts[1];
+    } else {
+      addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+    }
 
     const start = (timestamp) + utils.duration.minutes(1);
     const cliffDuration = utils.duration.days(cliff);
@@ -133,28 +162,31 @@ async function main() {
         // create token vesting contract
         console.log(`Executing ${cmd}`);
         const tokenVestingProxyContractAddress = execSync(cmd).toString().replace(/\n$/, '');
-        allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;
-        // whitelist the vesting contract
-        console.log(`Issuing attribute for vesting contract ${tokenVestingProxyContractAddress}`);
-        // eslint-disable-next-line no-await-in-loop
-        await jurisdictionContractInstance.methods.issueAttribute(
-          tokenVestingProxyContractAddress,
-          1,
-          0,
-        ).send({
-          from: validatorAddress,
-          gas: utils.gasLimit('attribute'),
-          gasPrice: utils.gasPrice(),
-          nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
-        // eslint-disable-next-line no-loop-func
-        }).then((receipt) => {
-          allocationOutput.validatedVestingContract = true;
-          allocationOutput.validationVestingTx = receipt.transactionHash;
-          countValidatedVestingContracts += 1;
-          console.log(`Attribute set for vesting contract ${tokenVestingProxyContractAddress}`);
-        }).catch((error) => {
-          console.warn(`Error setting attribute for vesting contract ${tokenVestingProxyContractAddress}:${error}`);
-        });
+        allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;        
+        if (utils.hasTPLContract()) {
+          // whitelist the vesting contract
+          console.log(`Issuing attribute for vesting contract ${tokenVestingProxyContractAddress}`);
+          // eslint-disable-next-line no-await-in-loop
+          await jurisdictionContractInstance.methods.issueAttribute(
+            tokenVestingProxyContractAddress,
+            1,
+            0,
+          ).send({
+            from: validatorAddress,
+            gas: utils.gasLimit('attribute'),
+            gasPrice: utils.gasPrice(),
+            nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
+          // eslint-disable-next-line no-loop-func
+          }).then((receipt) => {
+            allocationOutput.validatedVestingContract = true;
+            allocationOutput.validationVestingTx = receipt.transactionHash;
+            countValidatedVestingContracts += 1;
+            console.log(`Attribute set for vesting contract ${tokenVestingProxyContractAddress}`);
+          }).catch((error) => {
+            console.warn(`Error setting attribute for vesting contract ${tokenVestingProxyContractAddress}:${error}`);
+          });
+        }
+
         // transfer to vesting contract
         console.log(`Transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}`);
         // eslint-disable-next-line no-await-in-loop
@@ -180,38 +212,41 @@ async function main() {
       }
     }
 
-    // whitelist beneficianry
-    console.log(`Issuing attribute for beneficiary ${beneficiary}`);
+    if (utils.hasTPLContract()) {
+      // whitelist beneficianry
+      console.log(`Issuing attribute for beneficiary ${beneficiary}`);
 
-    // check if not validated already
-    let isBeneficiaryValidated = false;
-    // eslint-disable-next-line no-await-in-loop
-    await jurisdictionContractInstance.methods.hasAttribute(beneficiary, 1)
-      .call()
-      .then((val) => {
-        isBeneficiaryValidated = val;
-      });
-    if (!isBeneficiaryValidated) {
+      // check if not validated already
+      let isBeneficiaryValidated = false;
       // eslint-disable-next-line no-await-in-loop
-      await jurisdictionContractInstance.methods.issueAttribute(
-        beneficiary,
-        1,
-        0,
-      ).send({
-        from: validatorAddress,
-        gas: utils.gasLimit('attribute'),
-        gasPrice: utils.gasPrice(),
-        nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
-      // eslint-disable-next-line no-loop-func
-      }).then((receipt) => {
-        allocationOutput.validatedBeneficiary = true;
-        allocationOutput.validatedBeneficiaryTx = receipt.transactionHash;
-        countValidatedBeneficiaryWallets += 1;
-        console.log(`Attribute set for beneficiary ${beneficiary}`);
-      }).catch((error) => {
-        console.warn(`Error setting attribute for beneficiary ${beneficiary}:${error}`);
-      });
+      await jurisdictionContractInstance.methods.hasAttribute(beneficiary, 1)
+        .call()
+        .then((val) => {
+          isBeneficiaryValidated = val;
+        });
+      if (!isBeneficiaryValidated) {
+        // eslint-disable-next-line no-await-in-loop
+        await jurisdictionContractInstance.methods.issueAttribute(
+          beneficiary,
+          1,
+          0,
+        ).send({
+          from: validatorAddress,
+          gas: utils.gasLimit('attribute'),
+          gasPrice: utils.gasPrice(),
+          nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
+        // eslint-disable-next-line no-loop-func
+        }).then((receipt) => {
+          allocationOutput.validatedBeneficiary = true;
+          allocationOutput.validatedBeneficiaryTx = receipt.transactionHash;
+          countValidatedBeneficiaryWallets += 1;
+          console.log(`Attribute set for beneficiary ${beneficiary}`);
+        }).catch((error) => {
+          console.warn(`Error setting attribute for beneficiary ${beneficiary}:${error}`);
+        });
+      }
     }
+
     if (tokensToGrant > 0) {
       try {
         // transfer to beneficiary

@@ -1,8 +1,11 @@
-const { execSync } = require('child_process').execSync;
+/* eslint-disable prefer-destructuring */
+// eslint-disable-next-line prefer-destructuring
+const execSync = require('child_process').execSync;
+const Web3 = require('web3');
 const connectionConfig = require('../../truffle');
 
 const networkProvider = process.argv[2];
-const jurisdictionContractAddress = process.argv[3];
+const transferStartTime = process.argv[3];
 let networkInUse;
 let addressInUse;
 let cmd;
@@ -12,15 +15,28 @@ if (typeof (networkProvider) === 'undefined') {
   process.exit(0);
 }
 
-if (typeof (jurisdictionContractAddress) === 'undefined') {
-  console.log('Must supply jurisdictionContractAddress');
+if (typeof (transferStartTime) === 'undefined') {
+  console.log('Must supply transfer start time');
   process.exit(0);
 }
 
 async function main() {
   // compile/deploy logic contract
+  let web3;
+  let providerOwner;
   networkInUse = `${networkProvider}0`;
-  addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+    providerOwner = connectionConfig.networks[networkInUse].provider();
+    web3 = new Web3(providerOwner);
+  }
+  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+    const accounts = await web3.eth.getAccounts();
+    addressInUse = accounts[0];
+  } else {
+    addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+  }
+
   cmd = `zos push -v --network ${networkInUse} --from ${addressInUse}`;
   try {
     console.log(`Executing ${cmd}`);
@@ -31,14 +47,28 @@ async function main() {
   }
 
   // deploy proxy contract
+  let addressPropsHolder;
   networkInUse = `${networkProvider}1`;
-  addressInUse = connectionConfig.networks[networkInUse].wallet_address;
-  const addressPropsHolder = connectionConfig.networks[`${networkProvider}2`].wallet_address;
-  cmd = `zos create PropsToken -v --init initialize --args ${addressPropsHolder},${jurisdictionContractAddress},1 --network ${networkInUse} --from ${addressInUse}`;
+  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+    providerOwner = connectionConfig.networks[networkInUse].provider();
+    web3 = new Web3(providerOwner);
+  }
+  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+    const accounts = await web3.eth.getAccounts();
+    addressInUse = accounts[1];
+    addressPropsHolder = accounts[2];
+  } else {
+    addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+    addressPropsHolder = connectionConfig.networks[`${networkProvider}2`].wallet_address;
+  }
+
+  cmd = `zos create PropsToken -v --init initialize --args ${addressPropsHolder},${transferStartTime} --network ${networkInUse} --from ${addressInUse}`;
   try {
     console.log(`Executing ${cmd}`);
     const cmdOutput = execSync(cmd).toString();
     console.log(`${cmd} returned => ${cmdOutput}`);
+    process.exit(0);
   } catch (err) {
     console.warn(err);
   }

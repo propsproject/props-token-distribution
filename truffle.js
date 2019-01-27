@@ -11,10 +11,9 @@ const fs = require('fs');
 const web3 = new Web3();
 module.exports = {
   networks: {
-    test0: {
-      provider() {
-        return new web3.providers.HttpProvider('http://localhost:9545');
-      },
+    test0: {      
+      host: 'localhost',
+      port: 9545,
       network_id: '*',
     },
     test1: {

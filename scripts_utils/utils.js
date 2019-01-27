@@ -15,6 +15,8 @@ const gasLimit = (type) => {
       return 120000;
     case 'allowValidatorAttribute': // allow validator to assign attribute
       return 100000;
+    case 'validateAddress': // allow validator to assign attribute
+      return 60000;
     default:
       return 100000;
   }
@@ -61,8 +63,11 @@ const timeStamp = () => {
   return `${date.join('/')} ${time.join(':')} ${suffix}`;
 };
 
+const hasTPLContract = () => false;
+
 exports.gasLimit = gasLimit;
 exports.gasPrice = gasPrice;
 exports.duration = duration;
 exports.getAndIncrementNonce = getAndIncrementNonce;
 exports.timeStamp = timeStamp;
+exports.hasTPLContract = hasTPLContract;
