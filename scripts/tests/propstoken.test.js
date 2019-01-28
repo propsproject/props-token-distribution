@@ -3,11 +3,11 @@
 /* eslint-disable func-names */
 /* eslint-disable no-undef */
 /* eslint-disable prefer-destructuring */
-global.timestamp = Math.floor(Date.now() / 1000) + 15; // now + 60 seconds to allow for further testing when not allowed
+global.timestamp = Math.floor(Date.now() / 1000) + 10; // now + 60 seconds to allow for further testing when not allowed
 const BigNumber = require('bignumber.js');
 const waitUntil = require('async-wait-until');
 const main = require('./index.js').main;
-
+const utils = require('../../scripts_utils/utils');
 
 let instance;
 contract('main', (_accounts) => {
@@ -55,6 +55,29 @@ contract('main', (_accounts) => {
     });
   });
 
+  describe('ERC20 Tests', async () => {
+    it('Transfer works', async () => {
+      const transferrerBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
+      const receiverBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
+      const amount = 100000;
+      const result = await instance.transfer(web3.eth.accounts[4], web3.toWei(amount), { from: web3.eth.accounts[3] });
+      const newTransferrerBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
+      const newReceiverBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
+      assert.equal(newTransferrerBalance, transferrerBalance - amount);
+      assert.equal(newReceiverBalance, receiverBalance + amount);
+      const transferLogs = await utils.getEventData(instance, 'Transfer');
+      assert.equal(transferLogs[0].args.from, web3.eth.accounts[3]);
+      assert.equal(transferLogs[0].args.to, web3.eth.accounts[4]);
+      assert.equal(transferLogs[0].args.value, (new BigNumber(web3.toWei(amount)).toString()));
+      const transferDetailsLogs = await utils.getEventData(instance, 'TransferDetails');
+      assert.equal(transferDetailsLogs[0].args.from, web3.eth.accounts[3]);
+      assert.equal(transferDetailsLogs[0].args.to, web3.eth.accounts[4]);
+      assert.equal(transferDetailsLogs[0].args.amount, (new BigNumber(web3.toWei(amount)).toString()));
+      assert.equal(transferDetailsLogs[0].args.fromBalance, (new BigNumber(web3.toWei(newTransferrerBalance)).toString()));
+      assert.equal(transferDetailsLogs[0].args.toBalance, (new BigNumber(web3.toWei(newReceiverBalance)).toString()));
+    });
+  });
+
   describe('Timebase transfer logic', async () => {
     it('canTransfer is false with non holder account before transfer start time', async () => {
       const result = await instance.canTransfer(web3.eth.accounts[4]);
@@ -65,23 +88,55 @@ contract('main', (_accounts) => {
       const result = await instance.canTransfer(web3.eth.accounts[3]);
       assert.equal(result, true);
     });
-    it('Transfer after time to transfer time had passed works', async () => {
+
+    it('canTransfer is true with non holder accoutn after after tranfer start time', async () => {
       // Wait for some async operation to end
       try {
+        console.log(`will wait for ${global.timestamp - Math.floor(Date.now() / 1000)} seconds...`);
         const result = await waitUntil(() => {
           const timePassed = global.timestamp - Math.floor(Date.now() / 1000);
-          console.log(`timePassed=${timePassed}`);
           return timePassed < 0;
         }, 90000, 1000);
 
         // Here are the operations to be done after predicate
-        console.log('time passed...');
+        const res = await instance.canTransfer(web3.eth.accounts[4]);
+        assert.equal(res, true);
       } catch (error) {
       // Here are the operations to be done if predicate didn't succeed in the timeout
         console.log('Async operation failed: ', error);
       }
       const result = await instance.canTransfer(web3.eth.accounts[3]);
       assert.equal(result, true);
+    });
+  });
+
+
+  describe('Sidechain compatible logic', async () => {
+    it('Settle works as transfers do with settle event', async () => {
+      const transferrerBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
+      const receiverBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
+      const amount = 100000;
+      const result = await instance.settle(web3.eth.accounts[4], web3.toWei(amount), { from: web3.eth.accounts[3] });
+      const newTransferrerBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
+      const newReceiverBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
+      assert.equal(newTransferrerBalance, transferrerBalance - amount);
+      assert.equal(newReceiverBalance, receiverBalance + amount);
+      const transferLogs = await utils.getEventData(instance, 'Transfer');
+      assert.equal(transferLogs[0].args.from, web3.eth.accounts[3]);
+      assert.equal(transferLogs[0].args.to, web3.eth.accounts[4]);
+      assert.equal(transferLogs[0].args.value, (new BigNumber(web3.toWei(amount)).toString()));
+      const transferDetailsLogs = await utils.getEventData(instance, 'TransferDetails');
+      assert.equal(transferDetailsLogs[0].args.from, web3.eth.accounts[3]);
+      assert.equal(transferDetailsLogs[0].args.to, web3.eth.accounts[4]);
+      assert.equal(transferDetailsLogs[0].args.amount, (new BigNumber(web3.toWei(amount)).toString()));
+      assert.equal(transferDetailsLogs[0].args.fromBalance, (new BigNumber(web3.toWei(newTransferrerBalance)).toString()));
+      assert.equal(transferDetailsLogs[0].args.toBalance, (new BigNumber(web3.toWei(newReceiverBalance)).toString()));
+      const settleLogs = await utils.getEventData(instance, 'Settlement');
+      // console.log(`settleLogs=${JSON.stringify(settleLogs)}`);
+      assert.equal(settleLogs[0].args.from, web3.eth.accounts[3]);
+      assert.equal(settleLogs[0].args.recipient, web3.eth.accounts[4]);
+      assert.equal(settleLogs[0].args.amount, (new BigNumber(web3.toWei(amount)).toString()));
+      assert.isAtLeast(settleLogs[0].args.timestamp.toNumber(), global.timestamp);
     });
   });
 });

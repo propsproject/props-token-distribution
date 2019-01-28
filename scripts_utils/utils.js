@@ -1,3 +1,6 @@
+/* eslint-disable import/no-extraneous-dependencies */
+const Promise = require('bluebird');
+
 const gasPrice = () => 9 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
@@ -65,9 +68,23 @@ const timeStamp = () => {
 
 const hasTPLContract = () => false;
 
+const getEventData = (contract, eventName) => new Promise((resolve, reject) => {
+  const event = contract[eventName]();
+  event.watch();
+  event.get((error, logs) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(logs);
+    }
+  });
+  event.stopWatching();
+});
+
 exports.gasLimit = gasLimit;
 exports.gasPrice = gasPrice;
 exports.duration = duration;
 exports.getAndIncrementNonce = getAndIncrementNonce;
 exports.timeStamp = timeStamp;
 exports.hasTPLContract = hasTPLContract;
+exports.getEventData = getEventData;

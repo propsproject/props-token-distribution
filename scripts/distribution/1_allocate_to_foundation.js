@@ -162,7 +162,7 @@ async function main() {
         // create token vesting contract
         console.log(`Executing ${cmd}`);
         const tokenVestingProxyContractAddress = execSync(cmd).toString().replace(/\n$/, '');
-        allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;        
+        allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;
         if (utils.hasTPLContract()) {
           // whitelist the vesting contract
           console.log(`Issuing attribute for vesting contract ${tokenVestingProxyContractAddress}`);
