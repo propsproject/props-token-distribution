@@ -8,10 +8,11 @@ const Web3 = require('web3');
 const PrivateKeyProvider = require('truffle-privatekey-provider');
 const fs = require('fs');
 
+// eslint-disable-next-line no-unused-vars
 const web3 = new Web3();
 module.exports = {
   networks: {
-    test0: {      
+    test0: {
       host: 'localhost',
       port: 9545,
       network_id: '*',

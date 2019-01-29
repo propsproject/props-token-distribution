@@ -37,7 +37,8 @@ if (typeof (jurisdictionContractAddress) === 'undefined') {
   process.exit(0);
 }
 
-const zosData = JSON.parse(fs.readFileSync(`zos.${networkProvider}.json`, 'utf8'));
+const fileNetworkName = networkProvider === 'test' ? 'dev-5777' : networkProvider;
+const zosData = JSON.parse(fs.readFileSync(`zos.${fileNetworkName}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
 const jurisdictionContractABI = require('../../build/contracts/BasicJurisdiction.json');
@@ -58,22 +59,42 @@ if (typeof (distributionData.steps) === 'undefined') {
 const stepData = {
   name: 'finish',
 };
-
+let accounts;
 async function main() {
   // instantiate propstoken
   networkInUse = `${networkProvider}2`;
-  addressInUse = connectionConfig.networks[networkInUse].wallet_address;
-  const tokenHolderAddress = connectionConfig.networks[networkInUse].wallet_address;
-  const providerTransferrer = connectionConfig.networks[networkInUse].provider();
-  web3 = new Web3(providerTransferrer);
+  let tokenHolderAddress;
+  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+    const providerTransferrer = connectionConfig.networks[networkInUse].provider();
+    web3 = new Web3(providerTransferrer);
+  }
+  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+    accounts = await web3.eth.getAccounts();
+    // eslint-disable-next-line prefer-destructuring
+    tokenHolderAddress = accounts[2];
+  } else {
+    tokenHolderAddress = connectionConfig.networks[networkInUse].wallet_address;
+  }
   const propsContractInstance = new web3.eth.Contract(propsContractABI.abi, PropsTokenContractAddress);
   nonces[tokenHolderAddress] = await web3.eth.getTransactionCount(tokenHolderAddress);
 
   // instantiate jurisdiction
   networkInUse = `${networkProvider}Validator`;
-  const validatorAddress = connectionConfig.networks[networkInUse].wallet_address;
-  const providerValidator = connectionConfig.networks[networkInUse].provider();
-  web3 = new Web3(providerValidator);
+  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+    const providerValidator = connectionConfig.networks[networkInUse].provider();
+    web3 = new Web3(providerValidator);
+  }
+  let validatorAddress;
+  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+    accounts = await web3.eth.getAccounts();
+    // eslint-disable-next-line prefer-destructuring
+    validatorAddress = accounts[3];
+  } else {
+    validatorAddress = connectionConfig.networks[networkInUse].wallet_address;
+  }
+
   const jurisdictionContractInstance = new web3.eth.Contract(jurisdictionContractABI.abi, jurisdictionContractAddress);
   nonces[validatorAddress] = await web3.eth.getTransactionCount(validatorAddress);
 
