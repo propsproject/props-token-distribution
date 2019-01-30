@@ -6,8 +6,15 @@
 global.timestamp = Math.floor(Date.now() / 1000) + 10; // now + 60 seconds to allow for further testing when not allowed
 const BigNumber = require('bignumber.js');
 const waitUntil = require('async-wait-until');
+const ethUtil = require('ethereumjs-util');
 const main = require('./index.js').main;
 const utils = require('../../scripts_utils/utils');
+
+const formattedAddress = address => Buffer.from(ethUtil.stripHexPrefix(address), 'hex');
+const formattedInt = int => ethUtil.setLengthLeft(int, 32);
+const formattedBytes32 = bytes => ethUtil.addHexPrefix(bytes.toString('hex'));
+const hashedTightPacked = args => ethUtil.sha3(Buffer.concat(args));
+
 
 let instance;
 contract('main', (_accounts) => {
@@ -137,6 +144,73 @@ contract('main', (_accounts) => {
       assert.equal(settleLogs[0].args.recipient, web3.eth.accounts[4]);
       assert.equal(settleLogs[0].args.amount, (new BigNumber(web3.toWei(amount)).toString()));
       assert.isAtLeast(settleLogs[0].args.timestamp.toNumber(), global.timestamp);
+    });
+  });
+  const alice = { address: '0x1c77BCe3fAc2d7023aB3f9A6369c100FB8B6c7B5', pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
+  const bob = { address: web3.eth.accounts[8], pk: 'f34381274ac5cca8a465209bdeafeed0274ddcf7ba1df080df772b73ccad032a' };
+  const charlie = { address: web3.eth.accounts[9], pk: '5027f6ea1ab6cd9fe2bc5c2bbb07d5ec77524529964aafe0d02a76aabaa4917f' };
+  const damien = { address: web3.eth.accounts[7], pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
+  const to = bob.address;
+  const delegate = charlie.address;
+  const fee = 10;
+  const amount = 100;
+  const propsInWallet = 5000;
+  const alicePrivateKey = Buffer.from(alice.pk, 'hex');
+  let components;
+  let nonce;
+  describe('ERC865 compatible logic', async () => {
+    it('Charlie performs a transaction T, transferring 100 tokens from Alice to Bob (fee=10)', async () => {
+      // give alice some props
+      await instance.transfer(alice.address, propsInWallet, { from: web3.eth.accounts[3] });
+      // nonce = await web3.eth.getTransactionCount(alice.address);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
+
+      components = [
+        Buffer.from('48664c16', 'hex'),
+        formattedAddress(instance.address),
+        formattedAddress(to),
+        formattedInt(amount),
+        formattedInt(fee),
+        formattedInt(nonce),
+      ];
+
+      const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
+      const sig = utils.fixSignature(ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s));
+      console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
+      await instance.transferPreSigned(
+        sig,
+        to,
+        amount,
+        fee,
+        nonce,
+        { from: charlie.address },
+      );
+
+      aliceBalance = await instance.balanceOf(alice.address);
+      bobBalance = await instance.balanceOf(bob.address);
+      charlieBalance = await instance.balanceOf(charlie.address);
+      assert.equal(aliceBalance.toNumber(), propsInWallet - (amount + fee));
+      assert.equal(bobBalance.toNumber(), amount);
+      assert.equal(charlieBalance.toNumber(), fee);
+    });
+
+    it('Damien tries to replay transfer and fails', async () => {
+      await instance.transfer(damien.address, propsInWallet, { from: web3.eth.accounts[3] });
+      const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
+      try {
+        const tx = await instance.transferPreSigned(
+          sig,
+          to,
+          amount,
+          fee,
+          nonce,
+          { from: charlie.address },
+        );
+        assert.equal(tx.receipt.status, '0x00');
+      } catch (error) {
+        // console.log(`error:${error}`);
+      }
     });
   });
 });

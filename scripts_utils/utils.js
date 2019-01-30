@@ -81,6 +81,15 @@ const getEventData = (contract, eventName) => new Promise((resolve, reject) => {
   event.stopWatching();
 });
 
+const fixSignature = (signature) => {
+  // in geth its always 27/28, in ganache its 0/1. Change to 27/28 to prevent
+  // signature malleability
+  // https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L447
+  const v = parseInt(signature.slice(130, 132), 16) + 27;
+  const vHex = v.toString(16);
+  return signature.slice(0, 130) + vHex;
+};
+
 exports.gasLimit = gasLimit;
 exports.gasPrice = gasPrice;
 exports.duration = duration;
@@ -88,3 +97,4 @@ exports.getAndIncrementNonce = getAndIncrementNonce;
 exports.timeStamp = timeStamp;
 exports.hasTPLContract = hasTPLContract;
 exports.getEventData = getEventData;
+exports.fixSignature = fixSignature;

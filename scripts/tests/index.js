@@ -14,8 +14,24 @@ async function main() {
   const tokenHolderAddress = web3.eth.accounts[3];
   const myProject = new SimpleProject('PropsToken', { from: creatorAddress });
   console.log('Creating an upgradeable instance of PropsToken...');
-  const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp] });
-  return instance;
+  try {
+    const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp] });
+    // for (a in instance) {
+    //   console.log(`${a}=>${typeof(instance[a])}`);
+    // }
+    // console.log('-------');
+    // for (a in instance.contract) {
+    //   console.log(`${a}=>${typeof(instance.contract[a])}`);
+    // }
+    // process.exit(1);
+    // console.log(`instance.address=${instance.address}`);
+    // process.exit(1);
+    return instance;
+  } catch (error) {
+    console.warn(`error=${error}`);
+    process.exit(0);
+  }
+  return null;
 }
 
 // For truffle exec

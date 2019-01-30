@@ -4,7 +4,7 @@ import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol";
 import "./PropsSidechainCompatible.sol";
 import "./PropsTimeBasedTransfers.sol";
-// import "./ERC865Token.sol";
+import "./ERC865Token.sol";
 
 /**
  * @title PROPSToken
@@ -12,7 +12,7 @@ import "./PropsTimeBasedTransfers.sol";
  * The TPLToken integration causes tokens to only be transferrable to addresses
  * which have the validRecipient attribute in the jurisdiction.
  */
-contract PropsToken is Initializable, ERC20Detailed, PropsSidechainCompatible, PropsTimeBasedTransfers { /*, ERC865Token {*/
+contract PropsToken is Initializable, ERC20Detailed, PropsSidechainCompatible, ERC865Token, PropsTimeBasedTransfers {
 
   /**
    * @dev Initializer function. Called only once when a proxy for the contract is created.
