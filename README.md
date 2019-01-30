@@ -1,6 +1,6 @@
 # Props Token Contracts and Distribution
 
-![Props Token](http://propsproject.com/static/images/main-logo.png)
+![Props Token](props-logo.png?raw=true "Title")
 
 Props is a cryptocurrency built on top of the [Ethereum][ethereum] blockchain.
 For more information visit [Props Project Website](https://propsproject.com/)
