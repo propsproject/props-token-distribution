@@ -27,7 +27,7 @@ contract PropsToken is Initializable, ERC20Detailed, PropsSidechainCompatible, E
     public
   {
     uint8 decimals = 18;
-    uint256 totalSupply = 1e9 * (10 ** uint256(decimals));
+    uint256 totalSupply = 0.6 * 1e9 * (10 ** uint256(decimals));
     
     ERC20Detailed.initialize("DEV_Token", "DEV_TOKEN", decimals);
     PropsTimeBasedTransfers.initialize(_transfersStartTime, _holder);    
