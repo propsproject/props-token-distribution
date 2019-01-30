@@ -17,7 +17,7 @@ Contracts are written in [Solidity][solidity] using [ZeppelinOS](https://github.
 
 ```bash
 # Install Zos globally:
-$ npm install -g npm install --global zos
+$ npm install --global zos
 
 # Install local node dependencies:
 $ npm install
