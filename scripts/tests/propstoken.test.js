@@ -251,7 +251,7 @@ contract('main', (_accounts) => {
         { from: charlie.address },
       );
 
-      aliceBalance = await instance.balanceOf(alice.address);      
+      aliceBalance = await instance.balanceOf(alice.address);
       charlieBalance = await instance.balanceOf(charlie.address);
       // console.log(`Balances: aliceBalance=${aliceBalance.toNumber()},bobBalance=${bobBalance.toNumber()},charlieBalance=${charlieBalance.toNumber()}`);
       assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - fee);
@@ -302,7 +302,7 @@ contract('main', (_accounts) => {
       aliceBalance = await instance.balanceOf(alice.address);
       bobBalance = await instance.balanceOf(bob.address);
       charlieBalance = await instance.balanceOf(charlie.address);
-      damienBalance = await instance.balanceOf(damien.address);      
+      damienBalance = await instance.balanceOf(damien.address);
       assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - ((amount / 2) + fee));
       assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));
       assert.equal(charlieBalance.toNumber(), oldCharlieBalance.toNumber() + fee);
@@ -337,7 +337,7 @@ contract('main', (_accounts) => {
         { from: charlie.address },
       );
 
-      aliceBalance = await instance.balanceOf(alice.address);      
+      aliceBalance = await instance.balanceOf(alice.address);
       charlieBalance = await instance.balanceOf(charlie.address);
       // console.log(`Balances: aliceBalance=${aliceBalance.toNumber()},bobBalance=${bobBalance.toNumber()},charlieBalance=${charlieBalance.toNumber()}`);
       assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - fee);
@@ -375,7 +375,7 @@ contract('main', (_accounts) => {
         { from: charlie.address },
       );
 
-      aliceBalance = await instance.balanceOf(alice.address);      
+      aliceBalance = await instance.balanceOf(alice.address);
       charlieBalance = await instance.balanceOf(charlie.address);
       // console.log(`Balances: aliceBalance=${aliceBalance.toNumber()},bobBalance=${bobBalance.toNumber()},charlieBalance=${charlieBalance.toNumber()}`);
       assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - fee);

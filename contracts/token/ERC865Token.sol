@@ -14,8 +14,8 @@ import "./ERC865.sol";
 
 contract ERC865Token is ERC865 {
 
-    /* Nonces of transfers performed */
-    mapping(bytes => bool) signatures;
+    /* hashed tx of transfers performed */
+    mapping(bytes32 => bool) hashedTxs;
 
     event TransferPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
     event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
@@ -37,19 +37,19 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {        
-        require(_to != address(0));
-        require(signatures[_signature] == false);
+        require(_to != address(0));        
 
-        bytes32 hashedTx = transferPreSignedHashing(address(this), _to, _value, _fee, _nonce);
-
-        address from = recover(hashedTx, _signature);     
+        bytes32 hashedParams = transferPreSignedHashing(address(this), _to, _value, _fee, _nonce);
+        address from = recover(hashedParams, _signature);     
         require(from != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        require(hashedTxs[hashedTx] == false);
         _transfer(from, _to, _value);
         _transfer(from, msg.sender, _fee);
         // _balances[from] = _balances[from].sub(_value).sub(_fee);
         // _balances[_to] = _balances[_to].add(_value);
         // _balances[msg.sender] = _balances[msg.sender].add(_fee);
-        signatures[_signature] = true;
+        hashedTxs[hashedTx] = true;
 
         // Transfer(from, _to, _value);
         // Transfer(from, msg.sender, _fee);
@@ -75,18 +75,19 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0));
-        require(signatures[_signature] == false);
+        require(_spender != address(0));        
 
-        bytes32 hashedTx = approvePreSignedHashing(address(this), _spender, _value, _fee, _nonce);
-        address from = recover(hashedTx, _signature);
+        bytes32 hashedParams = approvePreSignedHashing(address(this), _spender, _value, _fee, _nonce);
+        address from = recover(hashedParams, _signature);
         require(from != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        require(hashedTxs[hashedTx] == false);
         _approve(from, _spender, _value);
         // _allowed[from][_spender] = _value;
         _transfer(from, msg.sender, _fee);
         // _balances[from] = _balances[from].sub(_fee);
         // _balances[msg.sender] = _balances[msg.sender].add(_fee);
-        signatures[_signature] = true;
+        hashedTxs[hashedTx] = true;
 
         // Approval(from, _spender, _value);
         // Transfer(from, msg.sender, _fee);
@@ -112,18 +113,19 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0));
-        require(signatures[_signature] == false);
+        require(_spender != address(0));        
 
-        bytes32 hashedTx = increaseApprovalPreSignedHashing(address(this), _spender, _addedValue, _fee, _nonce);
-        address from = recover(hashedTx, _signature);
+        bytes32 hashedParams = increaseApprovalPreSignedHashing(address(this), _spender, _addedValue, _fee, _nonce);
+        address from = recover(hashedParams, _signature);
         require(from != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        require(hashedTxs[hashedTx] == false);
         _approve(from, _spender, allowance(from, _spender).add(_addedValue));
         // _allowed[from][_spender] = _allowed[from][_spender].add(_addedValue);
         _transfer(from, msg.sender, _fee);
         // _balances[from] = _balances[from].sub(_fee);
         // _balances[msg.sender] = _balances[msg.sender].add(_fee);
-        signatures[_signature] = true;
+        hashedTxs[hashedTx] = true;
 
         // Approval(from, _spender, _allowed[from][_spender]);
         // Transfer(from, msg.sender, _fee);
@@ -149,13 +151,13 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0));
-        require(signatures[_signature] == false);
+        require(_spender != address(0));        
 
-        bytes32 hashedTx = decreaseApprovalPreSignedHashing(address(this), _spender, _subtractedValue, _fee, _nonce);
-        address from = recover(hashedTx, _signature);
+        bytes32 hashedParams = decreaseApprovalPreSignedHashing(address(this), _spender, _subtractedValue, _fee, _nonce);
+        address from = recover(hashedParams, _signature);
         require(from != address(0));
-
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        require(hashedTxs[hashedTx] == false);
         uint oldValue = allowance(from, _spender);
         if (_subtractedValue > oldValue) {
             _approve(from, _spender, 0);
@@ -167,7 +169,7 @@ contract ERC865Token is ERC865 {
         _transfer(from, msg.sender, _fee);
         // _balances[from] = _balances[from].sub(_fee);
         // _balances[msg.sender] = _balances[msg.sender].add(_fee);
-        signatures[_signature] = true;
+        hashedTxs[hashedTx] = true;
 
         // Approval(from, _spender, _subtractedValue);
         // Transfer(from, msg.sender, _fee);
@@ -195,14 +197,14 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_to != address(0));
-        require(signatures[_signature] == false);
+        require(_to != address(0));        
 
-        bytes32 hashedTx = transferFromPreSignedHashing(address(this), _from, _to, _value, _fee, _nonce);
+        bytes32 hashedParams = transferFromPreSignedHashing(address(this), _from, _to, _value, _fee, _nonce);
 
-        address spender = recover(hashedTx, _signature);
+        address spender = recover(hashedParams, _signature);
         require(spender != address(0));
-
+        bytes32 hashedTx = keccak256(abi.encodePacked(spender, hashedParams));
+        require(hashedTxs[hashedTx] == false);
         _transfer(_from, _to, _value);
         // _balances[_from] = _balances[_from].sub(_value);
         // _balances[_to] = _balances[_to].add(_value);
@@ -211,7 +213,7 @@ contract ERC865Token is ERC865 {
         _transfer(spender, msg.sender, _fee);
         // _balances[spender] = _balances[spender].sub(_fee);
         // _balances[msg.sender] = _balances[msg.sender].add(_fee);
-        signatures[_signature] = true;
+        hashedTxs[hashedTx] = true;
 
         // Transfer(_from, _to, _value);
         // Transfer(spender, msg.sender, _fee);
@@ -358,10 +360,10 @@ contract ERC865Token is ERC865 {
         v := byte(0, mload(add(sig, 96)))
       }
 
-    //   // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
-    //    if (v < 27) {
-    //         v += 27;
-    //    }
+      // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
+       if (v < 27) {
+            v += 27;
+       }
 
       // If the version is correct return the signer address
       if (v != 27 && v != 28) {
