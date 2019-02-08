@@ -78,7 +78,7 @@ Once enough multisig participants accept the upgrade the contract will be upgrad
 ### Transaction Permission Layer (TPL)
 
 A version that supports a TPL contract can be found under [pending-contracts/tpl](pending-contracts/tpl)
-In order to use TPL you must move the files to the [contracts/](contracts) directory first, deploy and setup using the provided scripts under the  [scripts/tpl](scripts/tpl) directory
+In order to use TPL you must move the files to the [contracts/](contracts) directory first, deploy and setup using the provided scripts under the  [scripts/tpl](scripts/tpl) directory.
 Once deployed and setup use the deployed contract address in the token deployment and distribution scripts and modify the following in [scripts-utils/utils.js](scripts-utils/utils.js) to true
 ```bash
 const hasTPLContract = () => false;
