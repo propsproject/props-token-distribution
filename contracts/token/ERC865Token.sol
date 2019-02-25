@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
-// import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-// import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
+import { ECDSA } from "openzeppelin-eth/contracts/cryptography/ECDSA.sol";
 import "./ERC865.sol";
 
 /**
@@ -40,19 +39,14 @@ contract ERC865Token is ERC865 {
         require(_to != address(0));        
 
         bytes32 hashedParams = transferPreSignedHashing(address(this), _to, _value, _fee, _nonce);
-        address from = recover(hashedParams, _signature);     
+        address from = ECDSA.recover(hashedParams, _signature);     
         require(from != address(0));
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
         require(hashedTxs[hashedTx] == false);
         _transfer(from, _to, _value);
-        _transfer(from, msg.sender, _fee);
-        // _balances[from] = _balances[from].sub(_value).sub(_fee);
-        // _balances[_to] = _balances[_to].add(_value);
-        // _balances[msg.sender] = _balances[msg.sender].add(_fee);
+        _transfer(from, msg.sender, _fee);        
         hashedTxs[hashedTx] = true;
 
-        // Transfer(from, _to, _value);
-        // Transfer(from, msg.sender, _fee);
         emit TransferPreSigned(from, _to, msg.sender, _value, _fee);
         return true;
     }
@@ -78,19 +72,14 @@ contract ERC865Token is ERC865 {
         require(_spender != address(0));        
 
         bytes32 hashedParams = approvePreSignedHashing(address(this), _spender, _value, _fee, _nonce);
-        address from = recover(hashedParams, _signature);
+        address from = ECDSA.recover(hashedParams, _signature);
         require(from != address(0));
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
         require(hashedTxs[hashedTx] == false);
-        _approve(from, _spender, _value);
-        // _allowed[from][_spender] = _value;
-        _transfer(from, msg.sender, _fee);
-        // _balances[from] = _balances[from].sub(_fee);
-        // _balances[msg.sender] = _balances[msg.sender].add(_fee);
+        _approve(from, _spender, _value);        
+        _transfer(from, msg.sender, _fee);        
         hashedTxs[hashedTx] = true;
 
-        // Approval(from, _spender, _value);
-        // Transfer(from, msg.sender, _fee);
         emit ApprovalPreSigned(from, _spender, msg.sender, _value, _fee);
         return true;
     }
@@ -116,19 +105,14 @@ contract ERC865Token is ERC865 {
         require(_spender != address(0));        
 
         bytes32 hashedParams = increaseApprovalPreSignedHashing(address(this), _spender, _addedValue, _fee, _nonce);
-        address from = recover(hashedParams, _signature);
+        address from = ECDSA.recover(hashedParams, _signature);
         require(from != address(0));
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
         require(hashedTxs[hashedTx] == false);
-        _approve(from, _spender, allowance(from, _spender).add(_addedValue));
-        // _allowed[from][_spender] = _allowed[from][_spender].add(_addedValue);
-        _transfer(from, msg.sender, _fee);
-        // _balances[from] = _balances[from].sub(_fee);
-        // _balances[msg.sender] = _balances[msg.sender].add(_fee);
+        _approve(from, _spender, allowance(from, _spender).add(_addedValue));        
+        _transfer(from, msg.sender, _fee);        
         hashedTxs[hashedTx] = true;
 
-        // Approval(from, _spender, _allowed[from][_spender]);
-        // Transfer(from, msg.sender, _fee);
         emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
         return true;
     }
@@ -154,25 +138,19 @@ contract ERC865Token is ERC865 {
         require(_spender != address(0));        
 
         bytes32 hashedParams = decreaseApprovalPreSignedHashing(address(this), _spender, _subtractedValue, _fee, _nonce);
-        address from = recover(hashedParams, _signature);
+        address from = ECDSA.recover(hashedParams, _signature);
         require(from != address(0));
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
         require(hashedTxs[hashedTx] == false);
         uint oldValue = allowance(from, _spender);
         if (_subtractedValue > oldValue) {
-            _approve(from, _spender, 0);
-            // _allowed[from][_spender] = 0;
+            _approve(from, _spender, 0);            
         } else {
-            _approve(from, _spender, allowance(from,_spender).sub(_subtractedValue));
-            // _allowed[from][_spender] = oldValue.sub(_subtractedValue);
+            _approve(from, _spender, allowance(from,_spender).sub(_subtractedValue));            
         }
-        _transfer(from, msg.sender, _fee);
-        // _balances[from] = _balances[from].sub(_fee);
-        // _balances[msg.sender] = _balances[msg.sender].add(_fee);
+        _transfer(from, msg.sender, _fee);        
         hashedTxs[hashedTx] = true;
 
-        // Approval(from, _spender, _subtractedValue);
-        // Transfer(from, msg.sender, _fee);
         emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
         return true;
     }
@@ -201,22 +179,16 @@ contract ERC865Token is ERC865 {
 
         bytes32 hashedParams = transferFromPreSignedHashing(address(this), _from, _to, _value, _fee, _nonce);
 
-        address spender = recover(hashedParams, _signature);
+        address spender = ECDSA.recover(hashedParams, _signature);
         require(spender != address(0));
         bytes32 hashedTx = keccak256(abi.encodePacked(spender, hashedParams));
         require(hashedTxs[hashedTx] == false);
-        _transfer(_from, _to, _value);
-        // _balances[_from] = _balances[_from].sub(_value);
-        // _balances[_to] = _balances[_to].add(_value);
-        _approve(_from, spender, allowance(_from, spender).sub(_value));
-        // _allowed[_from][spender] = _allowed[_from][spender].sub(_value);
-        _transfer(spender, msg.sender, _fee);
-        // _balances[spender] = _balances[spender].sub(_fee);
-        // _balances[msg.sender] = _balances[msg.sender].add(_fee);
+        _transfer(_from, _to, _value);        
+        _approve(_from, spender, allowance(_from, spender).sub(_value));        
+        _transfer(spender, msg.sender, _fee);        
         hashedTxs[hashedTx] = true;
 
-        // Transfer(_from, _to, _value);
-        // Transfer(spender, msg.sender, _fee);
+        emit TransferPreSigned(_from, _to, msg.sender, _value, _fee);
         return true;
     }
 
@@ -240,8 +212,8 @@ contract ERC865Token is ERC865 {
         pure
         returns (bytes32)
     {
-        /* "48664c16": transferPreSignedHashing(address,address,address,uint256,uint256,uint256) */
-        return keccak256(abi.encodePacked(bytes4(0x48664c16), _token, _to, _value, _fee, _nonce));
+        /* "15420b71": transferPreSignedHashing(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0x15420b71), _token, _to, _value, _fee, _nonce));
     }
 
     /**
@@ -337,40 +309,4 @@ contract ERC865Token is ERC865 {
         /* "b7656dc5": transferFromPreSignedHashing(address,address,address,uint256,uint256,uint256) */
         return keccak256(abi.encodePacked(bytes4(0xb7656dc5), _token, _from, _to, _value, _fee, _nonce));
     }
-
-    /**
-     * @notice Recover signer address from a message by using his signature
-     * @param hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
-     * @param sig bytes signature, the signature is generated using web3.eth.sign()
-     */
-    function recover(bytes32 hash, bytes sig) public pure returns (address) {
-      bytes32 r;
-      bytes32 s;
-      uint8 v;
-
-      //Check the signature length
-      if (sig.length != 65) {
-        return (address(0));
-      }
-
-      // Divide the signature in r, s and v variables
-      assembly {
-        r := mload(add(sig, 32))
-        s := mload(add(sig, 64))
-        v := byte(0, mload(add(sig, 96)))
-      }
-
-      // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
-       if (v < 27) {
-            v += 27;
-       }
-
-      // If the version is correct return the signer address
-      if (v != 27 && v != 28) {
-        return (address(0));
-      } else {
-        return ecrecover(hash, v, r, s);
-      }
-    }
-
 }

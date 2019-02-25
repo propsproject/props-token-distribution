@@ -91,6 +91,13 @@ module.exports = {
       port: 9000,
       network_id: '8000',
     },
+    coverage: {
+      host: 'localhost',
+      network_id: '*',
+      port: 9545,
+      gas: 0xfffffffffff,
+      gasPrice: 0x01,
+    },
   },
   mocha: {
     ui: 'bdd',

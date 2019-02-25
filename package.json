@@ -4,7 +4,10 @@
   "description": "PROPS ERC20 token contract and distribution helpers",
   "scripts": {
     "tdd": "nodemon --watch contracts --watch test --exec 'truffle test --network test'",
-    "test": "NODE_ENV=test truffle test ./scripts/tests/propstoken.test.js --network test --exit"
+    "pretest": "ganache-cli -p 9545 -m asset member awake bring mosquito lab sustain muscle elephant equip someone obvious > /dev/null &",
+    "test": "NODE_ENV=test truffle test ./scripts/tests/propstoken.test.js --network test --exit",
+    "posttest": "killall -9 ganache",
+    "coverage": "./node_modules/.bin/solidity-coverage"
   },
   "dependencies": {
     "bignumber.js": "^8.0.2",
@@ -35,7 +38,8 @@
     "mocha": "^3.2.0",
     "mocha-multi": "^0.9.1",
     "mocha-osx-reporter": "^0.1.2",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "solidity-coverage": "^0.5.11"
   },
   "author": "Platform Engineering @PROPS Project",
   "license": "ISC"

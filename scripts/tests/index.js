@@ -3,12 +3,12 @@
 // Required by zos-lib when running from truffle
 global.artifacts = artifacts;
 global.web3 = web3;
-
 const { Contracts, SimpleProject } = require('zos-lib');
 
 const PropsToken = Contracts.getFromLocal('PropsToken');
 
 async function main() {
+  // web3.setProvider(ganache.provider({ mnemonic: 'asset member awake bring mosquito lab sustain muscle elephant equip someone obvious' }));
   const creatorAddress = web3.eth.accounts[1];
   // const initializerAddress = web3.eth.accounts[2];
   const tokenHolderAddress = web3.eth.accounts[3];

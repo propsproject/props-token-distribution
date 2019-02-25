@@ -175,7 +175,7 @@ contract('main', (_accounts) => {
       nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
 
       components = [
-        Buffer.from('48664c16', 'hex'),
+        Buffer.from('15420b71', 'hex'),
         formattedAddress(instance.address),
         formattedAddress(to),
         formattedInt(amount),
@@ -184,7 +184,7 @@ contract('main', (_accounts) => {
       ];
 
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
-      const sig = utils.fixSignature(ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s));
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       await instance.transferPreSigned(
         sig,
@@ -240,7 +240,7 @@ contract('main', (_accounts) => {
       ];
 
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
-      const sig = utils.fixSignature(ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s));
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       await instance.approvePreSigned(
         sig,
@@ -275,24 +275,24 @@ contract('main', (_accounts) => {
       const oldCharlieBalance = charlieBalance;
       const oldDamienBalance = await instance.balanceOf(damien.address);
       nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
-
+      console.log(`oldAliceBalance=${oldAliceBalance.toNumber()}, `, `oldBobBalance=${oldBobBalance.toNumber()}, `, `oldCharlieBalance=${oldCharlieBalance.toNumber()}, `);
       components = [
         Buffer.from('b7656dc5', 'hex'),
         formattedAddress(instance.address),
         formattedAddress(alice.address),
-        formattedAddress(to),
+        formattedAddress(bob.address),
         formattedInt(amount / 2),
         formattedInt(fee),
         formattedInt(nonce),
       ];
-
+      // console.log(`components instance.address=${instance.address}, alice.address=${alice.address}, `)
       const vrs = ethUtil.ecsign(hashedTightPacked(components), Buffer.from(damien.pk, 'hex'));
-      const sig = utils.fixSignature(ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s));
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       await instance.transferFromPreSigned(
         sig,
         alice.address,
-        to,
+        bob.address,
         amount / 2,
         fee,
         nonce,
@@ -303,6 +303,7 @@ contract('main', (_accounts) => {
       bobBalance = await instance.balanceOf(bob.address);
       charlieBalance = await instance.balanceOf(charlie.address);
       damienBalance = await instance.balanceOf(damien.address);
+      console.log(`aliceBalance=${aliceBalance.toNumber()}, `, `bobBalance=${bobBalance.toNumber()}, `, `charlieBalance=${charlieBalance.toNumber()}, `);
       assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - ((amount / 2) + fee));
       assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));
       assert.equal(charlieBalance.toNumber(), oldCharlieBalance.toNumber() + fee);
@@ -326,7 +327,7 @@ contract('main', (_accounts) => {
       ];
 
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
-      const sig = utils.fixSignature(ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s));
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       await instance.increaseApprovalPreSigned(
         sig,
@@ -364,7 +365,7 @@ contract('main', (_accounts) => {
       ];
 
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
-      const sig = utils.fixSignature(ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s));
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       await instance.decreaseApprovalPreSigned(
         sig,
@@ -402,7 +403,7 @@ contract('main', (_accounts) => {
       ];
 
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
-      const sig = utils.fixSignature(ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s));
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       try {
         const tx = await instance.decreaseApprovalPreSigned(
