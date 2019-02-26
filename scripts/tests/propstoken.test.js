@@ -172,7 +172,7 @@ contract('main', (_accounts) => {
       // give alice some props
       await instance.transfer(alice.address, propsInWallet, { from: web3.eth.accounts[3] });
       // nonce = await web3.eth.getTransactionCount(alice.address);
-      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
 
       components = [
         Buffer.from('15420b71', 'hex'),
@@ -228,7 +228,7 @@ contract('main', (_accounts) => {
       const oldAliceBalance = aliceBalance;
       const oldCharlieBalance = charlieBalance;
       // nonce = await web3.eth.getTransactionCount(alice.address);
-      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
 
       components = [
         Buffer.from('f7ac9c2e', 'hex'),
@@ -265,17 +265,16 @@ contract('main', (_accounts) => {
       aliceBalance = await instance.balanceOf(alice.address);
       bobBalance = await instance.balanceOf(bob.address);
       assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - (amount / 2));
-      assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));
+      assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));      
     });
 
-    it('Charlie performs transferFrom of 100 tokens in behalf of damien from Alice to Bob (fee=10)', async () => {
+    it('Charlie performs transferFrom of 50 tokens on behalf of damien from Alice to Bob (fee=10)', async () => {
       // nonce = await web3.eth.getTransactionCount(alice.address);
       const oldAliceBalance = aliceBalance;
       const oldBobBalance = bobBalance;
       const oldCharlieBalance = charlieBalance;
       const oldDamienBalance = await instance.balanceOf(damien.address);
-      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
-      console.log(`oldAliceBalance=${oldAliceBalance.toNumber()}, `, `oldBobBalance=${oldBobBalance.toNumber()}, `, `oldCharlieBalance=${oldCharlieBalance.toNumber()}, `);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[7]);      
       components = [
         Buffer.from('b7656dc5', 'hex'),
         formattedAddress(instance.address),
@@ -288,7 +287,6 @@ contract('main', (_accounts) => {
       // console.log(`components instance.address=${instance.address}, alice.address=${alice.address}, `)
       const vrs = ethUtil.ecsign(hashedTightPacked(components), Buffer.from(damien.pk, 'hex'));
       const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
-      // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       await instance.transferFromPreSigned(
         sig,
         alice.address,
@@ -315,7 +313,7 @@ contract('main', (_accounts) => {
       const oldAliceBalance = aliceBalance;
       const oldCharlieBalance = charlieBalance;
       // nonce = await web3.eth.getTransactionCount(alice.address);
-      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
 
       components = [
         Buffer.from('a45f71ff', 'hex'),
@@ -353,7 +351,7 @@ contract('main', (_accounts) => {
       const oldAliceBalance = aliceBalance;
       const oldCharlieBalance = charlieBalance;
       // nonce = await web3.eth.getTransactionCount(alice.address);
-      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
 
       components = [
         Buffer.from('59388d78', 'hex'),
@@ -391,7 +389,7 @@ contract('main', (_accounts) => {
       const oldAliceBalance = aliceBalance;
       const oldCharlieBalance = charlieBalance;
       // nonce = await web3.eth.getTransactionCount(alice.address);
-      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[3]);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
 
       components = [
         Buffer.from('59388d78', 'hex'),
