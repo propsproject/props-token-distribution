@@ -7,15 +7,23 @@ import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
  * @title Props Sidechain Compatible
  * @dev Added a settle function and events
  **/
-contract PropsTimeBasedTransfers is ERC20 {
+contract PropsTimeBasedTransfers is Initializable, ERC20 {
     
     uint public transfersStartTime;
     address public canTransferBeforeStartTime;
 
+    modifier canTransfer(address _account)
+    {
+        require(now > transfersStartTime || _account==canTransferBeforeStartTime, 
+        "Cannot transfer before transfers start time from this account"
+        );
+        _;
+    }
+
     /**
-    * @notice The initializer function, with transfers start time `transfersStartTime`
+    * @dev The initializer function, with transfers start time `transfersStartTime` (unix timestamp)
     * and `canTransferBeforeStartTime` address which is exempt from start time restrictions
-    * @param start uint Timestamp of when transfers can start
+    * @param start uint Unix timestamp of when transfers can start
     * @param account uint256 address exempt from the start date check    
     */
     function initialize(
@@ -28,37 +36,37 @@ contract PropsTimeBasedTransfers is ERC20 {
         transfersStartTime = start;
         canTransferBeforeStartTime = account;
     }
-
-    function canTransfer(address account) public view returns (bool) {
-        return (now > transfersStartTime || account==canTransferBeforeStartTime);
-    }
-
+    /**
+    * @dev Transfer token for a specified address if allowed
+    * @param to The address to transfer to.
+    * @param value The amount to be transferred.
+    */
     function transfer(
         address to,
         uint256 value
     )
-    public    
+    public canTransfer(msg.sender)   
     returns (bool)
-    {
-        require(
-            canTransfer(msg.sender),
-            "Transfers are not yet active"
-        );
+    {        
         return super.transfer(to, value);        
     }
 
+    /**
+     * @dev Transfer tokens from one address to another if allowed
+     * Note that while this function emits an Approval event, this is not required as per the specification,
+     * and other compliant implementations may not emit the event.
+     * @param from address The address which you want to send tokens from
+     * @param to address The address which you want to transfer to
+     * @param value uint256 the amount of tokens to be transferred
+     */
     function transferFrom(
-    address from,
-    address to,
-    uint256 value
+        address from,
+        address to,
+        uint256 value
     )
-    public    
+    public canTransfer(from)    
     returns (bool)
-    {
-        require(
-            canTransfer(msg.sender),
-            "Transfers are not yet active"
-        );
+    {        
         return super.transferFrom(from, to, value);        
     }    
 }

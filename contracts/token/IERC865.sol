@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 
 /**
@@ -10,7 +11,10 @@ import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
  *
  */
 
-contract ERC865 is ERC20 {
+contract IERC865 is Initializable, ERC20 {
+
+    event TransferPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
+    event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
 
     function transferPreSigned(
         bytes _signature,
@@ -32,7 +36,7 @@ contract ERC865 is ERC20 {
         public
         returns (bool);
 
-    function increaseApprovalPreSigned(
+    function increaseAllowancePreSigned(
         bytes _signature,
         address _spender,
         uint256 _addedValue,
@@ -42,7 +46,7 @@ contract ERC865 is ERC20 {
         public
         returns (bool);
 
-    function decreaseApprovalPreSigned(
+    function decreaseAllowancePreSigned(
         bytes _signature,
         address _spender,
         uint256 _subtractedValue,

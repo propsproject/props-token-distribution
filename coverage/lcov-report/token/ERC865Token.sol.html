@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for token/ERC865Token.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">token/</a> ERC865Token.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>64/64</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">56.25% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>18/32</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>10/10</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>64/64</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.24;
+&nbsp;
+import { ECDSA } from "openzeppelin-eth/contracts/cryptography/ECDSA.sol";
+import "./ERC865.sol";
+&nbsp;
+/**
+ * @title ERC865Token Token
+ *
+ * ERC865Token allows users paying transfers in tokens instead of gas
+ * https://github.com/ethereum/EIPs/issues/865
+ *
+ */
+&nbsp;
+contract ERC865Token is ERC865 {
+&nbsp;
+    /* hashed tx of transfers performed */
+    mapping(bytes32 =&gt; bool) hashedTxs;
+&nbsp;
+    event TransferPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
+    event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
+    /**
+     * @notice Submit a presigned transfer
+     * @param _signature bytes The signature, issued by the owner.
+     * @param _to address The address which you want to transfer to.
+     * @param _value uint256 The amount of tokens to be transferred.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function transferPreSigned(
+        bytes _signature,
+        address _to,
+        uint256 _value,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        returns (bool)
+    {        
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_to != address(0));        
+&nbsp;
+        bytes32 hashedParams = transferPreSignedHashing(address(this), _to, _value, _fee, _nonce);
+        address from = ECDSA.recover(hashedParams, _signature);     
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(from != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        require(hashedTxs[hashedTx] == false);
+        _transfer(from, _to, _value);
+        _transfer(from, msg.sender, _fee);        
+        hashedTxs[hashedTx] = true;
+&nbsp;
+        emit TransferPreSigned(from, _to, msg.sender, _value, _fee);
+        return true;
+    }
+&nbsp;
+    /**
+     * @notice Submit a presigned approval
+     * @param _signature bytes The signature, issued by the owner.
+     * @param _spender address The address which will spend the funds.
+     * @param _value uint256 The amount of tokens to allow.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function approvePreSigned(
+        bytes _signature,
+        address _spender,
+        uint256 _value,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        returns (bool)
+    {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_spender != address(0));        
+&nbsp;
+        bytes32 hashedParams = approvePreSignedHashing(address(this), _spender, _value, _fee, _nonce);
+        address from = ECDSA.recover(hashedParams, _signature);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(from != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(hashedTxs[hashedTx] == false);
+        _approve(from, _spender, _value);        
+        _transfer(from, msg.sender, _fee);        
+        hashedTxs[hashedTx] = true;
+&nbsp;
+        emit ApprovalPreSigned(from, _spender, msg.sender, _value, _fee);
+        return true;
+    }
+&nbsp;
+    /**
+     * @notice Increase the amount of tokens that an owner allowed to a spender.
+     * @param _signature bytes The signature, issued by the owner.
+     * @param _spender address The address which will spend the funds.
+     * @param _addedValue uint256 The amount of tokens to increase the allowance by.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function increaseApprovalPreSigned(
+        bytes _signature,
+        address _spender,
+        uint256 _addedValue,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        returns (bool)
+    {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_spender != address(0));        
+&nbsp;
+        bytes32 hashedParams = increaseApprovalPreSignedHashing(address(this), _spender, _addedValue, _fee, _nonce);
+        address from = ECDSA.recover(hashedParams, _signature);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(from != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(hashedTxs[hashedTx] == false);
+        _approve(from, _spender, allowance(from, _spender).add(_addedValue));        
+        _transfer(from, msg.sender, _fee);        
+        hashedTxs[hashedTx] = true;
+&nbsp;
+        emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
+        return true;
+    }
+&nbsp;
+    /**
+     * @notice Decrease the amount of tokens that an owner allowed to a spender.
+     * @param _signature bytes The signature, issued by the owner
+     * @param _spender address The address which will spend the funds.
+     * @param _subtractedValue uint256 The amount of tokens to decrease the allowance by.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function decreaseApprovalPreSigned(
+        bytes _signature,
+        address _spender,
+        uint256 _subtractedValue,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        returns (bool)
+    {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_spender != address(0));        
+&nbsp;
+        bytes32 hashedParams = decreaseApprovalPreSignedHashing(address(this), _spender, _subtractedValue, _fee, _nonce);
+        address from = ECDSA.recover(hashedParams, _signature);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(from != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(hashedTxs[hashedTx] == false);
+        uint oldValue = allowance(from, _spender);
+        if (_subtractedValue &gt; oldValue) {
+            _approve(from, _spender, 0);            
+        } else {
+            _approve(from, _spender, allowance(from,_spender).sub(_subtractedValue));            
+        }
+        _transfer(from, msg.sender, _fee);        
+        hashedTxs[hashedTx] = true;
+&nbsp;
+        emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
+        return true;
+    }
+&nbsp;
+    /**
+     * @notice Transfer tokens from one address to another
+     * @param _signature bytes The signature, issued by the spender.
+     * @param _from address The address which you want to send tokens from.
+     * @param _to address The address which you want to transfer to.
+     * @param _value uint256 The amount of tokens to be transferred.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the spender.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function transferFromPreSigned(
+        bytes _signature,
+        address _from,
+        address _to,
+        uint256 _value,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        returns (bool)
+    {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_to != address(0));        
+&nbsp;
+        bytes32 hashedParams = transferFromPreSignedHashing(address(this), _from, _to, _value, _fee, _nonce);
+&nbsp;
+        address spender = ECDSA.recover(hashedParams, _signature);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(spender != address(0));
+        bytes32 hashedTx = keccak256(abi.encodePacked(spender, hashedParams));
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(hashedTxs[hashedTx] == false);
+        _transfer(_from, _to, _value);        
+        _approve(_from, spender, allowance(_from, spender).sub(_value));        
+        _transfer(spender, msg.sender, _fee);        
+        hashedTxs[hashedTx] = true;
+&nbsp;
+        emit TransferPreSigned(_from, _to, msg.sender, _value, _fee);
+        return true;
+    }
+&nbsp;
+&nbsp;
+    /**
+     * @notice Hash (keccak256) of the payload used by transferPreSigned
+     * @param _token address The address of the token.
+     * @param _to address The address which you want to transfer to.
+     * @param _value uint256 The amount of tokens to be transferred.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function transferPreSignedHashing(
+        address _token,
+        address _to,
+        uint256 _value,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        pure
+        returns (bytes32)
+    {
+        /* "15420b71": transferPreSignedHashing(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0x15420b71), _token, _to, _value, _fee, _nonce));
+    }
+&nbsp;
+    /**
+     * @notice Hash (keccak256) of the payload used by approvePreSigned
+     * @param _token address The address of the token
+     * @param _spender address The address which will spend the funds.
+     * @param _value uint256 The amount of tokens to allow.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function approvePreSignedHashing(
+        address _token,
+        address _spender,
+        uint256 _value,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        pure
+        returns (bytes32)
+    {
+        /* "f7ac9c2e": approvePreSignedHashing(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0xf7ac9c2e), _token, _spender, _value, _fee, _nonce));
+    }
+&nbsp;
+    /**
+     * @notice Hash (keccak256) of the payload used by increaseApprovalPreSigned
+     * @param _token address The address of the token
+     * @param _spender address The address which will spend the funds.
+     * @param _addedValue uint256 The amount of tokens to increase the allowance by.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function increaseApprovalPreSignedHashing(
+        address _token,
+        address _spender,
+        uint256 _addedValue,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        pure
+        returns (bytes32)
+    {
+        /* "a45f71ff": increaseApprovalPreSignedHashing(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0xa45f71ff), _token, _spender, _addedValue, _fee, _nonce));
+    }
+&nbsp;
+     /**
+      * @notice Hash (keccak256) of the payload used by decreaseApprovalPreSigned
+      * @param _token address The address of the token
+      * @param _spender address The address which will spend the funds.
+      * @param _subtractedValue uint256 The amount of tokens to decrease the allowance by.
+      * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+      * @param _nonce uint256 Presigned transaction number.
+      */
+    function decreaseApprovalPreSignedHashing(
+        address _token,
+        address _spender,
+        uint256 _subtractedValue,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        pure
+        returns (bytes32)
+    {
+        /* "59388d78": decreaseApprovalPreSignedHashing(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0x59388d78), _token, _spender, _subtractedValue, _fee, _nonce));
+    }
+&nbsp;
+    /**
+     * @notice Hash (keccak256) of the payload used by transferFromPreSigned
+     * @param _token address The address of the token
+     * @param _from address The address which you want to send tokens from.
+     * @param _to address The address which you want to transfer to.
+     * @param _value uint256 The amount of tokens to be transferred.
+     * @param _fee uint256 The amount of tokens paid to msg.sender, by the spender.
+     * @param _nonce uint256 Presigned transaction number.
+     */
+    function transferFromPreSignedHashing(
+        address _token,
+        address _from,
+        address _to,
+        uint256 _value,
+        uint256 _fee,
+        uint256 _nonce
+    )
+        public
+        pure
+        returns (bytes32)
+    {
+        /* "b7656dc5": transferFromPreSignedHashing(address,address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0xb7656dc5), _token, _from, _to, _value, _fee, _nonce));
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Feb 26 2019 08:49:17 GMT-0500 (EST)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

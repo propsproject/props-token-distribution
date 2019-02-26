@@ -94,24 +94,26 @@ module.exports = {
     coverage: {
       host: 'localhost',
       network_id: '*',
-      port: 9545,
+      port: 8555,
       gas: 0xfffffffffff,
       gasPrice: 0x01,
     },
   },
-  mocha: {
-    ui: 'bdd',
-    reporter: 'mocha-multi',
-    reporterOptions: {
-      'mocha-osx-reporter': '-',
-      spec: '-',
-    },
-  },
-  solc: {
-    version: '0.4.24',
-    optimizer: {
-      enabled: true,
-      runs: 500,
+  // mocha: {
+  //   ui: 'bdd',
+  //   reporter: 'mocha-multi',
+  //   reporterOptions: {
+  //     'mocha-osx-reporter': '-',
+  //     spec: '-',
+  //   },
+  // },
+  compilers: {
+    solc: {
+      version: '0.4.24',
+      optimizer: {
+        enabled: true,
+        runs: 500,
+      },
     },
   },
 };

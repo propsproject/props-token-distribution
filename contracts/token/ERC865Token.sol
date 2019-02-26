@@ -1,7 +1,8 @@
 pragma solidity ^0.4.24;
 
+import "zos-lib/contracts/Initializable.sol";
 import { ECDSA } from "openzeppelin-eth/contracts/cryptography/ECDSA.sol";
-import "./ERC865.sol";
+import "./IERC865.sol";
 
 /**
  * @title ERC865Token Token
@@ -11,15 +12,13 @@ import "./ERC865.sol";
  *
  */
 
-contract ERC865Token is ERC865 {
+contract ERC865Token is Initializable, IERC865 {
 
     /* hashed tx of transfers performed */
-    mapping(bytes32 => bool) hashedTxs;
-
-    event TransferPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
-    event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
+    mapping(bytes32 => bool) hashedTxs;    
     /**
-     * @notice Submit a presigned transfer
+     * @dev Submit a presigned transfer
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _signature bytes The signature, issued by the owner.
      * @param _to address The address which you want to transfer to.
      * @param _value uint256 The amount of tokens to be transferred.
@@ -36,23 +35,30 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {        
-        require(_to != address(0));        
+        require(_to != address(0), 
+        "Invalid _to address"
+        );        
 
-        bytes32 hashedParams = transferPreSignedHashing(address(this), _to, _value, _fee, _nonce);
+        bytes32 hashedParams = getTransferPreSignedHash(address(this), _to, _value, _fee, _nonce);
         address from = ECDSA.recover(hashedParams, _signature);     
-        require(from != address(0));
+        require(from != address(0), 
+        "Invalid from address recovered"
+        );
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
-        require(hashedTxs[hashedTx] == false);
-        _transfer(from, _to, _value);
-        _transfer(from, msg.sender, _fee);        
+        require(hashedTxs[hashedTx] == false,
+        "Transaction hash was already used"
+        );
         hashedTxs[hashedTx] = true;
+        _transfer(from, _to, _value);
+        _transfer(from, msg.sender, _fee);
 
         emit TransferPreSigned(from, _to, msg.sender, _value, _fee);
         return true;
     }
 
     /**
-     * @notice Submit a presigned approval
+     * @dev Submit a presigned approval
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _signature bytes The signature, issued by the owner.
      * @param _spender address The address which will spend the funds.
      * @param _value uint256 The amount of tokens to allow.
@@ -69,30 +75,37 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0));        
+        require(_spender != address(0),
+        "Invalid _spender address"
+        );        
 
-        bytes32 hashedParams = approvePreSignedHashing(address(this), _spender, _value, _fee, _nonce);
+        bytes32 hashedParams = getApprovePreSignedHash(address(this), _spender, _value, _fee, _nonce);
         address from = ECDSA.recover(hashedParams, _signature);
-        require(from != address(0));
+        require(from != address(0),
+        "Invalid from address recovered"
+        );
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
-        require(hashedTxs[hashedTx] == false);
+        require(hashedTxs[hashedTx] == false,
+        "Transaction hash was already used"
+        );
+        hashedTxs[hashedTx] = true;
         _approve(from, _spender, _value);        
         _transfer(from, msg.sender, _fee);        
-        hashedTxs[hashedTx] = true;
-
+        
         emit ApprovalPreSigned(from, _spender, msg.sender, _value, _fee);
         return true;
     }
 
     /**
-     * @notice Increase the amount of tokens that an owner allowed to a spender.
+     * @dev Increase the amount of tokens that an owner allowed to a spender.
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _signature bytes The signature, issued by the owner.
      * @param _spender address The address which will spend the funds.
      * @param _addedValue uint256 The amount of tokens to increase the allowance by.
      * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
      * @param _nonce uint256 Presigned transaction number.
      */
-    function increaseApprovalPreSigned(
+    function increaseAllowancePreSigned(
         bytes _signature,
         address _spender,
         uint256 _addedValue,
@@ -102,30 +115,37 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0));        
+        require(_spender != address(0),
+        "Invalid _spender address"
+        );        
 
-        bytes32 hashedParams = increaseApprovalPreSignedHashing(address(this), _spender, _addedValue, _fee, _nonce);
+        bytes32 hashedParams = getIncreaseAllowancePreSignedHash(address(this), _spender, _addedValue, _fee, _nonce);
         address from = ECDSA.recover(hashedParams, _signature);
-        require(from != address(0));
+        require(from != address(0),
+        "Invalid from address recovered"
+        );
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
-        require(hashedTxs[hashedTx] == false);
+        require(hashedTxs[hashedTx] == false,
+        "Transaction hash was already used"
+        );
+        hashedTxs[hashedTx] = true;
         _approve(from, _spender, allowance(from, _spender).add(_addedValue));        
         _transfer(from, msg.sender, _fee);        
-        hashedTxs[hashedTx] = true;
-
+        
         emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
         return true;
     }
 
     /**
-     * @notice Decrease the amount of tokens that an owner allowed to a spender.
+     * @dev Decrease the amount of tokens that an owner allowed to a spender.
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _signature bytes The signature, issued by the owner
      * @param _spender address The address which will spend the funds.
      * @param _subtractedValue uint256 The amount of tokens to decrease the allowance by.
      * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
      * @param _nonce uint256 Presigned transaction number.
      */
-    function decreaseApprovalPreSigned(
+    function decreaseAllowancePreSigned(
         bytes _signature,
         address _spender,
         uint256 _subtractedValue,
@@ -135,28 +155,31 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0));        
+        require(_spender != address(0),
+        "Invalid _spender address"
+        );              
 
-        bytes32 hashedParams = decreaseApprovalPreSignedHashing(address(this), _spender, _subtractedValue, _fee, _nonce);
+        bytes32 hashedParams = getDecreaseAllowancePreSignedHash(address(this), _spender, _subtractedValue, _fee, _nonce);
         address from = ECDSA.recover(hashedParams, _signature);
-        require(from != address(0));
+        require(from != address(0),
+        "Invalid from address recovered"
+        );
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
-        require(hashedTxs[hashedTx] == false);
-        uint oldValue = allowance(from, _spender);
-        if (_subtractedValue > oldValue) {
-            _approve(from, _spender, 0);            
-        } else {
-            _approve(from, _spender, allowance(from,_spender).sub(_subtractedValue));            
-        }
-        _transfer(from, msg.sender, _fee);        
+        require(hashedTxs[hashedTx] == false,
+        "Transaction hash was already used"
+        );        
+        // if substractedValue is greater than allowance will fail as allowance is uint256
         hashedTxs[hashedTx] = true;
+        _approve(from, _spender, allowance(from,_spender).sub(_subtractedValue));            
+        _transfer(from, msg.sender, _fee);                
 
         emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
         return true;
     }
 
     /**
-     * @notice Transfer tokens from one address to another
+     * @dev Transfer tokens from one address to another
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _signature bytes The signature, issued by the spender.
      * @param _from address The address which you want to send tokens from.
      * @param _to address The address which you want to transfer to.
@@ -175,33 +198,40 @@ contract ERC865Token is ERC865 {
         public
         returns (bool)
     {
-        require(_to != address(0));        
+        require(_to != address(0),
+        "Invalid _to address"
+        );        
 
-        bytes32 hashedParams = transferFromPreSignedHashing(address(this), _from, _to, _value, _fee, _nonce);
+        bytes32 hashedParams = getTransferFromPreSignedHash(address(this), _from, _to, _value, _fee, _nonce);
 
         address spender = ECDSA.recover(hashedParams, _signature);
-        require(spender != address(0));
+        require(spender != address(0),
+        "Invalid spender address recovered"
+        );
         bytes32 hashedTx = keccak256(abi.encodePacked(spender, hashedParams));
-        require(hashedTxs[hashedTx] == false);
+        require(hashedTxs[hashedTx] == false,
+        "Transaction hash was already used"
+        );
+        hashedTxs[hashedTx] = true;
         _transfer(_from, _to, _value);        
         _approve(_from, spender, allowance(_from, spender).sub(_value));        
         _transfer(spender, msg.sender, _fee);        
-        hashedTxs[hashedTx] = true;
-
+        
         emit TransferPreSigned(_from, _to, msg.sender, _value, _fee);
         return true;
     }
 
 
     /**
-     * @notice Hash (keccak256) of the payload used by transferPreSigned
+     * @dev Hash (keccak256) of the payload used by transferPreSigned
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _token address The address of the token.
      * @param _to address The address which you want to transfer to.
      * @param _value uint256 The amount of tokens to be transferred.
      * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
      * @param _nonce uint256 Presigned transaction number.
      */
-    function transferPreSignedHashing(
+    function getTransferPreSignedHash(
         address _token,
         address _to,
         uint256 _value,
@@ -212,19 +242,20 @@ contract ERC865Token is ERC865 {
         pure
         returns (bytes32)
     {
-        /* "15420b71": transferPreSignedHashing(address,address,uint256,uint256,uint256) */
-        return keccak256(abi.encodePacked(bytes4(0x15420b71), _token, _to, _value, _fee, _nonce));
+        /* "0d98dcb1": getTransferPreSignedHash(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0x0d98dcb1), _token, _to, _value, _fee, _nonce));
     }
 
     /**
-     * @notice Hash (keccak256) of the payload used by approvePreSigned
+     * @dev Hash (keccak256) of the payload used by approvePreSigned
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _token address The address of the token
      * @param _spender address The address which will spend the funds.
      * @param _value uint256 The amount of tokens to allow.
      * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
      * @param _nonce uint256 Presigned transaction number.
      */
-    function approvePreSignedHashing(
+    function getApprovePreSignedHash(
         address _token,
         address _spender,
         uint256 _value,
@@ -235,19 +266,20 @@ contract ERC865Token is ERC865 {
         pure
         returns (bytes32)
     {
-        /* "f7ac9c2e": approvePreSignedHashing(address,address,uint256,uint256,uint256) */
-        return keccak256(abi.encodePacked(bytes4(0xf7ac9c2e), _token, _spender, _value, _fee, _nonce));
+        /* "79250dcf": getApprovePreSignedHash(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0x79250dcf), _token, _spender, _value, _fee, _nonce));
     }
 
     /**
-     * @notice Hash (keccak256) of the payload used by increaseApprovalPreSigned
+     * @dev Hash (keccak256) of the payload used by increaseAllowancePreSigned
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _token address The address of the token
      * @param _spender address The address which will spend the funds.
      * @param _addedValue uint256 The amount of tokens to increase the allowance by.
      * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
      * @param _nonce uint256 Presigned transaction number.
      */
-    function increaseApprovalPreSignedHashing(
+    function getIncreaseAllowancePreSignedHash(
         address _token,
         address _spender,
         uint256 _addedValue,
@@ -258,19 +290,20 @@ contract ERC865Token is ERC865 {
         pure
         returns (bytes32)
     {
-        /* "a45f71ff": increaseApprovalPreSignedHashing(address,address,uint256,uint256,uint256) */
-        return keccak256(abi.encodePacked(bytes4(0xa45f71ff), _token, _spender, _addedValue, _fee, _nonce));
+        /* "138e8da1": getIncreaseAllowancePreSignedHash(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0x138e8da1), _token, _spender, _addedValue, _fee, _nonce));
     }
 
      /**
-      * @notice Hash (keccak256) of the payload used by decreaseApprovalPreSigned
+      * @dev Hash (keccak256) of the payload used by decreaseAllowancePreSigned
+      * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
       * @param _token address The address of the token
       * @param _spender address The address which will spend the funds.
       * @param _subtractedValue uint256 The amount of tokens to decrease the allowance by.
       * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
       * @param _nonce uint256 Presigned transaction number.
       */
-    function decreaseApprovalPreSignedHashing(
+    function getDecreaseAllowancePreSignedHash(
         address _token,
         address _spender,
         uint256 _subtractedValue,
@@ -281,12 +314,13 @@ contract ERC865Token is ERC865 {
         pure
         returns (bytes32)
     {
-        /* "59388d78": decreaseApprovalPreSignedHashing(address,address,uint256,uint256,uint256) */
-        return keccak256(abi.encodePacked(bytes4(0x59388d78), _token, _spender, _subtractedValue, _fee, _nonce));
+        /* "5229c56f": getDecreaseAllowancePreSignedHash(address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0x5229c56f), _token, _spender, _subtractedValue, _fee, _nonce));
     }
 
     /**
-     * @notice Hash (keccak256) of the payload used by transferFromPreSigned
+     * @dev Hash (keccak256) of the payload used by transferFromPreSigned
+     * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
      * @param _token address The address of the token
      * @param _from address The address which you want to send tokens from.
      * @param _to address The address which you want to transfer to.
@@ -294,7 +328,7 @@ contract ERC865Token is ERC865 {
      * @param _fee uint256 The amount of tokens paid to msg.sender, by the spender.
      * @param _nonce uint256 Presigned transaction number.
      */
-    function transferFromPreSignedHashing(
+    function getTransferFromPreSignedHash(
         address _token,
         address _from,
         address _to,
@@ -306,7 +340,7 @@ contract ERC865Token is ERC865 {
         pure
         returns (bytes32)
     {
-        /* "b7656dc5": transferFromPreSignedHashing(address,address,address,uint256,uint256,uint256) */
-        return keccak256(abi.encodePacked(bytes4(0xb7656dc5), _token, _from, _to, _value, _fee, _nonce));
+        /* "a70c41b4": getTransferFromPreSignedHash(address,address,address,uint256,uint256,uint256) */
+        return keccak256(abi.encodePacked(bytes4(0xa70c41b4), _token, _from, _to, _value, _fee, _nonce));
     }
 }

@@ -4,8 +4,8 @@
   "description": "PROPS ERC20 token contract and distribution helpers",
   "scripts": {
     "tdd": "nodemon --watch contracts --watch test --exec 'truffle test --network test'",
-    "pretest": "ganache-cli -p 9545 -m \"asset member awake bring mosquito lab sustain muscle elephant equip someone obvious\" > /dev/null &",
-    "test": "NODE_ENV=test truffle test ./scripts/tests/propstoken.test.js --network test --exit",    
+    "pretest": "truffle compile && ganache-cli -p 9545 -m \"asset member awake bring mosquito lab sustain muscle elephant equip someone obvious\" > /dev/null &",
+    "test": "NODE_ENV=test truffle test ./test/propstoken.test.js --network test --exit",
     "coverage": "./node_modules/.bin/solidity-coverage"
   },
   "dependencies": {
@@ -35,6 +35,7 @@
     "eslint-plugin-import": "^2.14.0",
     "lodash": "^4.17.11",
     "mocha": "^3.2.0",
+    "mocha-junit-reporter": "^1.18.0",
     "mocha-multi": "^0.9.1",
     "mocha-osx-reporter": "^0.1.2",
     "nodemon": "^1.11.0",
