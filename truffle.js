@@ -6,90 +6,57 @@
 // 3 - Valid Validator
 const Web3 = require('web3');
 const PrivateKeyProvider = require('truffle-privatekey-provider');
-const fs = require('fs');
 
 // eslint-disable-next-line no-unused-vars
 const web3 = new Web3();
 module.exports = {
   networks: {
-    test0: {
-      host: 'localhost',
-      port: 9545,
-      network_id: '*',
-    },
-    test1: {
-      host: 'localhost',
-      port: 9545,
-      network_id: '*',
-    },
-    test2: {
-      host: 'localhost',
-      port: 9545,
-      network_id: '*',
-    },
-    testValidator: {
-      host: 'localhost',
-      port: 9545,
-      network_id: '*',
-    },
     test: {
-      host: 'localhost',
-      port: 9545,
-      network_id: '*',
-    },
-    local: {
-      host: 'localhost',
-      port: 9545,
-      network_id: '*',
-    },
-    production: {
-      host: 'localhost',
-      port: 9545,
-      gasPrice: 5000000000,
-      gas: 3000000,
-      network_id: '1',
-    },
-    rinkeby0: {
-      provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK0.txt', 'utf8');
-        return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
-      },
-      network_id: '4',
-      wallet_address: '0x5338d6E393bdB6Da8649bCDc6afA27426e71c5C0',
-    },
-    rinkeby1: {
-      provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK1.txt', 'utf8');
-        return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
-      },
-      network_id: '4',
-      wallet_address: '0x87A617cD45D94D2eAb958940d29313F3A7d7dF46',
-    },
-    rinkeby2: {
-      provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevDevOps-PK2.txt', 'utf8');
-        return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
-      },
-      network_id: '4',
-      wallet_address: '0xA80a6946f8Af393D422cd6FEee9040C25121a3B8',
-    },
-    rinkebyValidator: {
-      provider() {
-        const pk = fs.readFileSync('/Users/jretina/DevValidator-PK.txt', 'utf8');
-        return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
-      },
-      network_id: '4',
-      wallet_address: '0xA80a6946f8Af393D422cd6FEee9040C25121a3B8',
-    },
-    rinkebydev: {
       host: 'localhost',
       port: 8545,
       network_id: '*',
     },
-    docker: {
-      host: '127.0.0.1',
-      port: 9000,
-      network_id: '8000',
+    rinkeby0: {
+      provider() {
+        if (!process.env.DEVOPS_PK0 || !process.env.DEVOPS_WALLET0) {
+          console.log('Must provide environment variable DEVOPS_PK0 and DEVOPS_WALLET0 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK0;
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+        }
+        return false;
+      },
+      network_id: '4',
+      wallet_address: process.env.DEVOPS_WALLET0,
+    },
+    rinkeby1: {
+      provider() {
+        if (!process.env.DEVOPS_PK1 || !process.env.DEVOPS_WALLET1) {
+          console.log('Must provide environment variable DEVOPS_PK1 and DEVOPS_WALLET1 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK1;
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+        }
+        return false;
+      },
+      network_id: '4',
+      wallet_address: process.env.DEVOPS_WALLET1,
+    },
+    rinkeby2: {
+      provider() {
+        if (!process.env.DEVOPS_PK2 || !process.env.DEVOPS_WALLET2) {
+          console.log('Must provide environment variable DEVOPS_PK2 and DEVOPS_WALLET2 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK2;
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+        }
+        return false;
+      },
+      network_id: '4',
+      wallet_address: process.env.DEVOPS_WALLET2,
     },
     coverage: {
       host: 'localhost',
@@ -99,19 +66,11 @@ module.exports = {
       gasPrice: 0x01,
     },
   },
-  // mocha: {
-  //   ui: 'bdd',
-  //   reporter: 'mocha-multi',
-  //   reporterOptions: {
-  //     'mocha-osx-reporter': '-',
-  //     spec: '-',
-  //   },
-  // },
   compilers: {
     solc: {
-      version: '0.4.24',
+      version: '0.4.25',
       optimizer: {
-        enabled: true,
+        enabled: false,
         runs: 500,
       },
     },

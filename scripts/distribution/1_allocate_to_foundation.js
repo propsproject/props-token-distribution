@@ -8,14 +8,11 @@ const connectionConfig = require('../../truffle');
 const utils = require('../../scripts_utils/utils');
 
 const networkProvider = process.argv[2];
-const jurisdictionContractAddress = process.argv[3];
-const addressesCSV = process.argv[4];
+const addressesCSV = process.argv[3];
 let networkInUse;
 let addressInUse;
 let cmd;
 let web3;
-let countValidatedVestingContracts = 0;
-let countValidatedBeneficiaryWallets = 0;
 let countWallets = 0;
 let totalTransferred = new BigNumber(0);
 let totalTransferredToVestingContracts = new BigNumber(0);
@@ -26,12 +23,6 @@ const allocateTo = typeof (allocationType) === 'undefined' ? 'foundation' : glob
 // validate network
 if (typeof (networkProvider) === 'undefined') {
   console.warn('Must supply networkProvider');
-  process.exit(0);
-}
-
-// validate jurisdiction contract address
-if (utils.hasTPLContract() && typeof (jurisdictionContractAddress) === 'undefined') {
-  console.warn('Must supply jurisdictionContractAddress');
   process.exit(0);
 }
 
@@ -66,17 +57,16 @@ if (typeof (allocationsData.allocations) === 'undefined') {
   allocationsData.allocations = [];
 }
 
-const fileNetworkName = networkProvider === 'test' ? 'dev-5777' : networkProvider;
+const fileNetworkName = networkProvider === 'test' ? 'dev-1551218979388' : networkProvider;
 const zosData = JSON.parse(fs.readFileSync(`zos.${fileNetworkName}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
-const jurisdictionContractABI = require('../../build/contracts/BasicJurisdiction.json');
 
 let accounts;
 async function main() {
   // instantiate propstoken
   let providerOwner;
-  networkInUse = `${networkProvider}2`;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}2`;
   if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
     providerOwner = connectionConfig.networks[networkInUse].provider();
     web3 = new Web3(providerOwner);
@@ -94,26 +84,6 @@ async function main() {
   const propsContractInstance = new web3.eth.Contract(propsContractABI.abi, PropsTokenContractAddress);
   nonces[tokenHolderAddress] = await web3.eth.getTransactionCount(tokenHolderAddress);
 
-  let jurisdictionContractInstance;
-  let validatorAddress;
-  if (utils.hasTPLContract()) {
-    // instantiate jurisdiction
-    networkInUse = `${networkProvider}Validator`;
-    if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
-      providerOwner = connectionConfig.networks[networkInUse].provider();
-      web3 = new Web3(providerOwner);
-    }
-    if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
-      web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
-      accounts = await web3.eth.getAccounts();
-      addressInUse = accounts[3];
-    } else {
-      addressInUse = connectionConfig.networks[networkInUse].wallet_address;
-    }
-    validatorAddress = addressInUse;
-    jurisdictionContractInstance = new web3.eth.Contract(jurisdictionContractABI.abi, jurisdictionContractAddress);
-    nonces[validatorAddress] = await web3.eth.getTransactionCount(validatorAddress);
-  }
 
   // read csv
   const allocationContents = fs.readFileSync(addressesCSV, 'utf8');
@@ -131,7 +101,7 @@ async function main() {
       const cliff = new BigNumber(allocationData[3]);
       const percent = new BigNumber(allocationData[4]);
       // deploy proxy contract per address
-      networkInUse = `${networkProvider}1`;
+      networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
       if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
         addressInUse = accounts[1];
       } else {
@@ -156,7 +126,7 @@ async function main() {
       allocationOutput.cliffDuration = cliff;
 
       if (tokensToVest > 0) {
-        cmd = `zos create TokenVesting -v --init initialize \
+        cmd = `zos create openzeppelin-eth/TokenVesting -v --init initialize \
         --args ${beneficiary},${start},${cliffDuration},${vestingDuration},${recovable},${addressInUse} \
         --network ${networkInUse} --from ${addressInUse}`;
         try {
@@ -164,29 +134,6 @@ async function main() {
           console.log(`Executing ${cmd}`);
           const tokenVestingProxyContractAddress = execSync(cmd).toString().replace(/\n$/, '');
           allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;
-          if (utils.hasTPLContract()) {
-            // whitelist the vesting contract
-            console.log(`Issuing attribute for vesting contract ${tokenVestingProxyContractAddress}`);
-            // eslint-disable-next-line no-await-in-loop
-            await jurisdictionContractInstance.methods.issueAttribute(
-              tokenVestingProxyContractAddress,
-              1,
-              0,
-            ).send({
-              from: validatorAddress,
-              gas: utils.gasLimit('attribute'),
-              gasPrice: utils.gasPrice(),
-              nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
-            // eslint-disable-next-line no-loop-func
-            }).then((receipt) => {
-              allocationOutput.validatedVestingContract = true;
-              allocationOutput.validationVestingTx = receipt.transactionHash;
-              countValidatedVestingContracts += 1;
-              console.log(`Attribute set for vesting contract ${tokenVestingProxyContractAddress}`);
-            }).catch((error) => {
-              console.warn(`Error setting attribute for vesting contract ${tokenVestingProxyContractAddress}:${error}`);
-            });
-          }
 
           // transfer to vesting contract
           console.log(`Transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}`);
@@ -210,41 +157,6 @@ async function main() {
           });
         } catch (err) {
           console.warn(err);
-        }
-      }
-
-      if (utils.hasTPLContract()) {
-        // whitelist beneficianry
-        console.log(`Issuing attribute for beneficiary ${beneficiary}`);
-
-        // check if not validated already
-        let isBeneficiaryValidated = false;
-        // eslint-disable-next-line no-await-in-loop
-        await jurisdictionContractInstance.methods.hasAttribute(beneficiary, 1)
-          .call()
-          .then((val) => {
-            isBeneficiaryValidated = val;
-          });
-        if (!isBeneficiaryValidated) {
-          // eslint-disable-next-line no-await-in-loop
-          await jurisdictionContractInstance.methods.issueAttribute(
-            beneficiary,
-            1,
-            0,
-          ).send({
-            from: validatorAddress,
-            gas: utils.gasLimit('attribute'),
-            gasPrice: utils.gasPrice(),
-            nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
-          // eslint-disable-next-line no-loop-func
-          }).then((receipt) => {
-            allocationOutput.validatedBeneficiary = true;
-            allocationOutput.validatedBeneficiaryTx = receipt.transactionHash;
-            countValidatedBeneficiaryWallets += 1;
-            console.log(`Attribute set for beneficiary ${beneficiary}`);
-          }).catch((error) => {
-            console.warn(`Error setting attribute for beneficiary ${beneficiary}:${error}`);
-          });
         }
       }
 
@@ -283,8 +195,6 @@ async function main() {
     name: allocateTo,
     tokenAddress: PropsTokenContractAddress,
     countWallets,
-    countValidatedBeneficiaryWallets,
-    countValidatedVestingContracts,
     totalTransferred,
     totalTransferredToVestingContracts,
     date: utils.timeStamp(),

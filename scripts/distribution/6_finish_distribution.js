@@ -7,9 +7,8 @@ const connectionConfig = require('../../truffle');
 const utils = require('../../scripts_utils/utils');
 
 const networkProvider = process.argv[2];
-const multisigWalletForRemaningProps = process.argv[4];
-const jurisdictionContractAddress = process.argv[3];
-const multisigWalletForPropsTokenProxy = process.argv[5];
+const multisigWalletForRemaningProps = process.argv[3];
+const multisigWalletForPropsTokenProxy = process.argv[4];
 const nonces = {};
 let networkInUse;
 let addressInUse;
@@ -31,17 +30,10 @@ if (typeof (multisigWalletForPropsTokenProxy) === 'undefined') {
   process.exit(0);
 }
 
-// validate jurisdiction contract address
-if (typeof (jurisdictionContractAddress) === 'undefined') {
-  console.warn('Must supply jurisdictionContractAddress');
-  process.exit(0);
-}
-
 const fileNetworkName = networkProvider === 'test' ? 'dev-5777' : networkProvider;
 const zosData = JSON.parse(fs.readFileSync(`zos.${fileNetworkName}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
-const jurisdictionContractABI = require('../../build/contracts/BasicJurisdiction.json');
 
 const distributionMetadataFilename = `output/distribution-summary-${networkProvider}.json`;
 let distributionData;
@@ -62,7 +54,7 @@ const stepData = {
 let accounts;
 async function main() {
   // instantiate propstoken
-  networkInUse = `${networkProvider}2`;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}2`;
   let tokenHolderAddress;
   if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
     const providerTransferrer = connectionConfig.networks[networkInUse].provider();
@@ -79,26 +71,6 @@ async function main() {
   const propsContractInstance = new web3.eth.Contract(propsContractABI.abi, PropsTokenContractAddress);
   nonces[tokenHolderAddress] = await web3.eth.getTransactionCount(tokenHolderAddress);
 
-  // instantiate jurisdiction
-  networkInUse = `${networkProvider}Validator`;
-  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
-    const providerValidator = connectionConfig.networks[networkInUse].provider();
-    web3 = new Web3(providerValidator);
-  }
-  let validatorAddress;
-  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
-    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
-    accounts = await web3.eth.getAccounts();
-    // eslint-disable-next-line prefer-destructuring
-    validatorAddress = accounts[3];
-  } else {
-    validatorAddress = connectionConfig.networks[networkInUse].wallet_address;
-  }
-
-  const jurisdictionContractInstance = new web3.eth.Contract(jurisdictionContractABI.abi, jurisdictionContractAddress);
-  nonces[validatorAddress] = await web3.eth.getTransactionCount(validatorAddress);
-
-
   // get balance of remaining props in props holder account
   let remainingProps;
   // eslint-disable-next-line no-await-in-loop
@@ -110,37 +82,6 @@ async function main() {
 
   const remainingPropsG = web3.utils.fromWei(remainingProps);
   if (remainingProps > 0) {
-    // check that multisig wallet can receive tokens
-    // check if not validated already
-    let isBeneficiaryValidated = false;
-    // eslint-disable-next-line no-await-in-loop
-    await jurisdictionContractInstance.methods.owner()
-      .call()
-      .then((val) => {
-        isBeneficiaryValidated = val;
-      });
-    if (!isBeneficiaryValidated) {
-      // whitelist beneficianry
-      console.log(`Issuing attribute for multisig wallet ${multisigWalletForRemaningProps}`);
-      // eslint-disable-next-line no-await-in-loop
-      await jurisdictionContractInstance.methods.issueAttribute(
-        multisigWalletForRemaningProps,
-        1,
-        0,
-      ).send({
-        from: validatorAddress,
-        gas: utils.gasLimit('attribute'),
-        gasPrice: utils.gasPrice(),
-        nonce: utils.getAndIncrementNonce(nonces, validatorAddress),
-        // eslint-disable-next-line no-loop-func
-      }).then((receipt) => {
-        stepData.validatedBeneficiary = true;
-        stepData.validatedBeneficiaryTx = receipt.transactionHash;
-        console.log(`Attribute set for multisig wallet ${multisigWalletForRemaningProps}`);
-      }).catch((error) => {
-        console.warn(`Error setting attribute for multisig wallet ${multisigWalletForRemaningProps}:${error}`);
-      });
-    }
     // transfer remaining props to multisig wallet
     console.log(`${tokenHolderAddress} has ${remainingPropsG} props remaining`);
     await propsContractInstance.methods.transfer(

@@ -24,7 +24,7 @@ async function main() {
   // compile/deploy logic contract
   let web3;
   let providerOwner;
-  networkInUse = `${networkProvider}0`;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}0`;
   if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
     providerOwner = connectionConfig.networks[networkInUse].provider();
     web3 = new Web3(providerOwner);
@@ -48,7 +48,7 @@ async function main() {
 
   // deploy proxy contract
   let addressPropsHolder;
-  networkInUse = `${networkProvider}1`;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
   if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
     providerOwner = connectionConfig.networks[networkInUse].provider();
     web3 = new Web3(providerOwner);

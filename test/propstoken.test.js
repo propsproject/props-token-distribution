@@ -22,7 +22,7 @@ contract('main', (_accounts) => {
     instance = await main();
   });
 
-  describe('Basic Setup Test', async () => {    
+  describe('Basic Setup Test', async () => {
     it('Name should be correct', async () => {
       const name = await instance.name();
       assert.equal(name, 'PROPS_Token');
@@ -121,7 +121,7 @@ contract('main', (_accounts) => {
         // Here are the operations to be done after predicate
         const amount = 10;
         const account3Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
-        const account4Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();        
+        const account4Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
         const res = await instance.transfer(web3.eth.accounts[3], web3.toWei(amount), { from: web3.eth.accounts[4] });
         newAccount3Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
         newAccount4Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
@@ -244,7 +244,7 @@ contract('main', (_accounts) => {
       aliceBalance = await instance.balanceOf(alice.address);
       bobBalance = await instance.balanceOf(bob.address);
       assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - (amount / 2));
-      assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));      
+      assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));
     });
 
     it('Charlie performs transferFrom of 50 tokens on behalf of damien from Alice to Bob (fee=10)', async () => {
@@ -253,7 +253,7 @@ contract('main', (_accounts) => {
       const oldBobBalance = bobBalance;
       const oldCharlieBalance = charlieBalance;
       const oldDamienBalance = await instance.balanceOf(damien.address);
-      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[7]);      
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[7]);
       components = [
         Buffer.from('a70c41b4', 'hex'),
         formattedAddress(instance.address),

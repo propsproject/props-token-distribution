@@ -4,8 +4,8 @@ import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 
 /**
- * @title Props Sidechain Compatible
- * @dev Added a settle function and events
+ * @title Props Time Based Transfers
+ * @dev Contract allows to set a transfer start time (unix timestamp) from which transfers are allowed excluding one address defined in initialize
  **/
 contract PropsTimeBasedTransfers is Initializable, ERC20 {
     
