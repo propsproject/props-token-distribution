@@ -18,7 +18,7 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
 function prepareBody(recipient) {
   let body = '';
   body += 'Hi ' + recipient.firstName + ',' + p;
-  body += 'Thank you for supporting Props. Your Props Tokens have been successfully distributed'
+  body += 'Thank you for supporting Props. Your Props Tokens have been successfully distributed '
   body += 'to the wallet address you provided. You’ll find a detailed summary of your Props holdings below: ' + p;
   body += '<ul>';
       body += '<li>' + 'Ethereum address: ' + recipient.beneficiary + '</li>';
@@ -32,9 +32,9 @@ function prepareBody(recipient) {
   }
   if(recipient.investedAmount) {
       body += '<li>' + 'Initial Token allocation: $' +  recipient.tokensToGrant + '</li>';
-      body += '</ul>';
-      body += 'As you remember, we chose to reward our early investors with a 10% bonus in March 2018. 
-      body += 'Given that bonus, your token allocation has increased:' + p;
+    body += '</ul>';
+    body += 'As you remember, we chose to reward our early investors with a 10% bonus in March 2018. ';
+    body += 'Given that bonus, your token allocation has increased:' + p;
       body += '<ul>';
       body += '<li>' + 'Bonus Tokens: '  + '</li>';
   }
