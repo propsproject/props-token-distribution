@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "zos-lib/contracts/Initializable.sol";
-import "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol";
+import "./ERC20Detailed.sol";
 import "./PropsSidechainCompatible.sol";
 import "./PropsTimeBasedTransfers.sol";
 import "./ERC865Token.sol";
