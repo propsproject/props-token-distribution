@@ -4,7 +4,8 @@
   "description": "PROPS ERC20 token contract and distribution helpers",
   "scripts": {
     "tdd": "nodemon --watch contracts --watch test --exec 'truffle test --network test'",
-    "pretest": "truffle compile && ganache-cli -p 9545 -m \"asset member awake bring mosquito lab sustain muscle elephant equip someone obvious\" > /dev/null &",
+    "testrpc": "ganache-cli -p 9545 -m \"asset member awake bring mosquito lab sustain muscle elephant equip someone obvious\" > /dev/null &",
+    "compile": "truffle compile",
     "test": "NODE_ENV=test truffle test ./test/propstoken.test.js --network test --exit",
     "coverage": "./node_modules/.bin/solidity-coverage",
     "postinstall": "cp pending-contracts/openzeppelin-eth-modified/ERC20.sol node_modules/openzeppelin-eth/contracts/token/ERC20/ERC20.sol"
