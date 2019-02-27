@@ -15,6 +15,8 @@ Contracts are written in [Solidity][solidity] using [ZeppelinOS](https://github.
 
 ### Depenencies
 
+Use node version v8.11.1
+
 ```bash
 # Install Zos globally:
 $ npm install --global zos
@@ -38,8 +40,17 @@ $ zos add PropsToken
 ### Test
 
 ```bash
+
+# Compile contracts
+$ npm run compile
+
+# Run ganache-cli
+$ npm run testrpc
+
 # Run contracts test suite
 $ npm run test
+# If fails to bind due to mismatch versions run directly:
+$ NODE_ENV=test truffle test ./test/propstoken.test.js --network test
 ```
 
 ### Deployment and Distribution
