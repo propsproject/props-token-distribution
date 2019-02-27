@@ -19,14 +19,18 @@ Contracts are written in [Solidity][solidity] using [ZeppelinOS](https://github.
 # Install Zos globally:
 $ npm install --global zos
 
-# Install Zos globally:
+# Install Ganache-cli globally:
 $ npm install --global ganache-cli
+
+# Install Truffle globally:
+$ npm install --global truffle@v4.1.12
 
 # Install local node dependencies:
 $ npm install
 ```
 
 ```bash
+# (Only for new project if zos.json does not exist) 
 # Initialize zos and add the relevant contracts
 $ zos init
 $ zos add PropsToken

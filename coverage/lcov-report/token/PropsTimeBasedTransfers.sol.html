@@ -22,12 +22,12 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>7/7</span>
+        <span class='fraction'>5/5</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>2/4</span>
+        <span class='fraction'>2/2</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>7/7</span>
+        <span class='fraction'>6/6</span>
       </div>
     </div>
   </div>
@@ -107,7 +107,15 @@
 62
 63
 64
-65</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+65
+66
+67
+68
+69
+70
+71
+72
+73</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -119,6 +127,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -139,21 +155,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -164,7 +165,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -177,18 +193,26 @@ import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 &nbsp;
 /**
- * @title Props Sidechain Compatible
- * @dev Added a settle function and events
+ * @title Props Time Based Transfers
+ * @dev Contract allows to set a transfer start time (unix timestamp) from which transfers are allowed excluding one address defined in initialize
  **/
-contract PropsTimeBasedTransfers is ERC20 {
+contract PropsTimeBasedTransfers is Initializable, ERC20 {
     
     uint public transfersStartTime;
     address public canTransferBeforeStartTime;
 &nbsp;
+    modifier canTransfer(address _account)
+    {
+        require(now &gt; transfersStartTime || _account==canTransferBeforeStartTime, 
+        "Cannot transfer before transfers start time from this account"
+        );
+        _;
+    }
+&nbsp;
     /**
-    * @notice The initializer function, with transfers start time `transfersStartTime`
+    * @dev The initializer function, with transfers start time `transfersStartTime` (unix timestamp)
     * and `canTransferBeforeStartTime` address which is exempt from start time restrictions
-    * @param start uint Timestamp of when transfers can start
+    * @param start uint Unix timestamp of when transfers can start
     * @param account uint256 address exempt from the start date check    
     */
     function initialize(
@@ -201,37 +225,37 @@ contract PropsTimeBasedTransfers is ERC20 {
         transfersStartTime = start;
         canTransferBeforeStartTime = account;
     }
-&nbsp;
-    function canTransfer(address account) public view returns (bool) {
-        return (now &gt; transfersStartTime || account==canTransferBeforeStartTime);
-    }
-&nbsp;
+    /**
+    * @dev Transfer token for a specified address if allowed
+    * @param to The address to transfer to.
+    * @param value The amount to be transferred.
+    */
     function transfer(
         address to,
         uint256 value
     )
-    public    
+    public canTransfer(msg.sender)   
     returns (bool)
-    {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
-            canTransfer(msg.sender),
-            "Transfers are not yet active"
-        );
+    {        
         return super.transfer(to, value);        
     }
 &nbsp;
+    /**
+     * @dev Transfer tokens from one address to another if allowed
+     * Note that while this function emits an Approval event, this is not required as per the specification,
+     * and other compliant implementations may not emit the event.
+     * @param from address The address which you want to send tokens from
+     * @param to address The address which you want to transfer to
+     * @param value uint256 the amount of tokens to be transferred
+     */
     function transferFrom(
-    address from,
-    address to,
-    uint256 value
+        address from,
+        address to,
+        uint256 value
     )
-    public    
+    public canTransfer(from)    
     returns (bool)
-    {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
-            canTransfer(msg.sender),
-            "Transfers are not yet active"
-        );
+    {        
         return super.transferFrom(from, to, value);        
     }    
 }
@@ -241,7 +265,7 @@ contract PropsTimeBasedTransfers is ERC20 {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Feb 26 2019 08:49:17 GMT-0500 (EST)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Feb 27 2019 08:31:34 GMT-0500 (EST)
 </div>
 </div>
 <script src="../prettify.js"></script>
