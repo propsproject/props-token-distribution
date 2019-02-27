@@ -57,7 +57,7 @@ if (typeof (allocationsData.allocations) === 'undefined') {
   allocationsData.allocations = [];
 }
 
-const fileNetworkName = networkProvider === 'test' ? 'dev-1551218979388' : networkProvider;
+const fileNetworkName = networkProvider === 'test' ? 'dev-1551288652415' : networkProvider;
 const zosData = JSON.parse(fs.readFileSync(`zos.${fileNetworkName}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
