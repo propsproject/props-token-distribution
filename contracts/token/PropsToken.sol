@@ -42,7 +42,7 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     // total supply is 600,000,000 PROPS specified in AttoPROPS
     uint256 totalSupply = 0.6 * 1e9 * (10 ** uint256(decimals));
     
-    ERC20Detailed.initialize("PROPS_Token", "PROPS_TOKEN", decimals);
+    ERC20Detailed.initialize("Props Token", "PROPS", decimals);
     PropsTimeBasedTransfers.initialize(_transfersStartTime, _holder);    
     _mint(_holder, totalSupply);
   }
