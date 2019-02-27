@@ -20,6 +20,8 @@ const gasLimit = (type) => {
       return 100000;
     case 'validateAddress': // allow validator to assign attribute
       return 60000;
+    case 'vestingContract': // token vestion proxy (864753)
+      return 900000;
     default:
       return 100000;
   }
