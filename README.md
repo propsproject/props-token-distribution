@@ -30,7 +30,6 @@ $ npm install
 # Initialize zos and add the relevant contracts
 $ zos init
 $ zos add PropsToken
-$ zos add TokenVesting
 ```
 ### Test
 
