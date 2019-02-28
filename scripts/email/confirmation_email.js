@@ -15,8 +15,7 @@ const outputData = require(`../../${outputDataFile}`);
 
 AWS.config.update({ region: 'us-east-1' });
 
-
-const network = 'rinkeby';
+const network = outputDataFile.split('.')[0].split('-')[3];
 
 for (let i = 0; i < outputData.allocations.length; i += 1) {
   const recipient = outputData.allocations[i];
@@ -25,7 +24,7 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', 'support@propsproject.com');
   // sendEmail(params);
-  console.log(params.Message.Body.Text.Data);
+  console.log(params.Message.Body.Text.Data)
   // console.log(params);
 }
 
