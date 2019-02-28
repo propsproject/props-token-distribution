@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 /* eslint-disable no-useless-concat */
 /* eslint-disable no-use-before-define */
 const htmlToText = require('html-to-text');
@@ -20,7 +21,7 @@ const network = outputDataFile.split('.')[0].split('-')[3];
 for (let i = 0; i < outputData.allocations.length; i += 1) {
   const recipient = outputData.allocations[i];
   const body = prepareBody(recipient);
-  const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', 'support@propsproject.com');
+  const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
   sendEmail(params);
   console.log(params.Message.Body.Text.Data);
   // console.log(params);
@@ -29,7 +30,7 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
 function prepareBody(recipient) {
   let body = '';
   if (network !== 'mainnet') {
-    body += 'NOTE: This is a test email, for a test token.<br><br>';
+    body += 'NOTE: This is a test email, for a test token.<br>-------<br><br>';
   }
   body += `Hi ${recipient.firstName},`;
   body += '<br><br>';
@@ -43,7 +44,7 @@ function prepareBody(recipient) {
   }
   body += '<li>' + 'Initial Token price: $0.136904' + '</li>';
   if (recipient.investedDiscount) {
-    body += `${'<li>' + 'Your discount: '}${recipient.investedDiscount}%` + `</li>`;
+    body += `${'<li>' + 'Your discount: '}${recipient.investedDiscount}%` + '</li>';
     body += `${'<li>' + 'Your discounted Token price: $'}${discountedPrice(recipient.investedDiscount)}</li>`;
   }
   if (recipient.investedAmount) {
@@ -71,9 +72,9 @@ function prepareBody(recipient) {
     body += '<br>';
     body += '<ul>';
     body += `${'<li>' + 'Vesting contract address: '}${etherscan(recipient.vestingContractAddress)}</li>`;
-    body += `${'<li>' + 'Vesting length: '}${recipient.vestingDuration} Days` + `</li>`;
-    if (recipient.vestingCliff) {
-      body += `${'<li>' + 'Vesting cliff: '}${recipient.vestingCliff} Days` + `</li>`;
+    body += `${'<li>' + 'Vesting length: '}${recipient.vestingDuration} Days` + '</li>';
+    if (recipient.cliffDuration) {
+      body += `${'<li>' + 'Vesting cliff: '}${recipient.cliffDuration} Days` + '</li>';
     }
     body += '</ul>';
     body += `Moving forward, visit the Props ${vestingUrl(recipient, 'Vesting Dashboard')} to see details `;
