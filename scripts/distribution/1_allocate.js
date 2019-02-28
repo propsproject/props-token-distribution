@@ -66,6 +66,7 @@ const zosData = JSON.parse(fs.readFileSync(`zos.${fileNetworkName}.json`, 'utf8'
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
 
+allocationsData.tokenContractAddress = PropsTokenContractAddress;
 let accounts;
 async function main() {
   // instantiate propstoken
@@ -101,9 +102,7 @@ async function main() {
     const tokensRead = new BigNumber(allocationData[1]);
     tokensNeeded = tokensNeeded.plus(tokensRead);
     gasNeeded = gasNeeded.plus(new BigNumber(utils.gasLimit('transfer')));
-    console.log('adding gasNeeded for transfer');
-    if (Number(allocationData[4]) > 0) { // also has a vesting contract
-      console.log('adding gasNeeded for vesting contract');
+    if (parseInt(allocationData[4], 10) > 0) { // also has a vesting contract
       gasNeeded = gasNeeded.plus(new BigNumber(utils.gasLimit('vestingContract')));
     }
   }
@@ -131,6 +130,7 @@ async function main() {
     // wallet address,tokens,vesting duration,vesting cliff,vesting percentage,type,name,email address,first name,invested amount,invested discount
     const address = allocationData[0];
     if (address.length > 0) {
+      const totalTokens = parseFloat(allocationData[1]).toLocaleString('en');
       const tokensRead = new BigNumber(allocationData[1]);
       // const _tokensMultiplier = new BigNumber(1 * 10 ** 18);
       const tokens = tokensRead; // .multipliedBy(_tokensMultiplier);
@@ -173,6 +173,7 @@ async function main() {
       allocationOutput.firstName = firstName;
       allocationOutput.investedAmount = investedAmount;
       allocationOutput.investedDiscount = investedDiscount;
+      allocationOutput.totalTokens = totalTokens;
 
 
       if (tokensToVest > 0) {
