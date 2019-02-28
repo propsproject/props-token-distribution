@@ -31,7 +31,7 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
 function prepareBody(recipient) {
   let body = '';
   if(network!=='mainnet') {
-    body += 'NOTE: This is a test email, for a test token.<br><br>';
+    body += 'NOTE: This is a test email, for a test token.<br>-------<br><br>';
   }
   body += `Hi ${recipient.firstName},`;
   body += '<br><br>';
@@ -74,8 +74,8 @@ function prepareBody(recipient) {
     body += '<ul>';
     body += `${'<li>' + 'Vesting contract address: '}${etherscan(recipient.vestingContractAddress)}</li>`;
     body += `${'<li>' + 'Vesting length: '}${recipient.vestingDuration} Days` + `</li>`;
-    if (recipient.vestingCliff) {
-      body += `${'<li>' + 'Vesting cliff: '}${recipient.vestingCliff} Days` + `</li>`;
+    if (recipient.cliffDuration) {
+      body += `${'<li>' + 'Vesting cliff: '}${recipient.cliffDuration} Days` + `</li>`;
     }
     body += '</ul>';
     body += `Moving forward, visit the Props ${vestingUrl(recipient, 'Vesting Dashboard')} to see details `;
