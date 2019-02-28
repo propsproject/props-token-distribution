@@ -21,12 +21,9 @@ const network = 'rinkeby';
 for (let i = 0; i < outputData.allocations.length; i += 1) {
   const recipient = outputData.allocations[i];
   // eslint-disable-next-line no-continue
-  if (recipient.email !== 'jon@younow.com') continue;
+  if (recipient.email !== 'peterwatts@younow.com') continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', 'support@propsproject.com');
-  if (recipient.email === 'jon@younow.com') {
-    sendEmail(params);
-  }
   // sendEmail(params);
   console.log(params.Message.Body.Text.Data);
   // console.log(params);
@@ -60,7 +57,7 @@ function prepareBody(recipient) {
   }
   body += `${'<li>' + 'Your total Token allocation: '}${parseFloat(recipient.totalTokens).toLocaleString('en')}</li>`;
   if (recipient.investedAmount) {
-    body += `${'<li>' + 'Your final Token price: $'}${roundDown(discountedPrice(recipient.investedDiscount) / 1.1, 6)}</li>`;
+    body += `${'<li>' + 'Your final Token price: $'}${round(discountedPrice(recipient.investedDiscount) / 1.1, 6)}</li>`;
   }
   body += '</ul>';
   if (recipient.vestingContractAddress) {
@@ -125,16 +122,21 @@ function etherscan(address) {
 }
 
 function discountedPrice(discount) {
-  return roundDown(0.136904 * ((100 - parseInt(discount, 10)) / 100), 6);
+  return round(0.136904 * ((100 - parseInt(discount, 10)) / 100), 6);
 }
 
 function initialTokens(tokens) {
-  return roundDown(parseFloat(tokens, 10) / 110 * 100, 2);
+  return roundDown(parseFloat(tokens, 10) / 1.1, 2);
 }
 
 function roundDown(num, decimals) {
   const multiplier = Math.pow(10, decimals);
   return Math.floor(num * multiplier) / multiplier;
+}
+
+function round(num, decimals) {
+  const multiplier = Math.pow(10, decimals);
+  return Math.round(num * multiplier) / multiplier;
 }
 
 function prepareEmail(to, body, subject, from) {
