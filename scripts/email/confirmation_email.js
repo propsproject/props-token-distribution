@@ -23,14 +23,14 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
   if (recipient.email !== 'jon@younow.com') continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
-  //sendEmail(params);
-  console.log(params.Message.Body.Text.Data)
+  sendEmail(params);
+  console.log(params.Message.Body.Text.Data);
   // console.log(params);
 }
 
 function prepareBody(recipient) {
   let body = '';
-  if(network!=='mainnet') {
+  if (network !== 'mainnet') {
     body += 'NOTE: This is a test email, for a test token.<br>-------<br><br>';
   }
   body += `Hi ${recipient.firstName},`;
@@ -42,8 +42,8 @@ function prepareBody(recipient) {
   body += `${'<li>' + 'Ethereum address: '}${etherscan(recipient.beneficiary)}</li>`;
   if (recipient.investedAmount) {
     body += `${'<li>' + 'Amount contributed in USD: $'}${parseInt(recipient.investedAmount, 10).toLocaleString('en')}</li>`;
+    body += '<li>' + 'Initial Token price: $0.136904' + '</li>';
   }
-  body += '<li>' + 'Initial Token price: $0.136904' + '</li>';
   if (recipient.investedDiscount) {
     body += `${'<li>' + 'Your discount: '}${recipient.investedDiscount}%` + `</li>`;
     body += `${'<li>' + 'Your discounted Token price: $'}${discountedPrice(recipient.investedDiscount)}</li>`;
