@@ -22,7 +22,7 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
   // eslint-disable-next-line no-continue
   if (recipient.email !== 'jon@younow.com') continue;
   const body = prepareBody(recipient);
-  const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', 'support@propsproject.com');
+  const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
   //sendEmail(params);
   console.log(params.Message.Body.Text.Data)
   // console.log(params);
