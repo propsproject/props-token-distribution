@@ -19,18 +19,16 @@ const network = outputDataFile.split('.')[0].split('-')[3];
 
 for (let i = 0; i < outputData.allocations.length; i += 1) {
   const recipient = outputData.allocations[i];
-  // eslint-disable-next-line no-continue
-  if (recipient.email !== 'jon@younow.com') continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', 'support@propsproject.com');
-  //sendEmail(params);
-  console.log(params.Message.Body.Text.Data)
+  sendEmail(params);
+  console.log(params.Message.Body.Text.Data);
   // console.log(params);
 }
 
 function prepareBody(recipient) {
   let body = '';
-  if(network!=='mainnet') {
+  if (network !== 'mainnet') {
     body += 'NOTE: This is a test email, for a test token.<br><br>';
   }
   body += `Hi ${recipient.firstName},`;
