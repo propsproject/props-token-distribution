@@ -130,7 +130,7 @@ async function main() {
     // wallet address,tokens,vesting duration,vesting cliff,vesting percentage,type,name,email address,first name,invested amount,invested discount
     const address = allocationData[0];
     if (address.length > 0) {
-      const totalTokens = parseFloat(allocationData[1]).toLocaleString('en');
+      const totalTokens = allocationData[1];
       const tokensRead = new BigNumber(allocationData[1]);
       // const _tokensMultiplier = new BigNumber(1 * 10 ** 18);
       const tokens = tokensRead; // .multipliedBy(_tokensMultiplier);

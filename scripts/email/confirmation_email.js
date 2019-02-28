@@ -29,7 +29,6 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
   }
   // sendEmail(params);
   console.log(params.Message.Body.Text.Data);
-  process.exit();
   // console.log(params);
 }
 
@@ -51,15 +50,15 @@ function prepareBody(recipient) {
     body += `${'<li>' + 'Your discounted Token price: $'}${discountedPrice(recipient.investedDiscount)}</li>`;
   }
   if (recipient.investedAmount) {
-    body += `${'<li>' + 'Initial Token allocation: '}${initialTokens(recipient.totalTokens)}</li>`;
+    body += `${'<li>' + 'Initial Token allocation: '}${initialTokens(recipient.totalTokens).toLocaleString('en')}</li>`;
     body += '</ul>';
     body += 'As you remember, we chose to reward our early investors with a 10% bonus in March 2018. ';
     body += 'Given that bonus, your token allocation has increased:';
     body += '<br><br>';
     body += '<ul>';
-    body += `${'<li>' + 'Bonus Tokens: '}${roundDown(parseFloat(recipient.totalTokens, 10) - initialTokens(recipient.totalTokens), 2)}</li>`;
+    body += `${'<li>' + 'Bonus Tokens: '}${roundDown(parseFloat(recipient.totalTokens, 10) - initialTokens(recipient.totalTokens), 2).toLocaleString('en')}</li>`;
   }
-  body += `${'<li>' + 'Your total Token allocation: '}${recipient.totalTokens}</li>`;
+  body += `${'<li>' + 'Your total Token allocation: '}${parseFloat(recipient.totalTokens).toLocaleString('en')}</li>`;
   if (recipient.investedAmount) {
     body += `${'<li>' + 'Your final Token price: $'}${roundDown(discountedPrice(recipient.investedDiscount) / 1.1, 6)}</li>`;
   }
@@ -166,7 +165,7 @@ function prepareEmail(to, body, subject, from) {
   };
 }
 
-function sendEmail(params) {  
+function sendEmail(params) {
   const sendPromise = new AWS.SES({ apiVersion: '2010-12-01' }).sendEmail(params).promise();
   sendPromise.then(
     (data) => {
