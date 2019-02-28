@@ -97,7 +97,7 @@ function prepareBody(recipient) {
   body += '<br><br>';
   body += 'As a Props holder, you can immediately unlock unique features and premium functionality in the ';
   body += '<a href="https://www.younow.com">YouNow</a> app, as you can see in this ';
-  body += '<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">demonstration</a>. Simply visit ';
+  body += '<a href="https://www.youtube.com/watch?v=9kb88TQ-rxc">demonstration</a>. Simply visit ';
   body += '<a href="https://www.younow.com/props">younow.com/props</a> on the web, and link your wallet address to your ';
   body += ' YouNow account. Additional functionality will roll out in the months ahead, when we begin rewarding the ';
   body += 'platform\'s content creators and users with Props. Note that some transfers of tokens may be limited under state law.';
