@@ -58,6 +58,48 @@ module.exports = {
       network_id: '4',
       wallet_address: process.env.DEVOPS_WALLET2,
     },
+    mainnet0: {
+      provider() {
+        if (!process.env.DEVOPS_PK0 || !process.env.DEVOPS_WALLET0) {
+          console.log('Must provide environment variable DEVOPS_PK0 and DEVOPS_WALLET0 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK0;
+          return new PrivateKeyProvider(pk, `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`);
+        }
+        return false;
+      },
+      network_id: '1',
+      wallet_address: process.env.DEVOPS_WALLET0,
+    },
+    mainnet1: {
+      provider() {
+        if (!process.env.DEVOPS_PK1 || !process.env.DEVOPS_WALLET1) {
+          console.log('Must provide environment variable DEVOPS_PK1 and DEVOPS_WALLET1 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK1;
+          return new PrivateKeyProvider(pk, `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`);
+        }
+        return false;
+      },
+      network_id: '1',
+      wallet_address: process.env.DEVOPS_WALLET1,
+    },
+    mainnet2: {
+      provider() {
+        if (!process.env.DEVOPS_PK2 || !process.env.DEVOPS_WALLET2) {
+          console.log('Must provide environment variable DEVOPS_PK2 and DEVOPS_WALLET2 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK2;
+          return new PrivateKeyProvider(pk, `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`);
+        }
+        return false;
+      },
+      network_id: '1',
+      wallet_address: process.env.DEVOPS_WALLET2,
+    },
     coverage: {
       host: 'localhost',
       network_id: '*',
