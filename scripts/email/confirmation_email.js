@@ -37,7 +37,7 @@ function prepareBody(recipient) {
   body += `Hi ${recipient.firstName},`;
   body += '<br><br>';
   body += 'Thank you for supporting Props. Your Props Tokens are currently being sent to the wallet address you ';
-  body += 'provided! Over the next couple of hours Props Tokens are being distributed to hundreds of Props investors ';
+  body += 'provided. Over the next couple of hours Props Tokens are being distributed to hundreds of Props investors ';
   body += 'globally, and this process should be fully concluded by 11:59pm ET, at which point you will be able to ';
   body += 'begin using your Props. You’ll find a detailed summary of your Props holdings and the way you can use them below: ';
   body += '<br>';
