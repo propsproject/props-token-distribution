@@ -20,10 +20,12 @@ const network = outputDataFile.split('.')[0].split('-')[3];
 
 for (let i = 0; i < outputData.allocations.length; i += 1) {
   const recipient = outputData.allocations[i];
+  //if (parseInt(recipient.cliffDuration) === 0) continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
   sendEmail(params);
-  console.log(params.Message.Body.Text.Data);
+  console.log(recipient.name);
+  // console.log(params.Message.Body.Text.Data);
   // console.log(params);
 }
 
@@ -34,30 +36,32 @@ function prepareBody(recipient) {
   }
   body += `Hi ${recipient.firstName},`;
   body += '<br><br>';
-  body += 'Thank you for supporting Props. Your Props Tokens have been successfully distributed to the ';
-  body += 'wallet address you provided. You’ll find a detailed summary of your Props holdings below: ';
+  body += 'Thank you for supporting Props. Your Props Tokens are currently being sent to the wallet address you ';
+  body += 'provided. Over the next couple of hours Props Tokens are being distributed to hundreds of Props investors ';
+  body += 'globally, and this process should be fully concluded by 11:59pm ET, at which point you will be able to ';
+  body += 'begin using your Props. You’ll find a detailed summary of your Props holdings and the way you can use them below: ';
   body += '<br>';
   body += '<ul>';
   body += `${'<li>' + 'Ethereum address: '}${etherscan(recipient.beneficiary)}</li>`;
-  if (recipient.investedAmount) {
-    body += `${'<li>' + 'Amount contributed in USD: $'}${parseInt(recipient.investedAmount, 10).toLocaleString('en')}</li>`;
+  if (parseFloat(recipient.investedAmount)>0) {
+    body += `${'<li>' + 'Amount contributed in USD: $'}${parseFloat(recipient.investedAmount).toLocaleString('en')}</li>`;
+    body += '<li>' + 'Initial Token price: $0.136904' + '</li>';
   }
-  body += '<li>' + 'Initial Token price: $0.136904' + '</li>';
-  if (recipient.investedDiscount) {
+  if (parseInt(recipient.investedDiscount)>0) {
     body += `${'<li>' + 'Your discount: '}${recipient.investedDiscount}%` + '</li>';
     body += `${'<li>' + 'Your discounted Token price: $'}${discountedPrice(recipient.investedDiscount)}</li>`;
   }
-  if (recipient.investedAmount) {
+  if (parseFloat(recipient.investedAmount)>0) {
     body += `${'<li>' + 'Initial Token allocation: '}${initialTokens(recipient.totalTokens).toLocaleString('en')}</li>`;
     body += '</ul>';
     body += 'As you remember, we chose to reward our early investors with a 10% bonus in March 2018. ';
     body += 'Given that bonus, your token allocation has increased:';
     body += '<br>';
     body += '<ul>';
-    body += `${'<li>' + 'Bonus Tokens: '}${roundDown(parseFloat(recipient.totalTokens, 10) - initialTokens(recipient.totalTokens), 2).toLocaleString('en')}</li>`;
+    body += `${'<li>' + 'Bonus Tokens: '}${roundDown(parseFloat(recipient.totalTokens) - initialTokens(recipient.totalTokens), 2).toLocaleString('en')}</li>`;
   }
   body += `${'<li>' + 'Your total Token allocation: '}${parseFloat(recipient.totalTokens).toLocaleString('en')}</li>`;
-  if (recipient.investedAmount) {
+  if (parseFloat(recipient.investedAmount)>0) {
     body += `${'<li>' + 'Your final Token price: $'}${round(discountedPrice(recipient.investedDiscount) / 1.1, 6)}</li>`;
   }
   body += '</ul>';
@@ -65,7 +69,7 @@ function prepareBody(recipient) {
     body += '<b>Your Vesting Schedule</b>';
     body += '<br><br>';
     body += 'Your Props are subject to a vesting schedule governed by a unique Smart Vesting Contract, which you own. ';
-    if (recipient.vestingPercentage < 100) {
+    if (parseInt(recipient.vestingPercentage) < 100) {
       body += `You already have access to ${100 - recipient.vestingPercentage}% of your Props. `;
     }
     body += 'The Contract will unlock your remaining tokens on a linear schedule (ie. more tokens will vest on a daily basis).';
@@ -73,7 +77,7 @@ function prepareBody(recipient) {
     body += '<ul>';
     body += `${'<li>' + 'Vesting contract address: '}${etherscan(recipient.vestingContractAddress)}</li>`;
     body += `${'<li>' + 'Vesting length: '}${recipient.vestingDuration} Days` + '</li>';
-    if (recipient.cliffDuration) {
+    if (parseInt(recipient.cliffDuration)>0) {
       body += `${'<li>' + 'Vesting cliff: '}${recipient.cliffDuration} Days` + '</li>';
     }
     body += '</ul>';
