@@ -6,6 +6,7 @@
 // 3 - Valid Validator
 const Web3 = require('web3');
 const PrivateKeyProvider = require('truffle-privatekey-provider');
+const utils = require('./scripts_utils/utils');
 
 // eslint-disable-next-line no-unused-vars
 const web3 = new Web3();
@@ -14,7 +15,7 @@ module.exports = {
     test: {
       host: 'localhost',
       port: 8545,
-      network_id: '*',
+      network_id: '*',      
     },
     rinkeby0: {
       provider() {
@@ -71,6 +72,8 @@ module.exports = {
       },
       network_id: '1',
       wallet_address: process.env.DEVOPS_WALLET0,
+      gas: utils.gasLimit('vestingContract'),
+      gasPrice: utils.gasPrice(),      
     },
     mainnet1: {
       provider() {
@@ -85,6 +88,8 @@ module.exports = {
       },
       network_id: '1',
       wallet_address: process.env.DEVOPS_WALLET1,
+      gas: utils.gasLimit('vestingContract'),
+      gasPrice: utils.gasPrice(),      
     },
     mainnet2: {
       provider() {
@@ -99,6 +104,8 @@ module.exports = {
       },
       network_id: '1',
       wallet_address: process.env.DEVOPS_WALLET2,
+      gas: utils.gasLimit('vestingContract'),
+      gasPrice: utils.gasPrice(),      
     },
     coverage: {
       host: 'localhost',

@@ -9,14 +9,12 @@ import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
  **/
 contract PropsTimeBasedTransfers is Initializable, ERC20 {
     
-    uint public transfersStartTime;
+    uint256 public transfersStartTime;
     address public canTransferBeforeStartTime;
 
     modifier canTransfer(address _account)
     {
-        require(now > transfersStartTime || _account==canTransferBeforeStartTime, 
-        "Cannot transfer before transfers start time from this account"
-        );
+        require(now > transfersStartTime || _account==canTransferBeforeStartTime, "Cannot transfer before transfers start time from this account");
         _;
     }
 
@@ -27,7 +25,7 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
     * @param account uint256 address exempt from the start date check    
     */
     function initialize(
-        uint start,
+        uint256 start,
         address account
     )
         public

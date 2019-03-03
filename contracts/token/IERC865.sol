@@ -4,10 +4,8 @@ import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 
 /**
- * @title ERC865Token Token
- *
- * ERC865Token allows users paying transfers in tokens instead of gas
- * https://github.com/ethereum/EIPs/issues/865
+ * @title ERC865 Interface
+ * @dev see https://github.com/ethereum/EIPs/issues/865
  *
  */
 

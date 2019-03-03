@@ -33,7 +33,7 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
    */
   function initialize(
     address _holder,
-    uint _transfersStartTime
+    uint256 _transfersStartTime
   )
     initializer
     public

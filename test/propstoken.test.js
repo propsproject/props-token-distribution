@@ -24,22 +24,22 @@ contract('main', (_accounts) => {
 
   describe('Basic Setup Test', async () => {
     it('Name should be correct', async () => {
-      const name = await instance.name();
-      assert.equal(name, 'PROPS_Token');
+      const name = await instance.methods.name().call();
+      assert.equal(name, 'Props Token');
     });
 
     it('Symbol should be correct', async () => {
-      const symbol = await instance.symbol();
-      assert.equal(symbol, 'PROPS_TOKEN');
+      const symbol = await instance.methods.symbol().call();
+      assert.equal(symbol, 'PROPS');
     });
 
     it('Decimals is correct', async () => {
-      const decimals = await instance.decimals();
+      const decimals = await instance.methods.decimals().call();
       assert.equal(decimals, 18);
     });
 
     it('Total Supply is correct', async () => {
-      const totalSupply = new BigNumber(await instance.totalSupply());
+      const totalSupply = new BigNumber(await instance.methods.totalSupply().call());
       const expectedTotalSupply = new BigNumber(0.6 * (10 ** 9) * (1 * 10 ** 18));
       // console.log(`totalSupply=${totalSupply.toString()} expectedTotalSupply=${expectedTotalSupply.toString()}`);
       const isEqual = totalSupply.isEqualTo(expectedTotalSupply);
@@ -47,20 +47,20 @@ contract('main', (_accounts) => {
     });
 
     it('Total Supply owned by tokenHolder', async () => {
-      const totalSupply = new BigNumber(await instance.totalSupply());
-      const tokenHolderBalance = await instance.balanceOf(web3.eth.accounts[3]);
+      const totalSupply = new BigNumber(await instance.methods.totalSupply().call());
+      const tokenHolderBalance = await instance.methods.balanceOf(web3.eth.accounts[3]).call();
       const isEqual = totalSupply.isEqualTo(tokenHolderBalance);
       assert.equal(isEqual, true);
     });
 
     it('Transfer start time is correct', async () => {
-      const transferStartTime = await instance.transfersStartTime();
+      const transferStartTime = await instance.methods.transfersStartTime().call();
       assert.equal(transferStartTime, global.timestamp);
     });
 
     it('Transfer start time exception address is correct', async () => {
-      const canTransferExceptionAddress = await instance.canTransferBeforeStartTime();
-      assert.equal(canTransferExceptionAddress, web3.eth.accounts[3]);
+      const canTransferExceptionAddress = await instance.methods.canTransferBeforeStartTime().call();
+      assert.equal(String(canTransferExceptionAddress).toLowerCase(), String(web3.eth.accounts[3]).toLowerCase());
     });
   });
 
@@ -68,21 +68,21 @@ contract('main', (_accounts) => {
     const amount = 100000;
     let newTransferrerBalance;
     let newReceiverBalance;
-    it('Transfer works', async () => {
-      const transferrerBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
-      const receiverBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
-      const result = await instance.transfer(web3.eth.accounts[4], web3.toWei(amount), { from: web3.eth.accounts[3] });
-      newTransferrerBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
-      newReceiverBalance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
-      assert.equal(newTransferrerBalance, transferrerBalance - amount);
-      assert.equal(newReceiverBalance, receiverBalance + amount);
+    let transferResult;
+    it('Transfer works and event is emitted', async () => {
+      const transferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+      const receiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+      transferResult = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });      
+      newTransferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+      newReceiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+      assert.equal(Number(newTransferrerBalance), Number(transferrerBalance) - Number(amount));
+      assert.equal(Number(newReceiverBalance), Number(receiverBalance) + Number(amount));
     });
 
     it('Transfer Event Emitted', async () => {
-      const transferLogs = await utils.getEventData(instance, 'Transfer');
-      assert.equal(transferLogs[0].args.from, web3.eth.accounts[3]);
-      assert.equal(transferLogs[0].args.to, web3.eth.accounts[4]);
-      assert.equal(transferLogs[0].args.value, (new BigNumber(web3.toWei(amount)).toString()));
+      assert.equal(String(transferResult.events['Transfer'].returnValues['1']).toLowerCase(),String(web3.eth.accounts[4]).toLowerCase());
+      assert.equal(String(transferResult.events['Transfer'].returnValues['0']).toLowerCase(),String(web3.eth.accounts[3]).toLowerCase());
+      assert.equal(Number(web3.fromWei(transferResult.events['Transfer'].returnValues['2'])), amount);      
     });
   });
 
@@ -92,7 +92,7 @@ contract('main', (_accounts) => {
     it('transfer fails if non holder account before transfer start time', async () => {
       const amount = 10;
       try {
-        expect(await instance.transfer(web3.eth.accounts[3], web3.toWei(amount), { from: web3.eth.accounts[4] })).to.be.rejectedWith(Error);
+        expect(await instance.methods.transfer(web3.eth.accounts[3], web3.toWei(amount)).send({ from: web3.eth.accounts[4] })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }
@@ -100,13 +100,13 @@ contract('main', (_accounts) => {
 
     it('transfer succeeds with holder account before transfer start time', async () => {
       const amount = 10;
-      const account3Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
-      const account4Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
-      const result = await instance.transfer(web3.eth.accounts[4], web3.toWei(amount), { from: web3.eth.accounts[3] });
-      newAccount3Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
-      newAccount4Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
-      assert.equal(newAccount3Balance, account3Balance - amount);
-      assert.equal(newAccount4Balance, account4Balance + amount);
+      const account3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+      const account4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+      const result = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });
+      newAccount3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+      newAccount4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+      assert.equal(Number(newAccount3Balance), Number(account3Balance) - Number(amount));
+      assert.equal(Number(newAccount4Balance), Number(account4Balance) + Number(amount));
     });
 
     it('transfer succeeds with non holder accoutn after after tranfer start time', async () => {
@@ -120,13 +120,13 @@ contract('main', (_accounts) => {
 
         // Here are the operations to be done after predicate
         const amount = 10;
-        const account3Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
-        const account4Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
-        const res = await instance.transfer(web3.eth.accounts[3], web3.toWei(amount), { from: web3.eth.accounts[4] });
-        newAccount3Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[3])).toNumber();
-        newAccount4Balance = web3.fromWei(await instance.balanceOf(web3.eth.accounts[4])).toNumber();
-        assert.equal(newAccount3Balance, account3Balance + amount);
-        assert.equal(newAccount4Balance, account4Balance - amount);
+        const account3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+        const account4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+        const res = await instance.methods.transfer(web3.eth.accounts[3], web3.toWei(amount)).send({ from: web3.eth.accounts[4] });
+        newAccount3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+        newAccount4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+        assert.equal(Number(newAccount3Balance), Number(account3Balance) + Number(amount));
+        assert.equal(Number(newAccount4Balance), Number(account4Balance) - Number(amount));
       } catch (error) {
       // Here are the operations to be done if predicate didn't succeed in the timeout
         console.log('Async operation failed: ', error);
@@ -149,13 +149,15 @@ contract('main', (_accounts) => {
   describe('ERC865 compatible logic', async () => {
     it('Charlie transfers 100 tokens from Alice to Bob (fee=10)', async () => {
       // give alice some props
-      await instance.transfer(alice.address, propsInWallet, { from: web3.eth.accounts[3] });
+      
+      await instance.methods.transfer(alice.address, propsInWallet).send( { from: web3.eth.accounts[3] });
+      
       // nonce = await web3.eth.getTransactionCount(alice.address);
       nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
 
       components = [
         Buffer.from('0d98dcb1', 'hex'),
-        formattedAddress(instance.address),
+        formattedAddress(instance._address),
         formattedAddress(to),
         formattedInt(amount),
         formattedInt(fee),
@@ -163,43 +165,35 @@ contract('main', (_accounts) => {
       ];
 
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
-      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
-      // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
-      await instance.transferPreSigned(
-        sig,
-        to,
-        amount,
-        fee,
-        nonce,
-        { from: charlie.address },
-      );
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);      
+      await instance.methods.transferPreSigned(sig,to,amount,fee,nonce).send({ from: charlie.address, gas:1000000});
 
-      aliceBalance = await instance.balanceOf(alice.address);
-      bobBalance = await instance.balanceOf(bob.address);
-      charlieBalance = await instance.balanceOf(charlie.address);
-      // console.log(`Balances: aliceBalance=${aliceBalance.toNumber()},bobBalance=${bobBalance.toNumber()},charlieBalance=${charlieBalance.toNumber()}`);
-      assert.equal(aliceBalance.toNumber(), propsInWallet - (amount + fee));
-      assert.equal(bobBalance.toNumber(), amount);
-      assert.equal(charlieBalance.toNumber(), fee);
+      aliceBalance = await instance.methods.balanceOf(alice.address).call();
+      bobBalance = await instance.methods.balanceOf(bob.address).call();
+      charlieBalance = await instance.methods.balanceOf(charlie.address).call();
+      
+      assert.equal(Number(aliceBalance), propsInWallet - (amount + fee));
+      assert.equal(Number(bobBalance), amount);
+      assert.equal(Number(charlieBalance), fee);
     });
 
     it('Damien tries to replay transfer and fails', async () => {
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
       const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       try {
-        const tx = await instance.transferPreSigned(
+        const tx = await instance.methods.transferPreSigned(
           sig,
           to,
           amount,
           fee,
-          nonce,
-          { from: charlie.address },
+          nonce).send(
+          { from: charlie.address, gas:1000000 }
         );
         assert.equal(tx.receipt.status, '0x00');
       } catch (error) {
         // console.log(`error:${error}`);
       }
-    });
+    });    
 
     it('Charlie approves Damien to spend 100 tokens on behalf of Alice to Bob (fee=10)', async () => {
       // give alice some props
@@ -221,30 +215,30 @@ contract('main', (_accounts) => {
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
       const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
-      await instance.approvePreSigned(
+      await instance.methods.approvePreSigned(
         sig,
         damien.address,
         amount,
         fee,
-        nonce,
-        { from: charlie.address },
+        nonce).send(
+        { from: charlie.address , gas:1000000}
       );
 
-      aliceBalance = await instance.balanceOf(alice.address);
-      charlieBalance = await instance.balanceOf(charlie.address);
+      aliceBalance = await instance.methods.balanceOf(alice.address).call();
+      charlieBalance = await instance.methods.balanceOf(charlie.address).call();
       // console.log(`Balances: aliceBalance=${aliceBalance.toNumber()},bobBalance=${bobBalance.toNumber()},charlieBalance=${charlieBalance.toNumber()}`);
-      assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - fee);
-      assert.equal(charlieBalance.toNumber(), oldCharlieBalance.toNumber() + fee);
+      assert.equal(Number(aliceBalance), Number(oldAliceBalance) - fee);
+      assert.equal(Number(charlieBalance), Number(oldCharlieBalance) + fee);
     });
 
     it('Damien transfers half of approved tokens from Alice to Bob', async () => {
       const oldAliceBalance = aliceBalance;
       const oldBobBalance = bobBalance;
-      await instance.transferFrom(alice.address, bob.address, amount / 2, { from: damien.address });
-      aliceBalance = await instance.balanceOf(alice.address);
-      bobBalance = await instance.balanceOf(bob.address);
-      assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - (amount / 2));
-      assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));
+      await instance.methods.transferFrom(alice.address, bob.address, amount / 2).send({ from: damien.address });
+      aliceBalance = await instance.methods.balanceOf(alice.address).call();
+      bobBalance = await instance.methods.balanceOf(bob.address).call();
+      assert.equal(Number(aliceBalance), Number(oldAliceBalance) - (amount / 2));
+      assert.equal(Number(bobBalance), Number(oldBobBalance) + (amount / 2));
     });
 
     it('Charlie performs transferFrom of 50 tokens on behalf of damien from Alice to Bob (fee=10)', async () => {
@@ -252,7 +246,7 @@ contract('main', (_accounts) => {
       const oldAliceBalance = aliceBalance;
       const oldBobBalance = bobBalance;
       const oldCharlieBalance = charlieBalance;
-      const oldDamienBalance = await instance.balanceOf(damien.address);
+      const oldDamienBalance = await instance.methods.balanceOf(damien.address).call();
       nonce = await web3.eth.getTransactionCount(web3.eth.accounts[7]);
       components = [
         Buffer.from('a70c41b4', 'hex'),
@@ -266,24 +260,24 @@ contract('main', (_accounts) => {
       // console.log(`components instance.address=${instance.address}, alice.address=${alice.address}, `)
       const vrs = ethUtil.ecsign(hashedTightPacked(components), Buffer.from(damien.pk, 'hex'));
       const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
-      await instance.transferFromPreSigned(
+      await instance.methods.transferFromPreSigned(
         sig,
         alice.address,
         bob.address,
         amount / 2,
         fee,
-        nonce,
-        { from: charlie.address },
+        nonce).send(
+        { from: charlie.address, gas:1000000 }
       );
 
-      aliceBalance = await instance.balanceOf(alice.address);
-      bobBalance = await instance.balanceOf(bob.address);
-      charlieBalance = await instance.balanceOf(charlie.address);
-      damienBalance = await instance.balanceOf(damien.address);
+      aliceBalance = await instance.methods.balanceOf(alice.address).call();
+      bobBalance = await instance.methods.balanceOf(bob.address).call();
+      charlieBalance = await instance.methods.balanceOf(charlie.address).call();
+      damienBalance = await instance.methods.balanceOf(damien.address).call();
 
-      assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - ((amount / 2) + fee));
-      assert.equal(bobBalance.toNumber(), oldBobBalance.toNumber() + (amount / 2));
-      assert.equal(charlieBalance.toNumber(), oldCharlieBalance.toNumber() + fee);
+      assert.equal(Number(aliceBalance), Number(oldAliceBalance) - ((amount / 2) + fee));
+      assert.equal(Number(bobBalance), Number(oldBobBalance) + (amount / 2));
+      assert.equal(Number(charlieBalance), Number(oldCharlieBalance) + fee);
     });
 
     it('Charlie increase allowance of Damien to spend 100 tokens on behalf of Alice to Bob (fee=10)', async () => {
@@ -306,22 +300,22 @@ contract('main', (_accounts) => {
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
       const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
-      await instance.increaseAllowancePreSigned(
+      await instance.methods.increaseAllowancePreSigned(
         sig,
         damien.address,
         amount,
         fee,
-        nonce,
-        { from: charlie.address },
+        nonce).send(
+        { from: charlie.address, gas:1000000 }
       );
 
-      aliceBalance = await instance.balanceOf(alice.address);
-      charlieBalance = await instance.balanceOf(charlie.address);
+      aliceBalance = await instance.methods.balanceOf(alice.address).call();
+      charlieBalance = await instance.methods.balanceOf(charlie.address).call();
       // console.log(`Balances: aliceBalance=${aliceBalance.toNumber()},bobBalance=${bobBalance.toNumber()},charlieBalance=${charlieBalance.toNumber()}`);
-      assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - fee);
-      assert.equal(charlieBalance.toNumber(), oldCharlieBalance.toNumber() + fee);
-      const allowance = await instance.allowance(alice.address, damien.address);
-      assert.equal(allowance.toNumber(), amount);
+      assert.equal(Number(aliceBalance), Number(oldAliceBalance) - fee);
+      assert.equal(Number(charlieBalance), Number(oldCharlieBalance) + fee);
+      const allowance = await instance.methods.allowance(alice.address, damien.address).call();
+      assert.equal(Number(allowance), amount);
     });
 
     it('Charlie decreases allowance of Damien to spend 50 tokens on behalf of Alice to Bob (fee=10)', async () => {
@@ -344,22 +338,22 @@ contract('main', (_accounts) => {
       const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
       const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
-      await instance.decreaseAllowancePreSigned(
+      await instance.methods.decreaseAllowancePreSigned(
         sig,
         damien.address,
         amount / 2,
         fee,
-        nonce,
-        { from: charlie.address },
+        nonce).send(
+        { from: charlie.address, gas:1000000 }
       );
 
-      aliceBalance = await instance.balanceOf(alice.address);
-      charlieBalance = await instance.balanceOf(charlie.address);
+      aliceBalance = await instance.methods.balanceOf(alice.address).call();
+      charlieBalance = await instance.methods.balanceOf(charlie.address).call();
       // console.log(`Balances: aliceBalance=${aliceBalance.toNumber()},bobBalance=${bobBalance.toNumber()},charlieBalance=${charlieBalance.toNumber()}`);
-      assert.equal(aliceBalance.toNumber(), oldAliceBalance.toNumber() - fee);
-      assert.equal(charlieBalance.toNumber(), oldCharlieBalance.toNumber() + fee);
-      const allowance = await instance.allowance(alice.address, damien.address);
-      assert.equal(allowance.toNumber(), amount / 2);
+      assert.equal(Number(aliceBalance), Number(oldAliceBalance) - fee);
+      assert.equal(Number(charlieBalance), Number(oldCharlieBalance) + fee);
+      const allowance = await instance.methods.allowance(alice.address, damien.address).call();
+      assert.equal(Number(allowance), amount / 2);
     });
 
     it('Charlie decreases allowance of Damien by 100 when only 50 are allowed is rejected', async () => {
@@ -383,16 +377,87 @@ contract('main', (_accounts) => {
       const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);
       // console.log(`${instance.address},${to},${amount},${fee},${nonce},${sig}`);
       try {
-        expect(await instance.decreaseAllowancePreSigned(
+        expect(await instance.methods.decreaseAllowancePreSigned(
           sig,
           damien.address,
           amount,
           fee,
-          nonce,
-          { from: charlie.address },
+          nonce).send(
+          { from: charlie.address, gas:1000000 }
         )).to.be.rejectedWith(Error);
       } catch (error) {
         //
+      }
+    });
+    it('Charlie tries to transfer more tokens than alice has to Bob (fee=10)', async () => {
+      
+      // nonce = await web3.eth.getTransactionCount(alice.address);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
+
+      components = [
+        Buffer.from('0d98dcb1', 'hex'),
+        formattedAddress(instance._address),
+        formattedAddress(to),
+        formattedInt(amount*1000000),
+        formattedInt(fee),
+        formattedInt(nonce),
+      ];
+
+      const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);      
+      try {
+        const tx = await instance.methods.transferPreSigned(sig,to,amount,fee,nonce).send({ from: charlie.address, gas:1000000});
+        assert.equal(tx.receipt.status, '0x00');
+      } catch (error) {
+        // console.log(`error:${error}`);
+      }
+    });
+
+    it('Charlie tries to transfer tokens from alice has to no-one', async () => {
+      
+      // nonce = await web3.eth.getTransactionCount(alice.address);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
+
+      components = [
+        Buffer.from('0d98dcb1', 'hex'),
+        formattedAddress(instance._address),
+        formattedAddress('0x0'),
+        formattedInt(amount),
+        formattedInt(fee),
+        formattedInt(nonce),
+      ];
+
+      const vrs = ethUtil.ecsign(hashedTightPacked(components), alicePrivateKey);
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);      
+      try {
+        const tx = await instance.methods.transferPreSigned(sig,to,amount,fee,nonce).send({ from: charlie.address, gas:1000000});
+        assert.equal(tx.receipt.status, '0x00');
+      } catch (error) {
+        // console.log(`error:${error}`);
+      }
+    });
+
+    it('Charlie tries to transfer tokens with bad signature from alice to bob', async () => {
+      
+      // nonce = await web3.eth.getTransactionCount(alice.address);
+      nonce = await web3.eth.getTransactionCount(web3.eth.accounts[9]);
+
+      components = [
+        Buffer.from('0d98dcb1', 'hex'),
+        formattedAddress(instance._address),
+        formattedAddress(to),
+        formattedInt(amount),
+        formattedInt(fee),
+        formattedInt(nonce),
+      ];
+
+      const vrs = ethUtil.ecsign(hashedTightPacked(components), Buffer.from(alice.pk, 'hex'));
+      const sig = ethUtil.toRpcSig(vrs.v, vrs.r, vrs.s);      
+      try {
+        const tx = await instance.methods.transferPreSigned(sig,to,amount,fee,nonce).send({ from: charlie.address, gas:1000000});
+        assert.equal(tx.receipt.status, '0x00');
+      } catch (error) {
+        // console.log(`error:${error}`);
       }
     });
   });

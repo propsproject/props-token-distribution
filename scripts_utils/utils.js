@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const Promise = require('bluebird');
 
-const gasPrice = () => 9 * (10 ** 9);
+const gasPrice = () => 8 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
     case 'attribute': // assign attribute to specific address
@@ -21,7 +21,7 @@ const gasLimit = (type) => {
     case 'validateAddress': // allow validator to assign attribute
       return 60000;
     case 'vestingContract': // token vestion proxy (864753)
-      return 900000;
+      return 1000000;
     default:
       return 100000;
   }
@@ -71,6 +71,7 @@ const timeStamp = () => {
 const hasTPLContract = () => false;
 
 const getEventData = (contract, eventName) => new Promise((resolve, reject) => {
+  console.log(eventName + ':::::'+JSON.stringify(contract));
   const event = contract[eventName]();
   event.watch();
   event.get((error, logs) => {
