@@ -76,7 +76,8 @@ $ node scripts/distribution/0_deploy_token.js {test/rinkeby/mainnet} {timestamp-
 # CSV file should be built as: 
 # Address,Tokens,Vesting Duration,Vesting Cliff,Percentage Vested
 # Step should be repeated for every group (csv file)
-$ node scripts/distribution/1_allocate_to_{group}.js {test/rinkeby/mainnet} {path-to-csv-file}
+# CSV File format (// wallet address,tokens,vesting duration,vesting cliff,vesting percentage,type,name,email address,first name,invested amount,invested discount)
+$ node scripts/distribution/1_allocate.js {test/rinkeby/mainnet} {path-to-csv-file}
 
 # Validate distribution
 $ node scripts/distribution/5_validate_distribution.js {test/rinkeby/mainnet} group1,group2,...,groupN

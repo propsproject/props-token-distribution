@@ -3,8 +3,8 @@
 // Required by zos-lib when running from truffle
 global.artifacts = artifacts;
 global.web3 = web3;
-const { Contracts, SimpleProject } = require('zos-lib');
-
+const { Contracts, SimpleProject, ZWeb3 } = require('zos-lib');
+ZWeb3.initialize(web3.currentProvider)
 const PropsToken = Contracts.getFromLocal('PropsToken');
 
 async function main() {
@@ -16,13 +16,13 @@ async function main() {
   console.log('Creating an upgradeable instance of PropsToken...');
   try {
     const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp] });
+    const name = await instance.methods.name().call();
+    
     // for (a in instance) {
-    //   console.log(`${a}=>${typeof(instance[a])}`);
+    //    console.log(`${a}=>${typeof(instance[a])}`);
     // }
-    // console.log('-------');
-    // for (a in instance.contract) {
-    //   console.log(`${a}=>${typeof(instance.contract[a])}`);
-    // }
+    // console.log('------- '+instance._address);
+    
     // process.exit(1);
     // console.log(`instance.address=${instance.address}`);
     // process.exit(1);
