@@ -72,7 +72,7 @@ module.exports = {
       },
       network_id: '1',
       wallet_address: process.env.DEVOPS_WALLET0,
-      gas: utils.gasLimit('vestingContract'),
+      gas: utils.gasLimit('deployJurisdiction'),
       gasPrice: utils.gasPrice(),      
     },
     mainnet1: {

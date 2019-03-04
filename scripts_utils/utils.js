@@ -11,7 +11,7 @@ const gasLimit = (type) => {
     case 'multisig':
       return 250000;
     case 'deployJurisdiction':
-      return 3000000;
+      return 5000000;
     case 'addAttribute': // add attribute to jurisdiction contract
       return 150000;
     case 'addValidator': // add attribute to jurisdiction contract
@@ -21,7 +21,7 @@ const gasLimit = (type) => {
     case 'validateAddress': // allow validator to assign attribute
       return 60000;
     case 'vestingContract': // token vestion proxy (864753)
-      return 1000000;
+      return 2000000;
     default:
       return 100000;
   }
