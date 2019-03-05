@@ -23,13 +23,14 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
   //if (parseInt(recipient.cliffDuration) === 0) continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
-  sendEmail(params);
-  console.log(recipient.name);
-  // console.log(params.Message.Body.Text.Data);
+  //sendEmail(params);
+  //console.log(recipient.name);
+  console.log(params.Message.Body.Text.Data);
   // console.log(params);
 }
 
 function prepareBody(recipient) {
+  recipient.vestingPercentage = (parseFloat(recipient.tokensToVest) / parseFloat(recipient.totalTokens)) * 100;
   let body = '';
   if (network !== 'mainnet') {
     body += 'NOTE: This is a test email, for a test token.<br>-------<br><br>';
@@ -83,7 +84,8 @@ function prepareBody(recipient) {
     body += '</ul>';
     body += `Moving forward, visit the Props ${vestingUrl(recipient, 'Vesting Dashboard')} to see details `;
     body += 'on your vesting schedule, and confirm how many of your tokens have vested. You may transfer ';
-    body += 'vested tokens to your address at any time. ';
+    body += 'vested tokens to your address at any time. Note that these tokens can <u>only be moved to the wallet address you provided</u> ';
+    body += '(copied above), so be sure to protect your keys to that wallet for the entire duration of the vesting contract.';
     body += '<br><br>';
   }
   body += '<b>Viewing your Token Balance</b>';
