@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const Promise = require('bluebird');
 
-const gasPrice = () => 8 * (10 ** 9);
+const gasPrice = () => 10 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
     case 'attribute': // assign attribute to specific address

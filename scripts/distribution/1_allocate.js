@@ -17,6 +17,7 @@ let web3;
 let countWallets = 0;
 let totalTransferred = new BigNumber(0);
 let totalTransferredToVestingContracts = new BigNumber(0);
+const startTime = Math.floor(Date.now()/1000);
 const nonces = {};
 
 
@@ -125,7 +126,8 @@ async function main() {
   }
 
   for (let i = 1; i < allocationArray.length; i += 1) {
-    console.log(`Working on row:${allocationArray[i]}`);
+    console.log(`Working on row - ${i} (timepassed=${(Math.floor(Date.now()/1000) - timestamp)}):${allocationArray[i]}`);
+    console.log(`--------------------------------------------`);
     const allocationData = allocationArray[i].split(',');
     // wallet address,tokens,vesting duration,vesting cliff,vesting percentage,type,name,email address,first name,invested amount,invested discount
     const address = allocationData[0];
