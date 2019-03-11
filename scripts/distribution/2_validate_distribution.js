@@ -60,6 +60,7 @@ async function main() {
   let remainingProps;
   let totalSupply;
   let totalTransferred = 0;
+  let usedWallets = {}
   // eslint-disable-next-line no-await-in-loop
   await propsContractInstance.methods.balanceOf(tokenHolderAddress)
     .call()
@@ -91,11 +92,12 @@ async function main() {
             totalTransferred += Number(web3.utils.fromWei(val));
           });
       }
-      if (typeof (allocationData.allocations[j].beneficiary) !== 'undefined') {
+      if (typeof (allocationData.allocations[j].beneficiary) !== 'undefined' && !(beneficiary in usedWallets)) {
         await propsContractInstance.methods.balanceOf(allocationData.allocations[j].beneficiary)
           .call()
           .then((val) => {
             totalTransferred += Number(web3.utils.fromWei(val));
+            usedWallets[beneficiary] = true;
           });
       }
     }

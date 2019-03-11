@@ -109,8 +109,7 @@ async function main() {
     }
   });
 
-  const addressesContents = fs.readFileSync(addressesCSVPath, 'utf8');
-  const addressesArray = addressesContents.split(/\r?\n/);
+  const addressesArray = await utils.getCSVData(addressesCSV);  
   console.log(JSON.stringify(addressesArray));
   for (let i = 0; i < addressesArray.length; i += 1) {
     if (i > 0) {

@@ -17,6 +17,7 @@ let web3;
 let countWallets = 0;
 let totalTransferred = new BigNumber(0);
 let totalTransferredToVestingContracts = new BigNumber(0);
+const startTime = Math.floor(Date.now()/1000);
 const nonces = {};
 
 
@@ -61,7 +62,7 @@ if (typeof (allocationsData.allocations) === 'undefined') {
   allocationsData.allocations = [];
 }
 
-const fileNetworkName = networkProvider === 'test' ? 'dev-1551288652415' : networkProvider;
+const fileNetworkName = networkProvider === 'test' ? 'dev-1551650219173' : networkProvider;
 const zosData = JSON.parse(fs.readFileSync(`zos.${fileNetworkName}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const propsContractABI = require('../../build/contracts/PropsToken.json');
@@ -76,34 +77,40 @@ async function main() {
     providerOwner = connectionConfig.networks[networkInUse].provider();
     web3 = new Web3(providerOwner);
   }
+  let proxyDeployerAddress;
   if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
     web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
     accounts = await web3.eth.getAccounts();
     addressInUse = accounts[2];
+    proxyDeployerAddress = accounts[1];
   } else {
     addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+    proxyDeployerAddress = connectionConfig.networks[`${networkProvider}1`].wallet_address;
   }
 
   BigNumber.config({ EXPONENTIAL_AT: 1e+9 });
   const tokenHolderAddress = addressInUse;
   const propsContractInstance = new web3.eth.Contract(propsContractABI.abi, PropsTokenContractAddress);
-  nonces[tokenHolderAddress] = await web3.eth.getTransactionCount(tokenHolderAddress);
+  nonces[tokenHolderAddress] = await web3.eth.getTransactionCount(tokenHolderAddress);  
   const tokenHolderEthBalance = new BigNumber(await web3.eth.getBalance(tokenHolderAddress));
+  const proxyDeployerEthBalance = new BigNumber(await web3.eth.getBalance(proxyDeployerAddress));
 
   // read csv
-  const allocationContents = fs.readFileSync(addressesCSV, 'utf8');
-  const allocationArray = allocationContents.split(/\r?\n/);
-
+  
+  const allocationArray = await utils.getCSVData(addressesCSV);
+  
   // do quick sum of all tokens and eth needed to succeed
   let tokensNeeded = new BigNumber(0);
   let gasNeeded = new BigNumber(0);
+  let gasNeededProxy = new BigNumber(0);
   for (let i = 1; i < allocationArray.length; i += 1) {
-    const allocationData = allocationArray[i].split(',');
+    const allocationData = allocationArray[i];
     const tokensRead = new BigNumber(allocationData[1]);
     tokensNeeded = tokensNeeded.plus(tokensRead);
     gasNeeded = gasNeeded.plus(new BigNumber(utils.gasLimit('transfer')));
     if (parseInt(allocationData[4], 10) > 0) { // also has a vesting contract
-      gasNeeded = gasNeeded.plus(new BigNumber(utils.gasLimit('vestingContract')));
+      gasNeeded = gasNeeded.plus(new BigNumber(utils.gasLimit('transfer')));
+      gasNeededProxy = gasNeededProxy.plus(new BigNumber(utils.gasLimit('vestingContract')));
     }
   }
   let tokenHolderBalance;
@@ -119,14 +126,22 @@ async function main() {
   }
 
   const ethNeeded = gasNeeded.multipliedBy(new BigNumber(utils.gasPrice()));
+  const ethNeededProxy = gasNeededProxy.multipliedBy(new BigNumber(utils.gasPrice()));
   if (tokenHolderEthBalance.isLessThan(ethNeeded)) {
-    console.warn(`Not enough eth to make this distribtion balance=${tokenHolderEthBalance} needed=${ethNeeded}`);
+    console.warn(`(Transferrer=${tokenHolderAddress}) Not enough eth to make this distribtion balance=${tokenHolderEthBalance} needed=${ethNeeded}`);
+    process.exit(0);
+  }
+
+  if (proxyDeployerEthBalance.isLessThan(ethNeededProxy)) {
+    console.warn(`(ProxyDeployer=${proxyDeployerAddress}) Not enough eth to make this distribtion balance=${proxyDeployerEthBalance} needed=${ethNeededProxy}`);
     process.exit(0);
   }
 
   for (let i = 1; i < allocationArray.length; i += 1) {
-    console.log(`Working on row:${allocationArray[i]}`);
-    const allocationData = allocationArray[i].split(',');
+    let vestingContractFailed = false;
+    console.log(`Working on row - ${i} (timepassed=${(Math.floor(Date.now()/1000) - timestamp)}):${allocationArray[i]}`);
+    console.log(`--------------------------------------------`);
+    const allocationData = allocationArray[i];
     // wallet address,tokens,vesting duration,vesting cliff,vesting percentage,type,name,email address,first name,invested amount,invested discount
     const address = allocationData[0];
     if (address.length > 0) {
@@ -177,38 +192,63 @@ async function main() {
 
 
       if (tokensToVest > 0) {
-        cmd = `zos create openzeppelin-eth/TokenVesting -v --init initialize \
-        --args ${beneficiary},${start},${cliffDuration},${vestingDuration},${recovable},${addressInUse} \
-        --network ${networkInUse} --from ${addressInUse}`;
-        try {
-          // create token vesting contract
-          console.log(`Executing ${cmd}`);
-          const tokenVestingProxyContractAddress = execSync(cmd).toString().replace(/\n$/, '');
-          allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;
-
-          // transfer to vesting contract
-          console.log(`Transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}`);
-          // eslint-disable-next-line no-await-in-loop
-          await propsContractInstance.methods.transfer(
-            tokenVestingProxyContractAddress,
-            web3.utils.toWei(tokensToVest.toString()),
-          ).send({
-            from: tokenHolderAddress,
-            gas: utils.gasLimit('transfer'),
-            gasPrice: utils.gasPrice(),
-            nonce: utils.getAndIncrementNonce(nonces, tokenHolderAddress),
-          // eslint-disable-next-line no-loop-func
-          }).then((receipt) => {
-            allocationOutput.vestingTransferTx = receipt.transactionHash;
-            totalTransferredToVestingContracts = totalTransferredToVestingContracts.plus(tokensToVest);
-            totalTransferred = totalTransferred.plus(tokensToVest);
-            console.log(`Transferred ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress} (tx=${receipt.transactionHash})`);
-          }).catch((error) => {
-            console.warn(`Error transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}:${error}`);
-          });
-        } catch (err) {
-          console.warn(err);
+        let retries = 0;
+        let success = false;
+        let throwErrorBeforeCreation = false;
+        let throwErrorAfterCreation = false;        
+        while (!success)
+        {
+          // const blockNumberBeforeCreate = await web3.eth.getBlockNumber();
+          // const nonceAtContractCreation = utils.getNonce(nonces, addressInUse);
+          cmd = `zos create openzeppelin-eth/TokenVesting -v --init initialize \
+          --args ${beneficiary},${start},${cliffDuration},${vestingDuration},${recovable},${addressInUse} \
+          --network ${networkInUse} --from ${addressInUse}`;
+          try {
+            // create token vesting contract
+            console.log(`Executing ${cmd}`);            
+            if (throwErrorBeforeCreation) {
+              throw new Error('Testing a throw error before vesting contract creation');
+            }
+            const tokenVestingProxyContractAddress = await execSync(cmd).toString().replace(/\n$/, '');
+            if (throwErrorAfterCreation) {
+              throw new Error('Testing a throw error after vesting contract creation');              
+            }            
+            allocationOutput.vestingContractAddress = tokenVestingProxyContractAddress;
+            success = true;
+            // transfer to vesting contract
+            console.log(`Transferring ${tokensToVest.toString()} to vesting contract ${tokenVestingProxyContractAddress} from ${tokenHolderAddress}`);
+            // eslint-disable-next-line no-await-in-loop
+            await propsContractInstance.methods.transfer(
+              tokenVestingProxyContractAddress,
+              web3.utils.toWei(tokensToVest.toString()),
+            ).send({
+              from: tokenHolderAddress,
+              gas: utils.gasLimit('transfer'),
+              gasPrice: utils.gasPrice(),
+              nonce: utils.getAndIncrementNonce(nonces, tokenHolderAddress),
+            // eslint-disable-next-line no-loop-func
+            }).then((receipt) => {
+              allocationOutput.vestingTransferTx = receipt.transactionHash;
+              totalTransferredToVestingContracts = totalTransferredToVestingContracts.plus(tokensToVest);
+              totalTransferred = totalTransferred.plus(tokensToVest);            
+              console.log(`Transferred ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress} (tx=${receipt.transactionHash})`);
+            }).catch((error) => {
+              console.warn(`Error transferring ${tokensToVest.toString()} to vesting contract from ${tokenHolderAddress}:${error}`);
+            });
+          } catch (err) {            
+            console.warn(err.message);
+            
+            retries +=1;   
+            if (retries >= utils.getMaxVestingContractCreationRetries()) {
+              console.log(`************ Failed to create contract max retries reached (retry=${retries} of ${utils.getMaxVestingContractCreationRetries()}) skipping allocation ${JSON.stringify(allocationData)} `);              
+              success = true;
+              vestingContractFailed = true;
+            } else {
+              console.log(`Failed to create contract will retry (retry=${retries} of ${utils.getMaxVestingContractCreationRetries()}) -> ${cmd} `);
+            }
+          }
         }
+        if (vestingContractFailed) continue;
       }
 
       if (tokensToGrant > 0) {
@@ -260,7 +300,7 @@ async function main() {
         process.exit(1);
       }
       console.log(`metadata written to ${distributionMetadataFilename}`);
-      console.log(JSON.stringify(distributionData, null, 2));
+      // console.log(JSON.stringify(distributionData, null, 2));
       fs.writeFile(
         allocationMetadataFilename,
         JSON.stringify(allocationsData),
@@ -271,7 +311,7 @@ async function main() {
             process.exit(1);
           }
           console.log(`metadata written to ${allocationMetadataFilename}`);
-          console.log(JSON.stringify(allocationsData, null, 2));
+          // console.log(JSON.stringify(allocationsData, null, 2));
           process.exit(0);
         },
       );

@@ -72,6 +72,22 @@ module.exports = {
       },
       network_id: '1',
       wallet_address: process.env.DEVOPS_WALLET0,
+      gas: utils.gasLimit('deployJurisdiction'),
+      gasPrice: utils.gasPrice(),      
+    },
+    mainnet: {
+      provider() {
+        if (!process.env.DEVOPS_PK1 || !process.env.DEVOPS_WALLET1) {
+          console.log('Must provide environment variable DEVOPS_PK1 and DEVOPS_WALLET1 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK1;
+          return new PrivateKeyProvider(pk, `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`);
+        }
+        return false;
+      },
+      network_id: '1',
+      wallet_address: process.env.DEVOPS_WALLET1,
       gas: utils.gasLimit('vestingContract'),
       gasPrice: utils.gasPrice(),      
     },
