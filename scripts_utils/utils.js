@@ -1,7 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const Promise = require('bluebird');
+const csv = require('fast-csv');
+const fs = require('fs');
 
-const gasPrice = () => 10 * (10 ** 9);
+const gasPrice = () => 4 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
     case 'attribute': // assign attribute to specific address
@@ -21,7 +23,7 @@ const gasLimit = (type) => {
     case 'validateAddress': // allow validator to assign attribute
       return 60000;
     case 'vestingContract': // token vestion proxy (864753)
-      return 2000000;
+      return 1100000;
     default:
       return 100000;
   }
@@ -42,6 +44,13 @@ const getAndIncrementNonce = (nonces, address) => {
   // eslint-disable-next-line no-param-reassign
   nonces[address] += 1;
   console.log(`Got nonce ${nonce} for ${address} and incremented to ${nonces[address]}`);
+  return nonce;
+};
+
+// nonces is the global variable that holds the current nonces per address
+const getNonce = (nonces, address) => {
+  const nonce = nonces[address];  
+  console.log(`Got nonce ${nonce} for ${address} ${nonces[address]}`);
   return nonce;
 };
 
@@ -69,6 +78,24 @@ const timeStamp = () => {
 };
 
 const hasTPLContract = () => false;
+const getMaxVestingContractCreationRetries = () => 3;
+
+const getCSVData = (filename) => new Promise((resolve, reject) => {
+  const rows = [];
+  const stream = fs.createReadStream(filename);
+ 
+  const csvStream = csv()
+      .on("data", function(data){
+          //  console.log(data);
+          rows.push(data);
+      })      
+      .on("end", function(){
+           resolve(rows);
+      });
+   
+  stream.pipe(csvStream);
+  
+});
 
 const getEventData = (contract, eventName) => new Promise((resolve, reject) => {
   console.log(eventName + ':::::'+JSON.stringify(contract));
@@ -88,6 +115,9 @@ exports.gasLimit = gasLimit;
 exports.gasPrice = gasPrice;
 exports.duration = duration;
 exports.getAndIncrementNonce = getAndIncrementNonce;
+exports.getNonce = getNonce;
 exports.timeStamp = timeStamp;
 exports.hasTPLContract = hasTPLContract;
 exports.getEventData = getEventData;
+exports.getMaxVestingContractCreationRetries = getMaxVestingContractCreationRetries;
+exports.getCSVData = getCSVData;

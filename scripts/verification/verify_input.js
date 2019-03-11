@@ -66,13 +66,11 @@ async function main() {
 
   BigNumber.config({ EXPONENTIAL_AT: 1e+9 });
   // read csv
-  const allocationContents = fs.readFileSync(addressesCSV, 'utf8');
-  const allocationArray = allocationContents.split(/\r?\n/);
-
+  const allocationArray = await utils.getCSVData(addressesCSV);
   
   for (let i = 1; i < allocationArray.length; i += 1) {
     console.log(`Working on row:${allocationArray[i]}`);
-    const allocationData = allocationArray[i].split(',');
+    const allocationData = allocationArray[i];
     // wallet address,tokens,vesting duration,vesting cliff,vesting percentage,type,name,email address,first name,invested amount,invested discount
     const address = allocationData[0];
     if (address.length > 0) {
