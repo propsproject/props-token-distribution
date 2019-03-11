@@ -23,10 +23,12 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
   //if (parseInt(recipient.cliffDuration) === 0) continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
-  //sendEmail(params);
-  //console.log(recipient.name);
-  console.log(params.Message.Body.Text.Data);
+  sendEmail(params);
+  console.log(i, recipient.name);
+  //console.log(params.Message.Body.Text.Data);
   // console.log(params);
+  //console.log(recipient.vestingPercentage);
+  //break;
 }
 
 function prepareBody(recipient) {
@@ -71,9 +73,9 @@ function prepareBody(recipient) {
     body += '<br><br>';
     body += 'Your Props are subject to a vesting schedule governed by a unique Smart Vesting Contract, which you own. ';
     if (parseInt(recipient.vestingPercentage) < 100) {
-      body += `You already have access to ${100 - recipient.vestingPercentage}% of your Props. `;
+      body += `You already have access to ${100 - recipient.vestingPercentage}% of your Props tokens. `;
     }
-    body += 'The Contract will unlock your remaining tokens on a linear schedule (ie. more tokens will vest on a daily basis).';
+    body += 'The Contract will unlock your remaining tokens on a linear schedule (i.e. more tokens will vest on a daily basis).';
     body += '<br>';
     body += '<ul>';
     body += `${'<li>' + 'Vesting contract address: '}${etherscan(recipient.vestingContractAddress)}</li>`;
@@ -91,7 +93,7 @@ function prepareBody(recipient) {
   body += '<b>Viewing your Token Balance</b>';
   body += '<br><br>';
   body += 'To view your token balance using <a href="https://metamask.io/">MetaMask</a> or ';
-  body += '<a href="https://www.myetherwallet.com/">MyEtherWallet</a>, tap “Add Token,” and use the following parameters:';
+  body += '<a href="https://www.myetherwallet.com/">MyEtherWallet</a>, tap “Add Custom Token,” and use the following parameters:';
   body += '<br>';
   body += '<ul>';
   body += `${'<li>' + 'Token contract address: '}${etherscan(outputData.tokenContractAddress)}</li>`;
@@ -107,7 +109,7 @@ function prepareBody(recipient) {
   body += ' YouNow account. Additional functionality will roll out in the months ahead, when we begin rewarding the ';
   body += 'platform\'s content creators and users with Props. Note that some transfers of tokens may be limited under state law.';
   body += '<br><br>';
-  body += 'Thank you for joining and contributing to the Props Project. We look forward to working closely with you, ';
+  body += 'Thank you for joining and contributing to the Props Project. We look forward to working with you, ';
   body += 'as we further build out the Props Network.';
   body += '<br><br>';
   body += 'If you have any questions, please write to team@propsproject.com, and we’ll get back to you as quickly as possible.';
