@@ -23,8 +23,8 @@ for (let i = 0; i < outputData.allocations.length; i += 1) {
   //if (parseInt(recipient.cliffDuration) === 0) continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
-  sendEmail(params);
-  console.log(i, recipient.name);
+  //sendEmail(params);
+  console.log(i, recipient.email);
   //console.log(params.Message.Body.Text.Data);
   // console.log(params);
   //console.log(recipient.vestingPercentage);
