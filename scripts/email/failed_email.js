@@ -15,13 +15,16 @@ var csvStream = csv()
     .on("end", function(){
         console.log("csv",csvData.length);
         let allocationData = require("../../output/allocation-final-Mar4-mainnet.json");
-        for (i in failed) {
-            item = allocationData.allocations[failed[i]];
-            item.name = csvData[failed[i]][6];
-            item.email = csvData[failed[i]][7];
-            item.firstName = csvData[failed[i]][8];
-            item.investedAmount = csvData[failed[i]][9];
-            item.investedDiscount = csvData[failed[i]][10];
+        // for (i in failed) {
+        //     let index = failed[i];
+        for (i in allocationData.allocations) {
+            let index = i;
+            item = allocationData.allocations[index];
+            item.name = csvData[index][6];
+            item.email = csvData[index][7];
+            item.firstName = csvData[index][8];
+            item.investedAmount = csvData[index][9];
+            item.investedDiscount = csvData[index][10];
             fixed.push(item);
             //console.log(csvData[failed[i]][7]);
         }
@@ -30,7 +33,7 @@ var csvStream = csv()
         // console.log("allocationData",allocationData.allocations.length);
         // console.log("failed",failed.length)
         fs.writeFile(
-            "output/allocation-reemail-Mar4-mainnet.json",
+            "output/allocation-rebuild-Mar4-mainnet.json",
             JSON.stringify(allocationData),
             { flag: 'w' },
             (err) => {
