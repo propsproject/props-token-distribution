@@ -1,11 +1,12 @@
 var fs = require('fs');
 const csv = require('fast-csv');
-let allocationData = require("../../output/allocation-1000am-Mar11-mainnet.json");
+let allocationData = require("../../output/allocation-round3-03262019-mainnet.json");
 for(i in allocationData.allocations) {
-    allocationData.allocations[i].distribution = "Mar11";
+    allocationData.allocations[i].distribution = "Mar26";
 }
+allocationData.allocations.unshift(allocationData.allocations.pop()); // hack to make first item have all columns
 console.log(allocationData.allocations[0]);
-let ws = fs.createWriteStream("output/allocation-1000am-Mar11-mainnet.csv");
+let ws = fs.createWriteStream("output/allocation-round3-03262019-mainnet.csv");
 csv
    .write(allocationData.allocations, {headers: true})
    .pipe(ws);
