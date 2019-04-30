@@ -4,6 +4,7 @@ import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol";
 import "./PropsTimeBasedTransfers.sol";
 import "./ERC865Token.sol";
+import "./PropsRewards.sol";
 
 /**
  * @title PROPSToken
@@ -24,7 +25,7 @@ import "./ERC865Token.sol";
  */
 
 
-contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBasedTransfers {
+contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBasedTransfers, PropsRewards {
 
   /**
    * @dev Initializer function. Called only once when a proxy for the contract is created.
@@ -43,7 +44,8 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     uint256 totalSupply = 0.6 * 1e9 * (10 ** uint256(decimals));
     
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
-    PropsTimeBasedTransfers.initialize(_transfersStartTime, _holder);    
+    PropsTimeBasedTransfers.initialize(_transfersStartTime, _holder); 
+    PropsRewards.initialize(decimals);   
     _mint(_holder, totalSupply);
   }
 
