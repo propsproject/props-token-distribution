@@ -1,14 +1,13 @@
 pragma solidity ^0.4.24;
 
 import "zos-lib/contracts/Initializable.sol";
-import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-eth/contracts/ownership/Ownable.sol";
 
 /**
  * @title Props Parameters
  * @dev Contract allows to set and get parameters related to rewards
  **/
-contract PropsParameters is Initializable, ERC20, Ownable {
+contract PropsParameters is Initializable, Ownable {
     /*
      *  Events
      */
