@@ -39,17 +39,6 @@ contract PropsParameters is Initializable, Ownable {
     uint256 lastValidatorRewardsPercentPphm;
     uint256 lastValidatorRewardsUpdateTimestamp;
 
-    /*
-     *  Modifiers
-     */
-     modifier onlyIfNoPendingUpdate(uint256 _lastUpdateTimestamp) {
-         require(
-             block.timestamp > _lastUpdateTimestamp,
-             "Cannot update value while a new value is pending"
-            );
-         _;
-     }
-
     /**
     * @dev The initializer function, percentage is specified in pphm (1/100,000,000) e.g. 50,000,000 => 50%
     * @param _maxTotalSupply uint256 max props that can be minted    
@@ -85,11 +74,12 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     ) 
         public
-        onlyOwner
-        onlyIfNoPendingUpdate(lastValidatorRewardsUpdateTimestamp)
+        onlyOwner        
         returns (bool)
     {
-        lastValidatorRewardsPercentPphm = validatorRewardsPercentPphm;
+        if (block.timestamp >= lastValidatorRewardsUpdateTimestamp) {
+            lastValidatorRewardsPercentPphm = validatorRewardsPercentPphm;                
+        }        
         validatorRewardsPercentPphm = _percentagePphm;
         lastValidatorRewardsUpdateTimestamp = _timestamp;
         emit ParameterUpdate("validatorRewardsPercentage", validatorRewardsPercentPphm, lastValidatorRewardsPercentPphm, lastValidatorRewardsUpdateTimestamp);
@@ -98,13 +88,14 @@ contract PropsParameters is Initializable, Ownable {
 
     /**
     * @dev Get the current value of validator rewards percentage in ppm
+    * @param _timestamp for which time should we get the value
     */
-    function getValidatorRewardsPercentage()
+    function getValidatorRewardsPercentage(uint256 _timestamp)
         public
         view
         returns (uint256 percentagePphm)
     {
-        if (block.timestamp > lastValidatorRewardsUpdateTimestamp) {
+        if (_timestamp >= lastValidatorRewardsUpdateTimestamp) {
             return validatorRewardsPercentPphm;
         } else {
             return lastValidatorRewardsPercentPphm;
@@ -121,11 +112,12 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     ) 
         public
-        onlyOwner
-        onlyIfNoPendingUpdate(lastValidatorRewardsUpdateTimestamp)
+        onlyOwner        
         returns (bool)
     {
-        lastAppRewardsMaxVariationPercentPphm = appRewardsMaxVariationPercentPphm;
+        if (block.timestamp >= lastAppRewardsMaxVariationUpdateTimestamp) {
+            lastAppRewardsMaxVariationPercentPphm = appRewardsMaxVariationPercentPphm;
+        }
         appRewardsMaxVariationPercentPphm = _percentagePphm;
         lastAppRewardsMaxVariationUpdateTimestamp = _timestamp;
         emit ParameterUpdate("appRewardsMaxVariationPercentage", appRewardsMaxVariationPercentPphm, lastAppRewardsMaxVariationPercentPphm, lastAppRewardsMaxVariationUpdateTimestamp);
@@ -134,13 +126,14 @@ contract PropsParameters is Initializable, Ownable {
 
     /**
     * @dev Get the current value of app rewards max variation percentage
+    * @param _timestamp for which time should we get the value
     */
-    function getAppRewardsMaxVariationPercentage()
+    function getAppRewardsMaxVariationPercentage(uint256 _timestamp)
         public
         view
         returns (uint256 percentagePphm)
     {
-        if (block.timestamp > lastAppRewardsMaxVariationUpdateTimestamp) {
+        if (_timestamp >= lastAppRewardsMaxVariationUpdateTimestamp) {
             return appRewardsMaxVariationPercentPphm;
         } else {
             return lastAppRewardsMaxVariationPercentPphm;
@@ -157,11 +150,12 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     ) 
         public
-        onlyOwner
-        onlyIfNoPendingUpdate(lastValidatorRewardsUpdateTimestamp)
+        onlyOwner        
         returns (bool)
     {
-        lastAppRewardsPercentPphm = appRewardsPercentPphm;
+        if (block.number >= lastAppRewardsUpdateTimestamp) {
+            lastAppRewardsPercentPphm = appRewardsPercentPphm;
+        }
         appRewardsPercentPphm = _percentagePphm;
         lastAppRewardsUpdateTimestamp = _timestamp;
         emit ParameterUpdate("appRewardsPercentage", appRewardsPercentPphm, lastAppRewardsPercentPphm, lastAppRewardsUpdateTimestamp);
@@ -170,13 +164,14 @@ contract PropsParameters is Initializable, Ownable {
 
     /**
     * @dev Get the current value of app rewards percentage
+    * @param _timestamp for which time should we get the value
     */
-    function getAppRewardsPercentage()
+    function getAppRewardsPercentage(uint256 _timestamp)
         public
         view
         returns (uint256 percentagePphm)
     {
-        if (block.timestamp > lastAppRewardsUpdateTimestamp) {
+        if (_timestamp >= lastAppRewardsUpdateTimestamp) {
             return appRewardsPercentPphm;
         } else {
             return lastAppRewardsPercentPphm;
@@ -193,11 +188,12 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     ) 
         public
-        onlyOwner
-        onlyIfNoPendingUpdate(lastValidatorRewardsUpdateTimestamp)
+        onlyOwner        
         returns (bool)
     {
-        lastValidatorMajorityPercentPphm = validatorMajorityPercentPphm;
+        if (block.timestamp >= lastvalidatorMajorityUpdateTimestamp) {
+            lastValidatorMajorityPercentPphm = validatorMajorityPercentPphm;
+        }        
         validatorMajorityPercentPphm = _percentagePphm;
         lastvalidatorMajorityUpdateTimestamp = _timestamp;
         emit ParameterUpdate("majorityPercentage", validatorMajorityPercentPphm, lastValidatorMajorityPercentPphm, lastvalidatorMajorityUpdateTimestamp);
@@ -206,13 +202,14 @@ contract PropsParameters is Initializable, Ownable {
 
     /**
     * @dev Get the current value of validators majority percentage
+    * @param _timestamp for which time should we get the value
     */
-    function getValidatorsMajorityPercentage()
+    function getValidatorsMajorityPercentage(uint256 _timestamp)
         public
         view
         returns (uint256 percentagePphm)
     {
-        if (block.timestamp > lastvalidatorMajorityUpdateTimestamp) {
+        if (_timestamp >= lastvalidatorMajorityUpdateTimestamp) {
             return validatorMajorityPercentPphm;
         } else {
             return lastValidatorMajorityPercentPphm;

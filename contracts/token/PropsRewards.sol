@@ -38,6 +38,7 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
     /*
     *  Storage
     */
+    // TODO Change this to 3 daily states - previous, current, new?
     mapping (uint256 => mapping (bytes32 => uint256)) private dailyRewardsConfirmations; // dailyTimestamp => rewardsHash => confirmations
     mapping (uint256 => mapping (address => bytes32)) private dailyRewardsValidatorSubmissions; // dailyTimestamp ==> validator ==> rewardsHash
     

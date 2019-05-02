@@ -189,6 +189,7 @@ contract PropsRewardEntities is Initializable, Ownable {
     
     /**
     * @dev Allows the controller to approve an application
+    * @param _id address cold wallet storage and the id of an application
     */
     function approveApplication(
         address _id
@@ -210,6 +211,7 @@ contract PropsRewardEntities is Initializable, Ownable {
 
     /**
     * @dev Allows the controller to remove/deactivate an application
+    * @param _id address cold wallet storage and the id of an application
     */
     function removeApplication(
         address _id
