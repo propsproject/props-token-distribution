@@ -66,13 +66,14 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
     
     /**
     * @dev The initializer function for upgrade as initialize was already called, get the decimals used in the token to initialize the params
+    * @param _decimals uint256 number of decimals used in total supply
     */
-    function initializePostUpgrade(uint256 decimals)
+    function initializePostUpgrade(uint256 _decimals)
         public
         initializer
     {
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
-        uint256 maxTotalSupply = 1 * 1e9 * (10 ** uint256(decimals));
+        uint256 maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
         uint256 appRewardPercentage = 34750; // pphm ==> 0.03475%
         uint256 appRewardsMaxVariationPercentage = 1.5 * 1e8; //pphm ==> 150%
         uint256 validatorMajorityPercentage = 50 * 1e6; //pphm ==> 50%
@@ -87,13 +88,14 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
 
     /**
     * @dev The initializer function, get the decimals used in the token to initialize the params
+    * @param _decimals uint256 number of decimals used in total supply
     */
-    function initialize(uint256 decimals)
+    function initialize(uint256 _decimals)
         public
         initializer
     {
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
-        uint256 maxTotalSupply = 1 * 1e9 * (10 ** uint256(decimals));
+        uint256 maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
         uint256 appRewardPercentage = 34750; // pphm ==> 0.03475%
         uint256 appRewardsMaxVariationPercentage = 1.5 * 1e8; //pphm ==> 150%
         uint256 validatorMajorityPercentage = 50 * 1e6; //pphm ==> 50%
@@ -106,9 +108,18 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
             validatorMajorityPercentage, validatorRewardsPercentage);            
     }
     /**
-    * @dev The initializer function, get the decimals used in the token to initialize the params
+    * @dev The function is called by validators with the calculation of the daily rewards
+    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsHash bytes32 hash of the rewards data
+    * @param _applications address[] array of application addresses getting the daily reward
+    * @param _amounts uint256[] array of amounts each app should get
     */
-    function submitDailyRewards(uint256 _dailyTimestamp, bytes32 _rewardsHash, address[] _applications, uint256[] _amounts)
+    function submitDailyRewards(    
+        uint256 _dailyTimestamp, 
+        bytes32 _rewardsHash, 
+        address[] _applications, 
+        uint256[] _amounts
+    )
         public
         onlyValidDailyTimestamp(_dailyTimestamp)
         onlyActiveValidators(msg.sender)
@@ -117,9 +128,8 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
     {
         dailyRewardsValidatorSubmissions[_dailyTimestamp][msg.sender] = _rewardsHash;
         dailyRewardsConfirmations[_dailyTimestamp][_rewardsHash] += 1;
-        // what happens with inactive apps?
-        uint256 confimrations = dailyRewardsConfirmations[_dailyTimestamp][_rewardsHash];
-        if (confimrations > requiredValidatorsForAppRewards()) {
+        // what happens with inactive apps?        
+        if (dailyRewardsConfirmations[_dailyTimestamp][_rewardsHash] == requiredValidatorsForAppRewards()) {
             require(
                 rewardHashIsvalid(_dailyTimestamp, _rewardsHash, _applications, _amounts),
                 "Reward Hash is invalid"
@@ -131,21 +141,65 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
             );
 
             require(
-                sum <= appRewardsDailyAmount(),
+                sum <= getMaxAppRewardsDailyAmount(),
                 "Rewards data is invalid - daily reward amount too high"
             );
-
-            for (uint i=0; i<_applications.length; i++) {
-                _mint(applications[_applications[i]].rewardsAddress, _amounts[i]);
-            }
-            emit DailyRewardsApplicationsMinted(_dailyTimestamp, _rewardsHash, _applications.length, sum);
+            mintDailyRewardsForApps(_dailyTimestamp, _rewardsHash, _applications, _amounts, sum);            
         }
         emit DailyRewardsSubmitted(_dailyTimestamp, _rewardsHash, msg.sender);
-        
+        if (dailyRewardsConfirmations[_dailyTimestamp][_rewardsHash] == requiredValidatorsForValidatorsRewards()) { // all validators have submitted            
+            mintDailyRewardsForValidators(_dailyTimestamp, _rewardsHash);            
+        }
+        return true;
+    }
+
+    /**
+    * @dev Mint rewards for validators
+    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsHash bytes32 hash of the rewards data    
+    */
+    function mintDailyRewardsForValidators(uint256 _dailyTimestamp, bytes32 _rewardsHash) 
+        internal        
+        returns (bool)
+    {
+        uint256 validatorDailyRewardsAmountSum = 0;
+            for (uint j=0; j<validatorsList.length; j++) {
+                _mint(validators[validatorsList[j]].rewardsAddress, getValidatorRewardsDailyAmountPerValidator());
+                validatorDailyRewardsAmountSum += getValidatorRewardsDailyAmountPerValidator();
+            }
+            emit DailyRewardsValidatorsMinted(_dailyTimestamp, _rewardsHash, validatorsList.length, validatorDailyRewardsAmountSum);
+        return true;
+    }
+
+    /**
+    * @dev Mint rewards for apps
+    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsHash bytes32 hash of the rewards data
+    * @param _applications address[] array of application addresses getting the daily reward
+    * @param _amounts uint256[] array of amounts each app should get
+    * @param _sum uint256 the sum of all application rewards given
+    */
+    function mintDailyRewardsForApps(
+        uint256 _dailyTimestamp, 
+        bytes32 _rewardsHash, 
+        address[] _applications, 
+        uint256[] _amounts, 
+        uint256 _sum
+    ) 
+        internal        
+        returns (bool)
+    {
+        for (uint i=0; i<_applications.length; i++) {
+                _mint(applications[_applications[i]].rewardsAddress, _amounts[i]);
+        }
+        emit DailyRewardsApplicationsMinted(_dailyTimestamp, _rewardsHash, _applications.length, _sum);
+        return true;
     }
 
     /**
     * @dev Checks if app daily rewards amount is valid
+    * @param _applications address[] array of application addresses getting the daily reward
+    * @param _amounts uint256[] array of amounts each app should get
     */
     function validateSubmittedData(address[] _applications, uint256[] _amounts) 
         public
@@ -163,7 +217,7 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
     /**
     * @dev Checks how many validators are needed for app rewards
     */
-    function appRewardsDailyAmount() 
+    function getMaxAppRewardsDailyAmount() 
         public
         view
         returns (uint256)
@@ -191,5 +245,27 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
         returns (uint256)
     {
         return ((validatorsList.length * validatorMajorityPercentPphm) / 1e8)+1;
-    }    
+    }
+
+    /**
+    * @dev Checks how many validators are needed for app rewards
+    */
+    function requiredValidatorsForValidatorsRewards() 
+        public
+        view
+        returns (uint256)
+    {
+        return validatorsList.length;
+    }
+
+    /**
+    * @dev Checks how many validators are needed for app rewards
+    */
+    function getValidatorRewardsDailyAmountPerValidator() 
+        public
+        view
+        returns (uint256)
+    {
+        return (((maxTotalSupply - totalSupply()) * validatorRewardsPercentPphm) / 1e8) / validatorsList.length;
+    }            
 }
