@@ -65,7 +65,7 @@ contract PropsRewardEntities is Initializable, Ownable {
         address rewardsAddress;                  // address where rewards will be minted to
         address sidechainAddress;                // address used on the sidechain
         ValidatorStatus status;                  // The amount of tokens delegated to the delegator
-        uint8 initializedState;                  // A way to check if there's something in the map and whether already added to list
+        uint256 initializedState;                // A way to check if there's something in the map and whether already added to list
     }
 
     mapping (address => Application) public applications;
@@ -73,6 +73,8 @@ contract PropsRewardEntities is Initializable, Ownable {
 
     address[] public applicationsList;
     address[] public validatorsList;
+
+    mapping(uint=>uint) indexOfApplication;
     
 
     /*
@@ -281,6 +283,7 @@ contract PropsRewardEntities is Initializable, Ownable {
     
     /**
     * @dev Allows the controller to approve a validator
+    * @param _id address cold wallet storage and the id of a validator
     */
     function approveValidator(
         address _id
@@ -302,6 +305,7 @@ contract PropsRewardEntities is Initializable, Ownable {
 
     /**
     * @dev Allows the controller to remove/deactivate a validator
+    * @param _id address cold wallet storage and the id of a validator
     */
     function removeValidator(
         address _id

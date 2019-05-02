@@ -164,8 +164,8 @@ contract PropsRewards is Initializable, ERC20, PropsRewardEntities, PropsParamet
         returns (bool)
     {
         uint256 validatorDailyRewardsAmountSum = 0;
-            for (uint j=0; j<validatorsList.length; j++) {
-                _mint(validators[validatorsList[j]].rewardsAddress, getValidatorRewardsDailyAmountPerValidator());
+            for (uint i=0; i<validatorsList.length; i++) {
+                _mint(validators[validatorsList[i]].rewardsAddress, getValidatorRewardsDailyAmountPerValidator());
                 validatorDailyRewardsAmountSum += getValidatorRewardsDailyAmountPerValidator();
             }
             emit DailyRewardsValidatorsMinted(_dailyTimestamp, _rewardsHash, validatorsList.length, validatorDailyRewardsAmountSum);
