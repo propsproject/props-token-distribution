@@ -49,4 +49,15 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     _mint(_holder, totalSupply);
   }
 
+  /**
+   * @dev Initializer for upgrade function. Called only once after upgrade   
+   */
+  function initializePostUpgrade()
+    initializer
+    public
+  {
+    uint8 decimals = 18;    
+    PropsRewards.initializePostUpgrade(decimals);
+  }
+
 }

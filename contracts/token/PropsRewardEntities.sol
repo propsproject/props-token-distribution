@@ -10,8 +10,8 @@ import "openzeppelin-eth/contracts/ownership/Ownable.sol";
  **/
 contract PropsRewardEntities is Initializable, Ownable {    
     /*
-     *  Events
-     */
+    *  Events
+    */
     event ApplicationAdded(
         address indexed id,         
         bytes32 name,
@@ -42,8 +42,9 @@ contract PropsRewardEntities is Initializable, Ownable {
         ValidatorStatus indexed status
     );
     /*
-     *  Storage
-     */
+    *  Storage
+    */
+    
     // The various states a validator can be in
     enum ValidatorStatus { Inactive, Active }
     // The various states an application can be in
@@ -67,16 +68,16 @@ contract PropsRewardEntities is Initializable, Ownable {
         uint8 initializedState;                  // A way to check if there's something in the map and whether already added to list
     }
 
-    mapping (address => Application) private applications;
-    mapping (address => Validator) private validators;
+    mapping (address => Application) public applications;
+    mapping (address => Validator) public validators;
 
     address[] public applicationsList;
     address[] public validatorsList;
     
 
     /*
-     *  Modifiers
-     */
+    *  Modifiers
+    */
      modifier onlyNewApplications(address _address) {
          require(
              applications[_address].initializedState == 0,
@@ -113,6 +114,14 @@ contract PropsRewardEntities is Initializable, Ownable {
          require(
              validators[_address].initializedState > 0,
              "Must be an existing validator"
+             );
+         _;
+     }
+
+     modifier onlyActiveValidators(address _address) {
+         require(
+             validators[_address].status == ValidatorStatus.Active,
+             "Must be an active validator"
              );
          _;
      }
@@ -305,6 +314,4 @@ contract PropsRewardEntities is Initializable, Ownable {
         emit ValidatorUpdated(_id, validators[_id].name, validators[_id].rewardsAddress, validators[_id].sidechainAddress, validators[_id].status);
         return true;
     }
-
-    
 }
