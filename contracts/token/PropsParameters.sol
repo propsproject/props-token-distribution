@@ -26,7 +26,7 @@ contract PropsParameters is Initializable, Ownable {
     uint256 appRewardsMaxVariationPercentPphm;
     uint256 validatorMajorityPercentPphm;
     uint256 validatorRewardsPercentPphm;
-    
+
     uint256 lastAppRewardsPercentPphm;
     uint256 lastAppRewardsUpdateTimestamp;
 
@@ -39,14 +39,19 @@ contract PropsParameters is Initializable, Ownable {
     uint256 lastValidatorRewardsPercentPphm;
     uint256 lastValidatorRewardsUpdateTimestamp;
 
+    /*
+    * Modifiers
+    */
+
+
     /**
     * @dev The initializer function, percentage is specified in pphm (1/100,000,000) e.g. 50,000,000 => 50%
-    * @param _maxTotalSupply uint256 max props that can be minted    
+    * @param _maxTotalSupply uint256 max props that can be minted
     * @param _appRewardsPercentPphm uint256 app rewards percentage in pphm
     * @param _appRewardsMaxVariationPercentPphm uint256 app rewards max allowed variation percentage in pphm
     * @param _validatorMajorityPercentPphm uint256 validators majority percentage in pphm
     * @param _validatorRewardsPercentPphm uint256 app rewards percentage in pphm
-    */    
+    */
     function initialize(
         uint256 _maxTotalSupply,
         uint256 _appRewardsPercentPphm,
@@ -72,17 +77,23 @@ contract PropsParameters is Initializable, Ownable {
     function setValidatorRewardsPercentage(
         uint256 _percentagePphm,
         uint256 _timestamp
-    ) 
+    )
         public
-        onlyOwner        
+        onlyOwner
         returns (bool)
     {
         if (block.timestamp >= lastValidatorRewardsUpdateTimestamp) {
-            lastValidatorRewardsPercentPphm = validatorRewardsPercentPphm;                
-        }        
+            lastValidatorRewardsPercentPphm = validatorRewardsPercentPphm;
+        }
         validatorRewardsPercentPphm = _percentagePphm;
         lastValidatorRewardsUpdateTimestamp = _timestamp;
-        emit ParameterUpdate("validatorRewardsPercentage", validatorRewardsPercentPphm, lastValidatorRewardsPercentPphm, lastValidatorRewardsUpdateTimestamp);
+        emit ParameterUpdate
+        (
+            "validatorRewardsPercentage",
+            validatorRewardsPercentPphm,
+            lastValidatorRewardsPercentPphm,
+            lastValidatorRewardsUpdateTimestamp
+        );
         return true;
     }
 
@@ -110,9 +121,9 @@ contract PropsParameters is Initializable, Ownable {
     function setAppRewardsMaxVariationPercentage(
         uint256 _percentagePphm,
         uint256 _timestamp
-    ) 
+    )
         public
-        onlyOwner        
+        onlyOwner
         returns (bool)
     {
         if (block.timestamp >= lastAppRewardsMaxVariationUpdateTimestamp) {
@@ -120,7 +131,13 @@ contract PropsParameters is Initializable, Ownable {
         }
         appRewardsMaxVariationPercentPphm = _percentagePphm;
         lastAppRewardsMaxVariationUpdateTimestamp = _timestamp;
-        emit ParameterUpdate("appRewardsMaxVariationPercentage", appRewardsMaxVariationPercentPphm, lastAppRewardsMaxVariationPercentPphm, lastAppRewardsMaxVariationUpdateTimestamp);
+        emit ParameterUpdate
+        (
+            "appRewardsMaxVariationPercentage",
+            appRewardsMaxVariationPercentPphm,
+            lastAppRewardsMaxVariationPercentPphm,
+            lastAppRewardsMaxVariationUpdateTimestamp
+        );
         return true;
     }
 
@@ -148,12 +165,12 @@ contract PropsParameters is Initializable, Ownable {
     function setAppRewardsPercentage(
         uint256 _percentagePphm,
         uint256 _timestamp
-    ) 
+    )
         public
-        onlyOwner        
+        onlyOwner
         returns (bool)
     {
-        if (block.number >= lastAppRewardsUpdateTimestamp) {
+        if (block.timestamp >= lastAppRewardsUpdateTimestamp) {
             lastAppRewardsPercentPphm = appRewardsPercentPphm;
         }
         appRewardsPercentPphm = _percentagePphm;
@@ -186,17 +203,23 @@ contract PropsParameters is Initializable, Ownable {
     function setValidatorsMajorityPercentage(
         uint256 _percentagePphm,
         uint256 _timestamp
-    ) 
+    )
         public
-        onlyOwner        
+        onlyOwner
         returns (bool)
     {
         if (block.timestamp >= lastvalidatorMajorityUpdateTimestamp) {
             lastValidatorMajorityPercentPphm = validatorMajorityPercentPphm;
-        }        
+        }
         validatorMajorityPercentPphm = _percentagePphm;
         lastvalidatorMajorityUpdateTimestamp = _timestamp;
-        emit ParameterUpdate("majorityPercentage", validatorMajorityPercentPphm, lastValidatorMajorityPercentPphm, lastvalidatorMajorityUpdateTimestamp);
+        emit ParameterUpdate
+        (
+            "majorityPercentage",
+            validatorMajorityPercentPphm,
+            lastValidatorMajorityPercentPphm,
+            lastvalidatorMajorityUpdateTimestamp
+        );
         return true;
     }
 
