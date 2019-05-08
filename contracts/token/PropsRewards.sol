@@ -67,8 +67,8 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     struct ValidatorsList {
         mapping (address => bool) currentValidators;
         mapping (address => bool) previousValidators;
-        uint256 currentValidatorsCount;
-        uint256 previousValidatorsCount;
+        address[] currentValidatorsList;
+        address[] previousValidatorsCount;
         uint256 updateTimestamp;
     }
 
@@ -114,9 +114,16 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     }
 
     modifier onlyFutureValidDailyTimestamp(uint256 _dailyTimestamp) {
-        // assuming the daily timestamp is midnight UTC
         require(
              _dailyTimestamp % 86400 == 0 && _dailyTimestamp > currentValidatorsDailyTimestamp,
+             "Must be midnight and bigger than current daily timestamp"
+             );
+         _;
+    }
+
+    modifier onlyFutureValidValidatorDailyTimestamp(uint256 _dailyTimestamp) {
+        require(
+             _dailyTimestamp % 86400 == 0 && _dailyTimestamp > validatorsList.updateTimestamp,
              "Must be midnight and bigger than current daily timestamp"
              );
          _;
@@ -173,24 +180,58 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     function setValidators(uint256 _dailyTimestamp, address[] _validators)
         public
         onlyController
-        onlyFutureValidDailyTimestamp(_dailyTimestamp)
+        onlyFutureValidValidatorDailyTimestamp(_dailyTimestamp)
         returns (bool)
     {
-        // verify all validators exist and active
-        for (uint256 i = 0; i < _validators.length; i++){
-            // require (rewardsLibData.validators[_validators[i]].initializedState > 0, "All validators in new list must exist");
-        }
 
-        if (_dailyTimestamp <= validatorsList.updateTimestamp) {
-            // update only current validator list as a map
-            // update the validator list updateTimestamp
+        if (validatorsList.currentValidatorsList.length == 0) { // first time the daily validators list is set
+            _updateCurrentValidatorsList(_validators);
         } else {
-            // copy current validator list map to previous
-            // update current validator list as a map
-            // update the validator list updateTimestamp
+            _updatePreviousValidatorsList();
+            _updateCurrentValidatorsList(_validators);
         }
+        validatorsList.updateTimestamp = _dailyTimestamp;
         // TODO emit event about the list being updated with size of the list?
         return true;
+    }
+
+    /**
+    * @dev Update current daily validators list
+    * @param _validators address[] array of validators
+    */
+    function _updateCurrentValidatorsList(address[] _validators)
+        internal
+        returns (bool)
+    {
+        if (
+            validatorsList.currentValidatorsList.length == 0 ||
+            validatorsList.currentValidatorsList.length == _validators.length
+        ) {
+            for (uint256 i = 0; i < _validators.length; i++) {
+                // TODO check validators actually exist
+                // TODO add to list and map push if length == 0 update if length is identical
+            }
+        }
+        // TODO handle case length is the different by deleting previous values and inserting
+    }
+
+    /**
+    * @dev Update current daily validators list
+    */
+    function _updatePreviousValidatorsList()
+        internal
+        returns (bool)
+    {
+        if (
+            validatorsList.previousValidatorsList.length == 0 ||
+            validatorsList.currentValidatorsList.length == validatorsList.previousValidatorsList.length
+        ) {
+            for (uint256 i = 0; i < validatorsList.currentValidatorsList.length.length; i++) {
+                // TODO check validators actually exist
+                // TODO add to list and map push if length == 0 update if length is identical
+            }
+        }
+        // TODO handle case length is the different by deleting previous values and inserting
     }
 
     /**
