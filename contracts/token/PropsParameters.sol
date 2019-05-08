@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
 import "zos-lib/contracts/Initializable.sol";
-import "openzeppelin-eth/contracts/ownership/Ownable.sol";
+// import "openzeppelin-eth/contracts/ownership/Ownable.sol";
 
 /**
  * @title Props Parameters
  * @dev Contract allows to set and get parameters related to rewards
  **/
-contract PropsParameters is Initializable, Ownable {
+contract PropsParameters is Initializable/*, Ownable*/ {
     /*
      *  Events
      */
@@ -79,7 +79,7 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     )
         public
-        onlyOwner
+        // onlyOwner
         returns (bool)
     {
         if (block.timestamp >= lastValidatorRewardsUpdateTimestamp) {
@@ -123,7 +123,7 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     )
         public
-        onlyOwner
+        // onlyOwner
         returns (bool)
     {
         if (block.timestamp >= lastAppRewardsMaxVariationUpdateTimestamp) {
@@ -167,7 +167,7 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     )
         public
-        onlyOwner
+        // onlyOwner
         returns (bool)
     {
         if (block.timestamp >= lastAppRewardsUpdateTimestamp) {
@@ -205,7 +205,7 @@ contract PropsParameters is Initializable, Ownable {
         uint256 _timestamp
     )
         public
-        onlyOwner
+        // onlyOwner
         returns (bool)
     {
         if (block.timestamp >= lastvalidatorMajorityUpdateTimestamp) {

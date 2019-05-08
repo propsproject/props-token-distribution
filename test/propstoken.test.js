@@ -1,3 +1,11 @@
+/*
+------------------------------------------------------------------
+This file tests the following propstoken contract functionalities:
+1. ERC20 Basics
+2. Transfer Start Time
+3. ERC865
+------------------------------------------------------------------
+*/
 /* eslint-disable no-mixed-operators */
 /* eslint-disable no-unused-vars */
 /* eslint-disable func-names */
