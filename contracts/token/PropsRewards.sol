@@ -56,9 +56,12 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         uint256 timestamp
     );
 
-    event ControllerUpdate(address indexed newController);
+    event ValidatorListUpdate(
+        address[] validatorsList,
+        uint256 indexed dailyTimestamp
+    );
 
-    //
+    event ControllerUpdate(address indexed newController);
 
     /*
     *  Storage
@@ -68,7 +71,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         mapping (address => bool) currentValidators;
         mapping (address => bool) previousValidators;
         address[] currentValidatorsList;
-        address[] previousValidatorsCount;
+        address[] previousValidatorsList;
         uint256 updateTimestamp;
     }
 
@@ -79,10 +82,8 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     mapping (uint256 => mapping (bytes32 => uint256)) private dailyRewardsConfirmations; // day of the week => rewardsHash => confirmations
     mapping (uint256 => mapping (address => bytes32)) private dailyRewardsValidatorSubmissions; // day of the week ==> validator ==> rewardsHash
     mapping (uint256 => uint256) private dowToDailyTimestamp; // day of the week ==> daily timestamp
-    mapping (address => uint256) public currentValidators;
-    mapping (address => uint256) public previousValidators;
     ValidatorsList public validatorsList;
-    uint256 public currentValidatorsDailyTimestamp;
+    uint256 currentValidatorsDailyTimestamp;
     uint256 public maxTotalSupply;
     address public controller; // controller entity
     /*
@@ -129,15 +130,6 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
          _;
     }
 
-    modifier onlyActiveValidators(uint256 _dailyTimestamp, address _validator) {
-        // TODO write this modifier, to use a function to check if in correct list
-        require(
-             _dailyTimestamp % 86400 == 0,
-             "Must be midnight"
-             );
-         _;
-    }
-
     /**
     * @dev The initializer function for upgrade as initialize was already called, get the decimals used in the token to initialize the params
     * @param _decimals uint256 number of decimals used in total supply
@@ -148,10 +140,14 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     {
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
         maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0); // pphm ==> 0.03475%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 1.5 * 1e8, 0); // pphm ==> 150%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0); // pphm ==> 50%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0); // pphm ==> 0.001829%
+        // ApplicationRewardsPercent pphm ==> 0.03475%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
+        // ApplicationRewardsMaxVariationPercent pphm ==> 150%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 1.5 * 1e8, 0);
+        // ValidatorMajorityPercent pphm ==> 50%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
+         // ValidatorRewardsPercent pphm ==> 0.001829%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
         controller = _controller;
     }
 
@@ -165,10 +161,14 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     {
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
         maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0); // pphm ==> 0.03475%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 1.5 * 1e8, 0); // pphm ==> 150%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0); // pphm ==> 50%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0); // pphm ==> 0.001829%
+        // ApplicationRewardsPercent pphm ==> 0.03475%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
+        // ApplicationRewardsMaxVariationPercent pphm ==> 150%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 1.5 * 1e8, 0);
+        // ValidatorMajorityPercent pphm ==> 50%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
+         // ValidatorRewardsPercent pphm ==> 0.001829%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
         controller = _controller;
     }
 
@@ -185,34 +185,49 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     {
 
         if (validatorsList.currentValidatorsList.length == 0) { // first time the daily validators list is set
-            _updateCurrentValidatorsList(_validators);
+            require(
+                _updateCurrentValidatorsList(_validators),
+                "Failed to update validator list - all validators must be added first"
+            );
         } else {
             _updatePreviousValidatorsList();
-            _updateCurrentValidatorsList(_validators);
+            require(
+                _updateCurrentValidatorsList(_validators),
+                "Failed to update validator list - all validators must be added first"
+            );
         }
         validatorsList.updateTimestamp = _dailyTimestamp;
-        // TODO emit event about the list being updated with size of the list?
+        emit ValidatorListUpdate(_validators, _dailyTimestamp);
         return true;
     }
 
     /**
-    * @dev Update current daily validators list
+    * @dev Update current daily validators list.
+    * If new, push.
+    * If same size, replace
+    * If different size, delete, and then push.
     * @param _validators address[] array of validators
     */
     function _updateCurrentValidatorsList(address[] _validators)
         internal
         returns (bool)
     {
-        if (
-            validatorsList.currentValidatorsList.length == 0 ||
-            validatorsList.currentValidatorsList.length == _validators.length
-        ) {
-            for (uint256 i = 0; i < _validators.length; i++) {
-                // TODO check validators actually exist
-                // TODO add to list and map push if length == 0 update if length is identical
-            }
+        bool emptyCurrentValidatorsList = validatorsList.currentValidatorsList.length == 0;
+        if (!emptyCurrentValidatorsList && validatorsList.currentValidatorsList.length != _validators.length) {
+            _deleteValidatorsList(validatorsList.currentValidatorsList, validatorsList.currentValidators);
+            emptyCurrentValidatorsList = true;
         }
-        // TODO handle case length is the different by deleting previous values and inserting
+
+        for (uint256 i = 0; i < _validators.length; i++) {
+            if (rewardsLibData.validators[_validators[i]].initializedState != 1) return false; // proposed validator doesn't exist
+            if (emptyCurrentValidatorsList) {
+                validatorsList.currentValidatorsList.push(_validators[i]);
+            } else {
+                validatorsList.currentValidatorsList[i] = _validators[i];
+            }
+            validatorsList.currentValidators[_validators[i]] = true;
+        }
+        return true;
     }
 
     /**
@@ -222,16 +237,36 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         internal
         returns (bool)
     {
-        if (
-            validatorsList.previousValidatorsList.length == 0 ||
-            validatorsList.currentValidatorsList.length == validatorsList.previousValidatorsList.length
-        ) {
-            for (uint256 i = 0; i < validatorsList.currentValidatorsList.length.length; i++) {
-                // TODO check validators actually exist
-                // TODO add to list and map push if length == 0 update if length is identical
-            }
+        bool emptyPreviousValidatorsList = validatorsList.previousValidatorsList.length == 0;
+        if (!emptyPreviousValidatorsList && validatorsList.previousValidatorsList.length != validatorsList.currentValidatorsList.length.length) {
+            _deleteValidatorsList(validatorsList.previousValidatorsList, validatorsList.previousValidators);
+            emptyPreviousValidatorsList = true;
         }
-        // TODO handle case length is the different by deleting previous values and inserting
+        for (uint256 i = 0; i < validatorsList.currentValidatorsList.length; i++) {
+            if (emptyPreviousValidatorsList) {
+                validatorsList.previousValidatorsList.push(validatorsList.currentValidatorsList[i]);
+            } else {
+                validatorsList.previousValidatorsList[i] = validatorsList.currentValidatorsList[i];
+            }
+            validatorsList.previousValidators[validatorsList.currentValidatorsList[i]] = true;
+        }
+        return true;
+    }
+
+    /**
+    * @dev Delete existing values from the daily validators list
+    * @param _validators address[] reference to the validators list to delete
+    */
+    function _deleteValidatorsList(address[] _validators, mapping (address => bool) validatorsMap)
+        internal
+        returns (bool)
+    {
+        for (uint256 i = 0; i < _validators ; i++) {
+            validatorsMap[_validators[i]] = false;
+            delete _validators[i];
+            _validators.length--;
+        }
+        return true;
     }
 
     /**
