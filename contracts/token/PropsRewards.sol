@@ -68,14 +68,6 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     */
 
     PropsRewardsLib.Data internal rewardsLibData;
-    // mapping (address => PropsRewardsLib.Application) public applications;
-    // mapping (address => PropsRewardsLib.Validator) public validators;
-
-    // mapping (uint256 => mapping (bytes32 => uint256)) private dailyRewardsConfirmations; // day of the week => rewardsHash => confirmations
-    // mapping (uint256 => mapping (address => bytes32)) private dailyRewardsValidatorSubmissions; // day of the week ==> validator ==> rewardsHash
-    // mapping (uint256 => uint256) private dowToDailyTimestamp; // day of the week ==> daily timestamp
-
-
     uint256 public maxTotalSupply;
     address public controller; // controller entity
     /*
@@ -361,65 +353,4 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         emit ValidatorUpdated(msg.sender, _name, _rewardsAddress, _sidechainAddress);
         return true;
     }
-    // /**
-    // * @dev Get active validators list
-    // */
-    // function getNewValidatorsList(uint256 _dailyTimestamp)
-    //     public
-    //     view
-    //     returns (address[])
-    // {
-    //     address[] memory dailyValidators;
-    //     uint256 counter = 0;
-    //     for (uint256 i = 0; i < validatorsList.length ; i++) {
-    //         if (validators[validatorsList[i]].status == ValidatorStatus.Active && _dailyTimestamp > validators[validatorsList[i]].timeAdded) {
-    //             dailyValidators[counter] = validatorsList[i];
-    //             counter++;
-    //         }
-    //     }
-    //     return dailyValidators;
-    // }
-
-    // /**
-    // * @dev Checks how many validators are needed for app rewards
-    // * @param _dayOfWeek uint256 the daily reward day of week
-    // */
-    // function updateDailyValidatorsList(uint256 _dayOfWeek)
-    //     internal
-    //     returns (bool)
-    // {
-    //     address[] memory newValidators = getNewValidatorsList(dowToDailyTimestamp[_dayOfWeek]);
-    //     // same length of list just replace it
-    //     if (dowToDailyValidatorsList[_dayOfWeek].length == newValidators.length) {
-    //         for (uint256 i = 0; i < newValidators.length; i++) {
-    //             dowToDailyValidatorsList[_dayOfWeek][i] = newValidators[i];
-    //         }
-    //     }
-    //     else {
-    //         // size of new list is different than last week for this day, delete array and populate
-    //         // otherwise it's the first time so just pupulate it
-    //         if (dowToDailyValidatorsList[_dayOfWeek].length > 0) {
-    //             deleteValidatorsList(_dayOfWeek);
-    //         }
-    //         for (uint256 j = 0; j < newValidators.length; j++) {
-    //             dowToDailyValidatorsList[_dayOfWeek].push(newValidators[j]);
-    //         }
-    //     }
-    //     return true;
-    // }
-
-    // /**
-    // * @dev Delete existing values from the daily validators list
-    // * @param _dayOfWeek uint256 the daily reward day of week
-    // */
-    // function deleteValidatorsList(uint256 _dayOfWeek)
-    //     internal
-    //     returns (bool)
-    // {
-    //     for (uint256 i = 0; i < dowToDailyValidatorsList[_dayOfWeek].length ; i++) {
-    //         delete dowToDailyValidatorsList[_dayOfWeek][i];
-    //         dowToDailyValidatorsList[_dayOfWeek].length--;
-    //     }
-    //     return true;
-    // }
 }
