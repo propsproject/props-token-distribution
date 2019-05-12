@@ -56,7 +56,12 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         uint256 timestamp
     );
 
-    event ValidatorListUpdate(
+    event ValidatorsListUpdate(
+        address[] validatorsList,
+        uint256 indexed dailyTimestamp
+    );
+
+    event ApplicationsListUpdate(
         address[] validatorsList,
         uint256 indexed dailyTimestamp
     );
@@ -103,11 +108,20 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
          _;
     }
 
-    modifier onlyFutureValidValidatorDailyTimestamp(uint256 _dailyTimestamp) {
+    modifier onlyFutureValidValidatorsDailyTimestamp(uint256 _dailyTimestamp) {
         require(
             _dailyTimestamp % 86400 == 0 &&
             _dailyTimestamp > rewardsLibData.selectedValidators.updateTimestamp,
-            "Must be midnight and > daily timestamp"
+            "Must be midnight and > last update timestamp"
+        );
+         _;
+    }
+
+    modifier onlyFutureValidApplicationsDailyTimestamp(uint256 _dailyTimestamp) {
+        require(
+            _dailyTimestamp % 86400 == 0 &&
+            _dailyTimestamp > rewardsLibData.selectedApplications.updateTimestamp,
+            "Must be midnight and > last update timestamp"
         );
          _;
     }
@@ -158,11 +172,27 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     function setValidators(uint256 _dailyTimestamp, address[] _validators)
         public
         onlyController
-        onlyFutureValidValidatorDailyTimestamp(_dailyTimestamp)
+        onlyFutureValidValidatorsDailyTimestamp(_dailyTimestamp)
         returns (bool)
     {
         PropsRewardsLib.setValidators(rewardsLibData, _dailyTimestamp, _validators);
-        emit ValidatorListUpdate(_validators, _dailyTimestamp);
+        emit ValidatorsListUpdate(_validators, _dailyTimestamp);
+        return true;
+    }
+
+    /**
+    * @dev Set new applications list
+    * @param _dailyTimestamp uint256 the daily reward timestamp from which this change should take effect
+    * @param _applications address[] array of validators
+    */
+    function setApplications(uint256 _dailyTimestamp, address[] _applications)
+        public
+        onlyController
+        onlyFutureValidApplicationsDailyTimestamp(_dailyTimestamp)
+        returns (bool)
+    {
+        PropsRewardsLib.setApplications(rewardsLibData, _dailyTimestamp, _applications);
+        emit ApplicationsListUpdate(_applications, _dailyTimestamp);
         return true;
     }
 
@@ -194,21 +224,23 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
             maxTotalSupply,
             totalSupply()
         );
-        if (appRewardsAmount > 0) {
+        if (appRewardsSum > 0) {
             mintDailyRewardsForApps(_dailyTimestamp, _rewardsHash, _applications, _amounts, appRewardsSum);
         }
 
         // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
-        uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
-            rewardsLibData,
-            rewardsLibData.previousDailyTimestamp,
-            rewardsLibData.previousDailyRewardsHash,
-            maxTotalSupply,
-            totalSupply(),
-            true
-        );
-        if (rewardsLibData.previousDailyRewardTimestamp > 0 && previousDayValidatorRewardsAmount > 0) {
-            mintDailyRewardsForValidators(rewardsLibData.previousDailyTimestamp, rewardsLibData.previousDailyRewardsHash, previousDayValidatorRewardsAmount);
+        if (rewardsLibData.previousDailyTimestamp > 0) {// no need to look back for first day
+            uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
+                rewardsLibData,
+                rewardsLibData.previousDailyTimestamp,
+                rewardsLibData.previousDailyRewardsHash,
+                maxTotalSupply,
+                totalSupply(),
+                true
+            );
+            if (previousDayValidatorRewardsAmount > 0) {
+                mintDailyRewardsForValidators(rewardsLibData.previousDailyTimestamp, rewardsLibData.previousDailyRewardsHash, previousDayValidatorRewardsAmount);
+            }
         }
         // check and give validator rewards if all validators submitted
         uint256 validatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
@@ -216,7 +248,8 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
             _dailyTimestamp,
             _rewardsHash,
             maxTotalSupply,
-            totalSupply()
+            totalSupply(),
+            false
         );
         if (validatorRewardsAmount > 0) {
             mintDailyRewardsForValidators(_dailyTimestamp, _rewardsHash, validatorRewardsAmount);
@@ -339,14 +372,13 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         internal
     {
         uint256 validatorsCount = rewardsLibData.dailyRewards[_rewardsHash].submissionValidators.length;
-        uint256 i;
         for (uint256 i = 0; i < validatorsCount; i++) {
             _mint(rewardsLibData.validators[rewardsLibData.dailyRewards[_rewardsHash].submissionValidators[i]].rewardsAddress,_amount);
         }
         emit DailyRewardsValidatorsMinted(
             _dailyTimestamp,
             _rewardsHash,
-            validatorsCounth,
+            validatorsCount,
             (_amount * validatorsCount)
         );
     }
