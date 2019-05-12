@@ -84,7 +84,11 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     modifier onlyValidDailyTimestamp(uint256 _dailyTimestamp) {
         // assuming the daily timestamp is midnight UTC
         require(
-            _dailyTimestamp % 86400 == 0,
+            _dailyTimestamp % 86400 == 0 && (
+                _dailyTimestamp >= rewardsLibData.currentDailyTimestamp ||
+                _dailyTimestamp == rewardsLibData.previousDailyTimestamp ||
+                _dailyTimestamp == 0
+            ),
             "Must be midnight"
         );
          _;
@@ -92,7 +96,8 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
 
     modifier onlyFutureValidDailyTimestamp(uint256 _dailyTimestamp) {
         require(
-            _dailyTimestamp % 86400 == 0 && _dailyTimestamp > rewardsLibData.currentDailyTimestamp,
+            _dailyTimestamp % 86400 == 0 &&
+            _dailyTimestamp > rewardsLibData.currentDailyTimestamp,
             "Must be midnight and > daily timestamp"
         );
          _;
@@ -100,7 +105,8 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
 
     modifier onlyFutureValidValidatorDailyTimestamp(uint256 _dailyTimestamp) {
         require(
-            _dailyTimestamp % 86400 == 0 && _dailyTimestamp > rewardsLibData.selectedValidators.updateTimestamp,
+            _dailyTimestamp % 86400 == 0 &&
+            _dailyTimestamp > rewardsLibData.selectedValidators.updateTimestamp,
             "Must be midnight and > daily timestamp"
         );
          _;
@@ -108,9 +114,15 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
 
     modifier onlySelectedValidators(uint256 _dailyTimestamp) {
         if (PropsRewardsLib.getSelectedValidatorsListType(rewardsLibData, _dailyTimestamp) == 0) {
-            require (rewardsLibData.selectedValidators.currentValidators[msg.sender], "Must be a current selected validator");
+            require (
+                rewardsLibData.selectedValidators.currentValidators[msg.sender],
+                "Must be a current selected validator"
+            );
         } else {
-            require (rewardsLibData.selectedValidators.previousValidators[msg.sender], "Must be a previous selected validator");
+            require (
+                rewardsLibData.selectedValidators.previousValidators[msg.sender],
+                "Must be a previous selected validator"
+            );
         }
         _;
     }
@@ -136,25 +148,6 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         initializer
     {
         _initializePostRewardsUpgrade1(_controller, _decimals);
-    }
-
-    /**
-    * @dev internal intialize rewards upgrade1
-    */
-    function _initializePostRewardsUpgrade1(address _controller, uint256 _decimals)
-        internal
-    {
-        // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
-        maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
-        // ApplicationRewardsPercent pphm ==> 0.03475%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
-        // ApplicationRewardsMaxVariationPercent pphm ==> 150%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 1.5 * 1e8, 0);
-        // ValidatorMajorityPercent pphm ==> 50%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
-         // ValidatorRewardsPercent pphm ==> 0.001829%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
-        controller = _controller;
     }
 
     /**
@@ -189,11 +182,10 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         public
         onlyValidDailyTimestamp(_dailyTimestamp)
         onlySelectedValidators(_dailyTimestamp)
-        // onlyOneRewardsHashPerValidator(_dailyTimestamp, _rewardsHash)
         returns (bool)
     {
-        (uint256 submitResult, uint256 amount) = PropsRewardsLib.submitDailyRewards
-        (
+        // check and give application rewards if majority of validators agree
+        uint256 appRewardsSum = PropsRewardsLib.calculateApplicationRewards(
             rewardsLibData,
             _dailyTimestamp,
             _rewardsHash,
@@ -202,72 +194,36 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
             maxTotalSupply,
             totalSupply()
         );
-
-        if (submitResult == 1) { // give application rewards
-            mintDailyRewardsForApps(_dailyTimestamp, _rewardsHash, _applications, _amounts, amount);
-        } else if (submitResult == 2) { // give validator rewards
-            mintDailyRewardsForValidators(_dailyTimestamp, _rewardsHash, amount);
+        if (appRewardsAmount > 0) {
+            mintDailyRewardsForApps(_dailyTimestamp, _rewardsHash, _applications, _amounts, appRewardsSum);
         }
-        emit DailyRewardsSubmitted(_dailyTimestamp, _rewardsHash, msg.sender);
-        return true;
-    }
 
-    /**
-    * @dev Mint rewards for validators
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
-    * @param _rewardsHash bytes32 hash of the rewards data
-    * @param _amount uint256 amount each validator should get
-    */
-    function mintDailyRewardsForValidators(uint256 _dailyTimestamp, bytes32 _rewardsHash, uint256 _amount)
-        internal
-    {
-        uint256 validatorsCount;
-        uint256 i;
-        if (PropsRewardsLib.getSelectedValidatorsListType(rewardsLibData, _dailyTimestamp) == 0) {
-            validatorsCount = rewardsLibData.selectedValidators.currentValidatorsList.length;
-            for (i = 0; i < validatorsCount; i++) {
-                _mint(
-                    rewardsLibData.validators[rewardsLibData.selectedValidators.currentValidatorsList[i]].rewardsAddress,
-                    _amount);
-            }
-        } else {
-            validatorsCount = rewardsLibData.selectedValidators.previousValidatorsList.length;
-            for (i = 0; i < validatorsCount; i++) {
-                _mint(
-                    rewardsLibData.validators[rewardsLibData.selectedValidators.previousValidatorsList[i]].rewardsAddress,
-                    _amount);
-            }
+        // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
+        uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
+            rewardsLibData,
+            rewardsLibData.previousDailyTimestamp,
+            rewardsLibData.previousDailyRewardsHash,
+            maxTotalSupply,
+            totalSupply(),
+            true
+        );
+        if (rewardsLibData.previousDailyRewardTimestamp > 0 && previousDayValidatorRewardsAmount > 0) {
+            mintDailyRewardsForValidators(rewardsLibData.previousDailyTimestamp, rewardsLibData.previousDailyRewardsHash, previousDayValidatorRewardsAmount);
         }
-        emit DailyRewardsValidatorsMinted
-        (
+        // check and give validator rewards if all validators submitted
+        uint256 validatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
+            rewardsLibData,
             _dailyTimestamp,
             _rewardsHash,
-            validatorsCount,
-            (_amount * validatorsCount)
+            maxTotalSupply,
+            totalSupply()
         );
-    }
-
-    /**
-    * @dev Mint rewards for apps
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
-    * @param _rewardsHash bytes32 hash of the rewards data
-    * @param _applications address[] array of application addresses getting the daily reward
-    * @param _amounts uint256[] array of amounts each app should get
-    * @param _sum uint256 the sum of all application rewards given
-    */
-    function mintDailyRewardsForApps(
-        uint256 _dailyTimestamp,
-        bytes32 _rewardsHash,
-        address[] _applications,
-        uint256[] _amounts,
-        uint256 _sum
-    )
-        internal
-    {
-        for (uint256 i = 0; i < _applications.length; i++) {
-            _mint(rewardsLibData.applications[_applications[i]].rewardsAddress, _amounts[i]);
+        if (validatorRewardsAmount > 0) {
+            mintDailyRewardsForValidators(_dailyTimestamp, _rewardsHash, validatorRewardsAmount);
         }
-        emit DailyRewardsApplicationsMinted(_dailyTimestamp, _rewardsHash, _applications.length, _sum);
+
+        emit DailyRewardsSubmitted(_dailyTimestamp, _rewardsHash, msg.sender);
+        return true;
     }
 
     /**
@@ -306,8 +262,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         returns (bool)
     {
         bytes32 paramKey = PropsRewardsLib.updateParameter(rewardsLibData, _name, _value, _timestamp);
-        emit ParameterUpdate
-        (
+        emit ParameterUpdate(
             _name,
             rewardsLibData.parameters[paramKey].currentValue,
             rewardsLibData.parameters[paramKey].previousValue,
@@ -352,5 +307,70 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         PropsRewardsLib.updateValidator(rewardsLibData, _name, _rewardsAddress, _sidechainAddress);
         emit ValidatorUpdated(msg.sender, _name, _rewardsAddress, _sidechainAddress);
         return true;
+    }
+
+    /**
+    * @dev internal intialize rewards upgrade1
+    */
+    function _initializePostRewardsUpgrade1(address _controller, uint256 _decimals)
+        internal
+    {
+        // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
+        maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
+        // ApplicationRewardsPercent pphm ==> 0.03475%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
+        // ApplicationRewardsMaxVariationPercent pphm ==> 150%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 1.5 * 1e8, 0);
+        // ValidatorMajorityPercent pphm ==> 50%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
+         // ValidatorRewardsPercent pphm ==> 0.001829%
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
+        controller = _controller;
+        rewardsLibData.maxDailyRewardStorage = 7; // keep daily rewards data for up to 7 days
+    }
+
+    /**
+    * @dev Mint rewards for validators
+    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsHash bytes32 hash of the rewards data
+    * @param _amount uint256 amount each validator should get
+    */
+    function mintDailyRewardsForValidators(uint256 _dailyTimestamp, bytes32 _rewardsHash, uint256 _amount)
+        internal
+    {
+        uint256 validatorsCount = rewardsLibData.dailyRewards[_rewardsHash].submissionValidators.length;
+        uint256 i;
+        for (uint256 i = 0; i < validatorsCount; i++) {
+            _mint(rewardsLibData.validators[rewardsLibData.dailyRewards[_rewardsHash].submissionValidators[i]].rewardsAddress,_amount);
+        }
+        emit DailyRewardsValidatorsMinted(
+            _dailyTimestamp,
+            _rewardsHash,
+            validatorsCounth,
+            (_amount * validatorsCount)
+        );
+    }
+
+    /**
+    * @dev Mint rewards for apps
+    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsHash bytes32 hash of the rewards data
+    * @param _applications address[] array of application addresses getting the daily reward
+    * @param _amounts uint256[] array of amounts each app should get
+    * @param _sum uint256 the sum of all application rewards given
+    */
+    function mintDailyRewardsForApps(
+        uint256 _dailyTimestamp,
+        bytes32 _rewardsHash,
+        address[] _applications,
+        uint256[] _amounts,
+        uint256 _sum
+    )
+        internal
+    {
+        for (uint256 i = 0; i < _applications.length; i++) {
+            _mint(rewardsLibData.applications[_applications[i]].rewardsAddress, _amounts[i]);
+        }
+        emit DailyRewardsApplicationsMinted(_dailyTimestamp, _rewardsHash, _applications.length, _sum);
     }
 }
