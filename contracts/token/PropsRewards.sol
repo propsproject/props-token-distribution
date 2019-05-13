@@ -126,22 +126,6 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
          _;
     }
 
-    modifier onlySelectedValidators(uint256 _dailyTimestamp) {
-        if (PropsRewardsLib.getSelectedValidatorsListType(rewardsLibData, _dailyTimestamp) == 0) {
-            require (
-                rewardsLibData.selectedValidators.currentValidators[msg.sender],
-                "Must be a current selected validator"
-            );
-        } else {
-            require (
-                rewardsLibData.selectedValidators.previousValidators[msg.sender],
-                "Must be a previous selected validator"
-            );
-        }
-        _;
-    }
-
-
     /**
     * @dev The initializer function for upgrade as initialize was already called, get the decimals used in the token to initialize the params
     * @param _decimals uint256 number of decimals used in total supply
@@ -211,7 +195,6 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     )
         public
         onlyValidDailyTimestamp(_dailyTimestamp)
-        onlySelectedValidators(_dailyTimestamp)
         returns (bool)
     {
         // check and give application rewards if majority of validators agree

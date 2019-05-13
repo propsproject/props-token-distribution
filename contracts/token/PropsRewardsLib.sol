@@ -14,6 +14,7 @@ library PropsRewardsLib {
 
     // The various parameters used by the contract
     enum ParameterName { ApplicationRewardsPercent, ApplicationRewardsMaxVariationPercent, ValidatorMajorityPercent, ValidatorRewardsPercent}
+    enum RewardedEntityType { Application, Validator }
 
     // Represents a parameter current, previous and time of change
     struct Parameter {
@@ -22,36 +23,20 @@ library PropsRewardsLib {
         uint256 updateTimestamp;                // timestamp of when the value was updated
     }
     // Represents application details
-    struct Application {
+    struct RewardedEntity {
         bytes32 name;                           // Application name
         address rewardsAddress;                 // address where rewards will be minted to
         address sidechainAddress;               // address used on the sidechain
         uint256 initializedState;               // A way to check if there's something in the map and whether already added to list
-    }
-
-    // Represents validator details
-    struct Validator {
-        bytes32 name;                           // Application name
-        address rewardsAddress;                 // address where rewards will be minted to
-        address sidechainAddress;               // address used on the sidechain
-        uint256 initializedState;               // A way to check if there's something in the map and whether already added to list
+        RewardedEntityType entityType;                // Type of rewarded entity
     }
 
     // Represents validators current and previous lists
-    struct ValidatorsList {
-        mapping (address => bool) currentValidators;
-        mapping (address => bool) previousValidators;
-        address[] currentValidatorsList;
-        address[] previousValidatorsList;
-        uint256 updateTimestamp;
-    }
-
-    // Represents validators current and previous lists
-    struct ApplicationsList {
-        mapping (address => bool) currentApplications;
-        mapping (address => bool) previousApplications;
-        address[] currentApplicationsList;
-        address[] previousApplicationsList;
+    struct RewardedEntityList {
+        mapping (address => bool) current;
+        mapping (address => bool) previous;
+        address[] currentList;
+        address[] previousList;
         uint256 updateTimestamp;
     }
 
@@ -67,17 +52,17 @@ library PropsRewardsLib {
     // represent the storage structures
     struct Data {
         // applications data
-        mapping (address => Application) applications;
+        mapping (address => RewardedEntity) applications;
         address[] applicationsList;
         // validators data
-        mapping (address => Validator) validators;
+        mapping (address => RewardedEntity) validators;
         address[] validatorsList;
         // adjustable parameters data
         mapping (bytes32 => Parameter) parameters; // parameter name which is keccak256(ParameterName.X)
         // the participating validators
-        ValidatorsList selectedValidators;
+        RewardedEntityList selectedValidators;
         // the participating applications
-        ApplicationsList selectedApplications;
+        RewardedEntityList selectedApplications;
         // daily rewards submission data
         mapping (bytes32 => DailyRewards) dailyRewards;
         bytes32[] dailyRewardsList;
@@ -98,6 +83,41 @@ library PropsRewardsLib {
             "Must be one submission per validator"
         );
          _;
+    }
+
+    modifier onlyExistingApplications(Data storage _self, address[] _entities) {
+        for (uint256 i = 0; i < _entities.length; i++) {
+            require(
+                _self.applications[_entities[i]].initializedState == 1,
+                "Application must exist"
+            );
+        }
+        _;
+    }
+
+    modifier onlyExistingValidators(Data storage _self, address[] _entities) {
+        for (uint256 i = 0; i < _entities.length; i++) {
+            require(
+                _self.validators[_entities[i]].initializedState == 1,
+                "Validator must exist"
+            );
+        }
+        _;
+    }
+
+    modifier onlySelectedValidators(Data storage _self, uint256 _dailyTimestamp) {
+        if (getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+            require (
+                _self.selectedValidators.current[msg.sender],
+                "Must be a current selected validator"
+            );
+        } else {
+            require (
+                _self.selectedValidators.previous[msg.sender],
+                "Must be a previous selected validator"
+            );
+        }
+        _;
     }
 
     /**
@@ -155,6 +175,7 @@ library PropsRewardsLib {
     )
         public
         onlyOneRewardsHashPerValidator(_self, _rewardsHash)
+        onlySelectedValidators(_self, _dailyTimestamp)
         returns (uint256)
     {
         if (_self.dailyRewards[_rewardsHash].initializedState == 0) {
@@ -270,8 +291,8 @@ library PropsRewardsLib {
         _self.applications[msg.sender].sidechainAddress = _sidechainAddress;
         if (_self.applications[msg.sender].initializedState == 0) {
             _self.applicationsList.push(msg.sender);
-        } else {
             _self.applications[msg.sender].initializedState = 1;
+            _self.applications[msg.sender].entityType = RewardedEntityType.Application;
         }
         return true;
     }
@@ -297,58 +318,10 @@ library PropsRewardsLib {
         _self.validators[msg.sender].sidechainAddress = _sidechainAddress;
         if (_self.validators[msg.sender].initializedState == 0) {
             _self.validatorsList.push(msg.sender);
-        } else {
             _self.validators[msg.sender].initializedState = 1;
+            _self.validators[msg.sender].entityType = RewardedEntityType.Validator;
         }
         return true;
-    }
-
-    /**
-    * @dev Set new applications list
-    * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp from which this change should take effect
-    * @param _applications address[] array of applications
-    */
-    function setApplications(
-        Data storage _self,
-        uint256 _dailyTimestamp,
-        address[] _applications
-    )
-        public
-        returns (bool)
-    {
-
-        if (_self.selectedApplications.currentApplicationsList.length == 0) { // first time the daily validators list is set
-            require(
-                _updateCurrentApplicationsList(_self, _applications),
-                "Failed to update applications list - all applications must be added first"
-            );
-        } else {
-            _updatePreviousApplicationsList(_self);
-            require(
-                _updateCurrentApplicationsList(_self, _applications),
-                "Failed to update applications list - all applications must be added first"
-            );
-        }
-        _self.selectedApplications.updateTimestamp = _dailyTimestamp;
-        return true;
-    }
-
-    /**
-    * @dev Get which applications list to use. Current = 0, previous = 1
-    * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
-    */
-    function getSelectedApplicationsListType(Data storage _self, uint256 _dailyTimestamp)
-        public
-        view
-        returns (uint256)
-    {
-        if (_dailyTimestamp >= _self.selectedApplications.updateTimestamp) {
-            return 0;
-        } else {
-            return 1;
-        }
     }
 
     /**
@@ -363,36 +336,57 @@ library PropsRewardsLib {
         address[] _validators
     )
         public
+        onlyExistingValidators(_self, _validators)
         returns (bool)
     {
 
-        if (_self.selectedValidators.currentValidatorsList.length == 0) { // first time the daily validators list is set
-            require(
-                _updateCurrentValidatorsList(_self, _validators),
-                "Failed to update validator list - all validators must be added first"
-            );
+        if (_self.selectedValidators.currentList.length == 0) { // first time the daily validators list is set
+            _updateCurrentEntityList(_self.selectedValidators, _validators);
         } else {
-            _updatePreviousValidatorsList(_self);
-            require(
-                _updateCurrentValidatorsList(_self, _validators),
-                "Failed to update validator list - all validators must be added first"
-            );
+            _updatePreviousEntityList(_self.selectedValidators);
+            _updateCurrentEntityList(_self.selectedValidators, _validators);
         }
         _self.selectedValidators.updateTimestamp = _dailyTimestamp;
         return true;
     }
 
-    /**
-    * @dev Get which validator to use. Current = 0, previous = 1
+   /**
+    * @dev Set new applications list
     * @param _self Data pointer to storage
+    * @param _dailyTimestamp uint256 the daily reward timestamp from which this change should take effect
+    * @param _applications address[] array of applications
+    */
+    function setApplications(
+        Data storage _self,
+        uint256 _dailyTimestamp,
+        address[] _applications
+    )
+        public
+        onlyExistingApplications(_self, _applications)
+        returns (bool)
+    {
+
+        if (_self.selectedApplications.currentList.length == 0) { // first time the daily validators list is set
+            _updateCurrentEntityList(_self.selectedApplications, _applications);
+        } else {
+            _updatePreviousEntityList(_self.selectedApplications);
+            _updateCurrentEntityList(_self.selectedApplications, _applications);
+        }
+        _self.selectedApplications.updateTimestamp = _dailyTimestamp;
+        return true;
+    }
+
+    /**
+    * @dev Get which entity list to use. Current = 0, previous = 1
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
     * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
     */
-    function getSelectedValidatorsListType(Data storage _self, uint256 _dailyTimestamp)
-        public
-        view
+    function getSelectedRewardedEntityListType(RewardedEntityList _rewardedEntitylist, uint256 _dailyTimestamp)
+        internal
+        pure
         returns (uint256)
     {
-        if (_dailyTimestamp >= _self.selectedValidators.updateTimestamp) {
+        if (_dailyTimestamp >= _rewardedEntitylist.updateTimestamp) {
             return 0;
         } else {
             return 1;
@@ -512,10 +506,10 @@ library PropsRewardsLib {
         view
         returns (uint256)
     {
-        if (getSelectedValidatorsListType(_self, _dailyTimestamp) == 0) {
-            return _self.selectedValidators.currentValidatorsList.length;
+        if (getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+            return _self.selectedValidators.currentList.length;
         } else {
-            return _self.selectedValidators.previousValidatorsList.length;
+            return _self.selectedValidators.previousList.length;
         }
     }
 
@@ -529,10 +523,10 @@ library PropsRewardsLib {
         view
         returns (uint256)
     {
-        if (getSelectedValidatorsListType(_self, _dailyTimestamp) == 0) {
-            return ((_self.selectedValidators.currentValidatorsList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;
+        if (getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+            return ((_self.selectedValidators.currentList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;
         } else {
-            return ((_self.selectedValidators.previousValidatorsList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;
+            return ((_self.selectedValidators.previousList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;
         }
     }
 
@@ -541,173 +535,88 @@ library PropsRewardsLib {
     * If new, push.
     * If same size, replace
     * If different size, delete, and then push.
-    * @param _self Data pointer to storage
-    * @param _applications address[] array of applications
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
+    * @param _entities address[] array of entities
     */
-    function _updateCurrentApplicationsList(Data storage _self, address[] _applications)
+    //_updateCurrentEntityList(_rewardedEntitylist, _entities,_rewardedEntityType),
+    function _updateCurrentEntityList(
+        RewardedEntityList storage _rewardedEntitylist,
+        address[] _entities
+    )
         internal
         returns (bool)
     {
-        bool emptyCurrentApplicationsList = _self.selectedApplications.currentApplicationsList.length == 0;
-        if (!emptyCurrentApplicationsList && _self.selectedApplications.currentApplicationsList.length != _applications.length) {
-            _deleteCurrentApplicationsList(_self);
-            emptyCurrentApplicationsList = true;
+        bool emptyCurrentList = _rewardedEntitylist.currentList.length == 0;
+        if (!emptyCurrentList && _rewardedEntitylist.currentList.length != _entities.length) {
+            _deleteCurrentEntityList(_rewardedEntitylist);
+            emptyCurrentList = true;
         }
 
-        for (uint256 i = 0; i < _applications.length; i++) {
-            if (_self.applications[_applications[i]].initializedState != 1) return false; // proposed application doesn't exist
-            if (emptyCurrentApplicationsList) {
-                _self.selectedApplications.currentApplicationsList.push(_applications[i]);
+        for (uint256 i = 0; i < _entities.length; i++) {
+            if (emptyCurrentList) {
+                _rewardedEntitylist.currentList.push(_entities[i]);
             } else {
-                _self.selectedApplications.currentApplicationsList[i] = _applications[i];
+                _rewardedEntitylist.currentList[i] = _entities[i];
             }
-            _self.selectedApplications.currentApplications[_applications[i]] = true;
+            _rewardedEntitylist.current[_entities[i]] = true;
         }
         return true;
     }
 
     /**
-    * @dev Update previous daily applications list
-    * @param _self Data pointer to storage
+    * @dev Update previous daily list
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
     */
-    function _updatePreviousApplicationsList(Data storage _self)
+    function _updatePreviousEntityList(RewardedEntityList storage _rewardedEntitylist)
         internal
         returns (bool)
     {
-        bool emptyPreviousApplicationsList = _self.selectedApplications.previousApplicationsList.length == 0;
+        bool emptyPreviousList = _rewardedEntitylist.previousList.length == 0;
         if (
-            !emptyPreviousApplicationsList &&
-            _self.selectedApplications.previousApplicationsList.length != _self.selectedApplications.currentApplicationsList.length
+            !emptyPreviousList &&
+            _rewardedEntitylist.previousList.length != _rewardedEntitylist.currentList.length
         ) {
-            _deletePreviousApplicationsList(_self);
-            emptyPreviousApplicationsList = true;
+            _deletePreviousEntityList(_rewardedEntitylist);
+            emptyPreviousList = true;
         }
-        for (uint256 i = 0; i < _self.selectedApplications.currentApplicationsList.length; i++) {
-            if (emptyPreviousApplicationsList) {
-                _self.selectedApplications.previousApplicationsList.push(_self.selectedApplications.currentApplicationsList[i]);
+        for (uint256 i = 0; i < _rewardedEntitylist.currentList.length; i++) {
+            if (emptyPreviousList) {
+                _rewardedEntitylist.previousList.push(_rewardedEntitylist.currentList[i]);
             } else {
-                _self.selectedApplications.previousApplicationsList[i] = _self.selectedApplications.currentApplicationsList[i];
+                _rewardedEntitylist.previousList[i] = _rewardedEntitylist.currentList[i];
             }
-            _self.selectedApplications.previousApplications[_self.selectedApplications.currentApplicationsList[i]] = true;
+            _rewardedEntitylist.previous[_rewardedEntitylist.currentList[i]] = true;
         }
         return true;
     }
 
     /**
-    * @dev Delete existing values from the current applications list
-    * @param _self Data pointer to storage
+    * @dev Delete existing values from the current list
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
     */
-    function _deleteCurrentApplicationsList(Data storage _self)
+    function _deleteCurrentEntityList(RewardedEntityList storage _rewardedEntitylist)
         internal
         returns (bool)
     {
-        for (uint256 i = 0; i < _self.selectedApplications.currentApplicationsList.length ; i++) {
-             delete _self.selectedApplications.currentApplications[_self.selectedApplications.currentApplicationsList[i]];
+        for (uint256 i = 0; i < _rewardedEntitylist.currentList.length ; i++) {
+             delete _rewardedEntitylist.current[_rewardedEntitylist.currentList[i]];
         }
-        delete  _self.selectedApplications.currentApplicationsList;
+        delete  _rewardedEntitylist.currentList;
         return true;
     }
 
     /**
     * @dev Delete existing values from the previous applications list
-    * @param _self Data pointer to storage
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
     */
-    function _deletePreviousApplicationsList(Data storage _self)
+    function _deletePreviousEntityList(RewardedEntityList storage _rewardedEntitylist)
         internal
         returns (bool)
     {
-        for (uint256 i = 0; i < _self.selectedApplications.previousApplicationsList.length ; i++) {
-            delete _self.selectedApplications.previousApplications[_self.selectedApplications.previousApplicationsList[i]];
+        for (uint256 i = 0; i < _rewardedEntitylist.previousList.length ; i++) {
+            delete _rewardedEntitylist.previous[_rewardedEntitylist.previousList[i]];
         }
-        delete _self.selectedApplications.previousApplicationsList;
+        delete _rewardedEntitylist.previousList;
         return true;
     }
-
-    /**
-    * @dev Update current daily validators list.
-    * If new, push.
-    * If same size, replace
-    * If different size, delete, and then push.
-    * @param _self Data pointer to storage
-    * @param _validators address[] array of validators
-    */
-    function _updateCurrentValidatorsList(Data storage _self, address[] _validators)
-        internal
-        returns (bool)
-    {
-        bool emptyCurrentValidatorsList = _self.selectedValidators.currentValidatorsList.length == 0;
-        if (!emptyCurrentValidatorsList && _self.selectedValidators.currentValidatorsList.length != _validators.length) {
-            _deleteCurrentValidatorsList(_self);
-            emptyCurrentValidatorsList = true;
-        }
-
-        for (uint256 i = 0; i < _validators.length; i++) {
-            if (_self.validators[_validators[i]].initializedState != 1) return false; // proposed validator doesn't exist
-            if (emptyCurrentValidatorsList) {
-                _self.selectedValidators.currentValidatorsList.push(_validators[i]);
-            } else {
-                _self.selectedValidators.currentValidatorsList[i] = _validators[i];
-            }
-            _self.selectedValidators.currentValidators[_validators[i]] = true;
-        }
-        return true;
-    }
-
-    /**
-    * @dev Update previous daily validators list
-    * @param _self Data pointer to storage
-    */
-    function _updatePreviousValidatorsList(Data storage _self)
-        internal
-        returns (bool)
-    {
-        bool emptyPreviousValidatorsList = _self.selectedValidators.previousValidatorsList.length == 0;
-        if (
-            !emptyPreviousValidatorsList &&
-            _self.selectedValidators.previousValidatorsList.length != _self.selectedValidators.currentValidatorsList.length
-        ) {
-            _deletePreviousValidatorsList(_self);
-            emptyPreviousValidatorsList = true;
-        }
-        for (uint256 i = 0; i < _self.selectedValidators.currentValidatorsList.length; i++) {
-            if (emptyPreviousValidatorsList) {
-                _self.selectedValidators.previousValidatorsList.push(_self.selectedValidators.currentValidatorsList[i]);
-            } else {
-                _self.selectedValidators.previousValidatorsList[i] = _self.selectedValidators.currentValidatorsList[i];
-            }
-            _self.selectedValidators.previousValidators[_self.selectedValidators.currentValidatorsList[i]] = true;
-        }
-        return true;
-    }
-
-    /**
-    * @dev Delete existing values from the current validators list
-    * @param _self Data pointer to storage
-    */
-    function _deleteCurrentValidatorsList(Data storage _self)
-        internal
-        returns (bool)
-    {
-        for (uint256 i = 0; i < _self.selectedValidators.currentValidatorsList.length ; i++) {
-             delete _self.selectedValidators.currentValidators[_self.selectedValidators.currentValidatorsList[i]];
-        }
-        delete  _self.selectedValidators.currentValidatorsList;
-        return true;
-    }
-
-    /**
-    * @dev Delete existing values from the previous validators list
-    * @param _self Data pointer to storage
-    */
-    function _deletePreviousValidatorsList(Data storage _self)
-        internal
-        returns (bool)
-    {
-        for (uint256 i = 0; i < _self.selectedValidators.previousValidatorsList.length ; i++) {
-            delete _self.selectedValidators.previousValidators[_self.selectedValidators.previousValidatorsList[i]];
-        }
-        delete _self.selectedValidators.previousValidatorsList;
-        return true;
-    }
-
 }
