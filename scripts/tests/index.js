@@ -15,7 +15,7 @@ async function main() {
   const myProject = new SimpleProject('PropsToken', { from: creatorAddress });
   console.log('Creating an upgradeable instance of PropsToken...');
   try {
-    const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp] });
+    const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp, creatorAddress] });
     const name = await instance.methods.name().call();
     
     // for (a in instance) {
