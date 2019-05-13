@@ -1,8 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "zos-lib/contracts/Initializable.sol";
-
-
 /**
  * @title Props Rewards Library
  * @dev Library to manage application and validators and parameters
@@ -106,7 +103,7 @@ library PropsRewardsLib {
     }
 
     modifier onlySelectedValidators(Data storage _self, uint256 _dailyTimestamp) {
-        if (getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
             require (
                 _self.selectedValidators.current[msg.sender],
                 "Must be a current selected validator"
@@ -381,7 +378,7 @@ library PropsRewardsLib {
     * @param _rewardedEntitylist RewardedEntityList pointer to storage
     * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
     */
-    function getSelectedRewardedEntityListType(RewardedEntityList _rewardedEntitylist, uint256 _dailyTimestamp)
+    function _getSelectedRewardedEntityListType(RewardedEntityList _rewardedEntitylist, uint256 _dailyTimestamp)
         internal
         pure
         returns (uint256)
@@ -506,7 +503,7 @@ library PropsRewardsLib {
         view
         returns (uint256)
     {
-        if (getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
             return _self.selectedValidators.currentList.length;
         } else {
             return _self.selectedValidators.previousList.length;
@@ -523,7 +520,7 @@ library PropsRewardsLib {
         view
         returns (uint256)
     {
-        if (getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
             return ((_self.selectedValidators.currentList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;
         } else {
             return ((_self.selectedValidators.previousList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;

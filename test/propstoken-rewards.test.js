@@ -24,7 +24,7 @@ const formattedAddress = address => Buffer.from(ethUtil.stripHexPrefix(address),
 const formattedInt = int => ethUtil.setLengthLeft(int, 32);
 const formattedBytes32 = bytes => ethUtil.addHexPrefix(bytes.toString('hex'));
 const hashedTightPacked = args => ethUtil.sha3(Buffer.concat(args));
-
+global.dontCreateProxy = true;
 
 let instance;
 contract('main', (_accounts) => {
@@ -47,10 +47,12 @@ contract('main', (_accounts) => {
       sidechainAddress: "0x1C9D0a98f58c3fa9a22A8BB85E31A7245355464C", //#32
     }    
     it('Application can add itself', async () => {
-      const res = await instance.methods.updateApplication(application1.name, application1.rewardsAddress, application1.sidechainAddress)
+      // const res = await instance.methods.updateApplication(application1.name, application1.rewardsAddress, application1.sidechainAddress)
+      // .send({ from: application1.account});
+      const res = await instance.methods.updateController('0x5B0Da644CCFc3794d60d33b17975867A5C5dd1aC')
       .send({ from: application1.account});
-      const applications = await instance.applications().call();
-      console.log(applications);
+      // const applications = await instance.applications().call();
+      // console.log(applications);
       process.exit(1);
       const transferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
       const receiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());

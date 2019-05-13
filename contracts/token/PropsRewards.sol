@@ -3,14 +3,13 @@ pragma solidity ^0.4.24;
 import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/math/SafeMath.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
-// import "./PropsParameters.sol";
 import { PropsRewardsLib } from "./PropsRewardsLib.sol";
 
 /**
  * @title Props Rewards
  * @dev Contract allows to set approved apps and validators. Submit and mint rewards...
  **/
-contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
+contract PropsRewards is Initializable, ERC20 {
     using SafeMath for uint256;
     /*
     *  Events
@@ -75,6 +74,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     PropsRewardsLib.Data internal rewardsLibData;
     uint256 public maxTotalSupply;
     address public controller; // controller entity
+
     /*
     *  Modifiers
     */
@@ -208,7 +208,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
             totalSupply()
         );
         if (appRewardsSum > 0) {
-            mintDailyRewardsForApps(_dailyTimestamp, _rewardsHash, _applications, _amounts, appRewardsSum);
+            _mintDailyRewardsForApps(_dailyTimestamp, _rewardsHash, _applications, _amounts, appRewardsSum);
         }
 
         // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
@@ -222,7 +222,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
                 true
             );
             if (previousDayValidatorRewardsAmount > 0) {
-                mintDailyRewardsForValidators(rewardsLibData.previousDailyTimestamp, rewardsLibData.previousDailyRewardsHash, previousDayValidatorRewardsAmount);
+                _mintDailyRewardsForValidators(rewardsLibData.previousDailyTimestamp, rewardsLibData.previousDailyRewardsHash, previousDayValidatorRewardsAmount);
             }
         }
         // check and give validator rewards if all validators submitted
@@ -235,7 +235,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
             false
         );
         if (validatorRewardsAmount > 0) {
-            mintDailyRewardsForValidators(_dailyTimestamp, _rewardsHash, validatorRewardsAmount);
+            _mintDailyRewardsForValidators(_dailyTimestamp, _rewardsHash, validatorRewardsAmount);
         }
 
         emit DailyRewardsSubmitted(_dailyTimestamp, _rewardsHash, msg.sender);
@@ -336,7 +336,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
         // ApplicationRewardsPercent pphm ==> 0.03475%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
         // ApplicationRewardsMaxVariationPercent pphm ==> 150%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 1.5 * 1e8, 0);
+        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 150 * 1e6, 0);
         // ValidatorMajorityPercent pphm ==> 50%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
          // ValidatorRewardsPercent pphm ==> 0.001829%
@@ -351,7 +351,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     * @param _rewardsHash bytes32 hash of the rewards data
     * @param _amount uint256 amount each validator should get
     */
-    function mintDailyRewardsForValidators(uint256 _dailyTimestamp, bytes32 _rewardsHash, uint256 _amount)
+    function _mintDailyRewardsForValidators(uint256 _dailyTimestamp, bytes32 _rewardsHash, uint256 _amount)
         internal
     {
         uint256 validatorsCount = rewardsLibData.dailyRewards[_rewardsHash].submissionValidators.length;
@@ -374,7 +374,7 @@ contract PropsRewards is Initializable, ERC20 /*, PropsParameters*/ {
     * @param _amounts uint256[] array of amounts each app should get
     * @param _sum uint256 the sum of all application rewards given
     */
-    function mintDailyRewardsForApps(
+    function _mintDailyRewardsForApps(
         uint256 _dailyTimestamp,
         bytes32 _rewardsHash,
         address[] _applications,
