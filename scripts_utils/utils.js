@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 const csv = require('fast-csv');
 const fs = require('fs');
 
-const gasPrice = () => 4 * (10 ** 9);
+const gasPrice = () => 11 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
     case 'attribute': // assign attribute to specific address
