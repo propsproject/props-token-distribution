@@ -47,7 +47,7 @@ contract('main', (_accounts) => {
       sidechainAddress: "0x1C9D0a98f58c3fa9a22A8BB85E31A7245355464C", //#32
     }    
     it('Application can add itself', async () => {
-      const res = await instance.methods.addAplication(application1.name, application1.rewardsAddress, application1.sidechainAddress)
+      const res = await instance.methods.updateApplication(application1.name, application1.rewardsAddress, application1.sidechainAddress)
       .send({ from: application1.account});
       const applications = await instance.applications().call();
       console.log(applications);
