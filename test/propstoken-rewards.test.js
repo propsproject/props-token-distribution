@@ -25,43 +25,337 @@ const formattedInt = int => ethUtil.setLengthLeft(int, 32);
 const formattedBytes32 = bytes => ethUtil.addHexPrefix(bytes.toString('hex'));
 const hashedTightPacked = args => ethUtil.sha3(Buffer.concat(args));
 global.dontCreateProxy = true;
-
+let newControllerAddress;
+let txRes;
 let instance;
+const now = Math.floor(Date.now()/1000);
+const dailyTimestamp1 = now - (now % 86400) + 86400; //today
+const dailyTimestamp2 = dailyTimestamp1 + (86400); //tomorrow
+const dailyTimestamp3 = dailyTimestamp1 - (86400); //yesterday
+const application1 = {
+  account: web3.eth.accounts[11],
+  name: "application1",
+  rewardsAddress: web3.eth.accounts[12],
+  sidechainAddress: web3.eth.accounts[13],
+  updatedName: "application1-update"
+}
+
+const application2 = {
+  account: web3.eth.accounts[14],
+  name: "application2",
+  rewardsAddress: web3.eth.accounts[15],
+  sidechainAddress: web3.eth.accounts[16],
+}        
+
+const application3 = {
+  account: web3.eth.accounts[17],
+  name: "application3",
+  rewardsAddress: web3.eth.accounts[18],
+  sidechainAddress: web3.eth.accounts[19],
+}
+
+const application4 = {
+  account: web3.eth.accounts[20],
+  name: "application4",
+  rewardsAddress: web3.eth.accounts[21],
+  sidechainAddress: web3.eth.accounts[22],
+}
+
+const application5 = {
+  account: web3.eth.accounts[23],
+  name: "application5",
+  rewardsAddress: web3.eth.accounts[24],
+  sidechainAddress: web3.eth.accounts[25],
+}
+
+const validator1 = {
+  account: web3.eth.accounts[30],
+  name: "validator1",
+  rewardsAddress: web3.eth.accounts[31],
+  sidechainAddress: web3.eth.accounts[32],
+  updatedName: "validator1-update"
+}
+
+const validator2 = {
+  account: web3.eth.accounts[33],
+  name: "validator2",
+  rewardsAddress: web3.eth.accounts[34],
+  sidechainAddress: web3.eth.accounts[35],
+}        
+
+const validator3 = {
+  account: web3.eth.accounts[36],
+  name: "validator3",
+  rewardsAddress: web3.eth.accounts[37],
+  sidechainAddress: web3.eth.accounts[38],
+}
+
+const validator4 = {
+  account: web3.eth.accounts[39],
+  name: "validator4",
+  rewardsAddress: web3.eth.accounts[40],
+  sidechainAddress: web3.eth.accounts[41],
+}
+
+const validator5 = {
+  account: web3.eth.accounts[42],
+  name: "validator5",
+  rewardsAddress: web3.eth.accounts[43],
+  sidechainAddress: web3.eth.accounts[44],
+}
+
+
 contract('main', (_accounts) => {
   before(async () => {
     instance = await main();
   });
 
-  describe('Application Management Tests', async () => {
-    const application1 = {
-      account: "0x04af31028F3C7bfCC88c67a7ea4b6B3AC836Ef13", // #11
-      name: web3.fromAscii("application1"),
-      rewardsAddress: "0xc6b3C8b9C8f287500b506f50b1986a1eF573fafB", //#21
-      sidechainAddress: "0x7a76f5F9915129b70d236d454a9EEcEbA553d405", //#31
-    }
-
-    const application2 = {
-      account: "0xC20E56F626894D38cF682f93Dac5CE05fDbbe688", // #12
-      name: web3.fromAscii("application2"),
-      rewardsAddress: "0x21FBd99127185F70222150c90BF24d3097Bd5f95", //#22
-      sidechainAddress: "0x1C9D0a98f58c3fa9a22A8BB85E31A7245355464C", //#32
-    }    
-    it('Application can add itself', async () => {
-      // const res = await instance.methods.updateApplication(application1.name, application1.rewardsAddress, application1.sidechainAddress)
-      // .send({ from: application1.account});
-      const res = await instance.methods.updateController('0x5B0Da644CCFc3794d60d33b17975867A5C5dd1aC')
-      .send({ from: application1.account});
-      // const applications = await instance.applications().call();
-      // console.log(applications);
-      process.exit(1);
-      const transferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
-      const receiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
-      transferResult = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });      
-      newTransferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
-      newReceiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
-      assert.equal(Number(newTransferrerBalance), Number(transferrerBalance) - Number(amount));
-      assert.equal(Number(newReceiverBalance), Number(receiverBalance) + Number(amount));
+  describe('Initialization values are correct and generic controller function', async () => {    
+    const controllerAddress = web3.eth.accounts[2];
+    newControllerAddress = web3.eth.accounts[4];    
+    it('Controller is properly set', async () => {      
+      const currentController = await instance.methods.controller().call();
+      assert.equal(currentController.toLowerCase(), controllerAddress.toLowerCase());
     });
+    it('Controller can be changed by controller', async () => {
+      txRes = await instance.methods.updateController(newControllerAddress).send({ from: controllerAddress });
+      const currentController = await instance.methods.controller().call();
+      assert.equal(currentController.toLowerCase(), newControllerAddress.toLowerCase());
+    });
+    it('ControllerUpdated Event Emitted', async () => {
+      assert.equal(String(txRes.events['ControllerUpdated'].returnValues['0']).toLowerCase(),String(newControllerAddress).toLowerCase());      
+    });
+    it('Controller cannot be changed by non controller', async () => {
+      try {
+        expect(await instance.methods.updateController(controllerAddress).send({ from: controllerAddress })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });    
+    it('Max Supply is properly set', async () => {      
+      const maxSupply = await instance.methods.maxTotalSupply().call();      
+      assert.equal(String(maxSupply), "1000000000000000000000000000");
+    });
+    // enum ParameterName { ApplicationRewardsPercent, ApplicationRewardsMaxVariationPercent, ValidatorMajorityPercent, ValidatorRewardsPercent}
+    it('Parameter ApplicationRewardsPercent is properly set', async () => {          
+      const value = await instance.methods.getParameter(0, dailyTimestamp1).call();      
+      assert.equal(value, 34750); //pphm
+    });
+    it('Parameter ApplicationRewardsMaxVariationPercent is properly set', async () => {      
+      const value = await instance.methods.getParameter(1, dailyTimestamp1).call();      
+      assert.equal(value, 150000000); //pphm
+    });
+    it('Parameter ValidatorMajorityPercent is properly set', async () => {      
+      const value = await instance.methods.getParameter(2, dailyTimestamp1).call();      
+      assert.equal(value, 50000000); //pphm
+    });
+    it('Parameter ValidatorRewardsPercent is properly set', async () => {      
+      const value = await instance.methods.getParameter(3, dailyTimestamp1).call();      
+      assert.equal(value, 1829); //pphm
+    });
+  });
+
+  describe('Parameter Management Tests', async () => {        
+    // enum ParameterName { ApplicationRewardsPercent, ApplicationRewardsMaxVariationPercent, ValidatorMajorityPercent, ValidatorRewardsPercent}
+    it('Can update a parameter value and read both values', async () => {  
+      txRes = await instance.methods.updateParameter(3, 1830, dailyTimestamp2).send({ from: newControllerAddress });    
+      let value = await instance.methods.getParameter(3, dailyTimestamp1).call();      
+      assert.equal(value, 1829); //pphm
+      value = await instance.methods.getParameter(3, dailyTimestamp2).call();      
+      assert.equal(value, 1830); //pphm      
+    });
+    it('ParameterUpdated event was emitted', async () => {  
+      assert.equal(String(txRes.events['ParameterUpdated'].returnValues['0']).toLowerCase(),String('3'));
+      assert.equal(String(txRes.events['ParameterUpdated'].returnValues['1']).toLowerCase(),String('1830').toLowerCase());
+      assert.equal(String(txRes.events['ParameterUpdated'].returnValues['2']).toLowerCase(),String('1829').toLowerCase());
+      assert.equal(String(txRes.events['ParameterUpdated'].returnValues['3']).toLowerCase(),String(dailyTimestamp2).toLowerCase());
+
+    });
+    it('Updating a parameter before the previous update took place', async () => {  
+      await instance.methods.updateParameter(0, 34752, dailyTimestamp2).send({ from: newControllerAddress });    
+      let value = await instance.methods.getParameter(0, dailyTimestamp1).call();      
+      assert.equal(value, 34750); //pphm
+      value = await instance.methods.getParameter(0, dailyTimestamp2).call();      
+      assert.equal(value, 34752); //pphm      
+    });    
+  });
+  describe('Application Management Tests', async () => {
+    
+
+    it('Application can add itself', async () => {
+      txRes = await instance.methods.updateApplication(web3.fromAscii(application1.updatedName), application1.rewardsAddress, application1.sidechainAddress).send({ from: application1.account, gas: 500000 });
+      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['0']).toLowerCase(),String(application1.account).toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['ApplicationUpdated'].returnValues['1']).toLowerCase()),String(application1.updatedName).toLowerCase());
+      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['2']).toLowerCase(),String(application1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['3']).toLowerCase(),String(application1.sidechainAddress).toLowerCase());
+
+      //add the other applications needed for testing
+      txRes = await instance.methods.updateApplication(web3.fromAscii(application2.name), application2.rewardsAddress, application2.sidechainAddress).send({ from: application2.account, gas: 500000 });
+      txRes = await instance.methods.updateApplication(web3.fromAscii(application3.name), application3.rewardsAddress, application3.sidechainAddress).send({ from: application3.account, gas: 500000 });
+      txRes = await instance.methods.updateApplication(web3.fromAscii(application4.name), application4.rewardsAddress, application4.sidechainAddress).send({ from: application4.account, gas: 500000 });
+
+    });
+    
+    it('Application must have valid addresses', async () => {
+      try {
+        expect(await instance.methods.updateApplication(web3.fromAscii(application2.name), '0x0', application2.sidechainAddress).send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+
+      try {
+        expect(await instance.methods.updateApplication(web3.fromAscii(application2.name),  application2.rewardsAddress, '0x0').send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }      
+    });
+    it('Application can update itself', async () => {
+      txRes = await instance.methods.updateApplication(web3.fromAscii(application1.name), application1.rewardsAddress, application1.sidechainAddress).send({ from: application1.account, gas: 500000 });
+      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['0']).toLowerCase(),String(application1.account).toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['ApplicationUpdated'].returnValues['1']).toLowerCase()),String(application1.name).toLowerCase());
+      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['2']).toLowerCase(),String(application1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['3']).toLowerCase(),String(application1.sidechainAddress).toLowerCase());
+    });
+    it('Active applications list cannot be updated by non-controller', async () => {
+      try {        
+        expect(await instance.methods.setApplications(dailyTimestamp1, [application1.account, application2.account]).send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });
+    it('Active applications list will fail if an app does not yet exist', async () => {
+      try {        
+        expect(await instance.methods.setApplications(dailyTimestamp1, [application1.account, application2.account, application5.account]).send({ from: newControllerAddress, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }      
+    });
+    it('Active applications list can be updated by controller', async () => {
+      txRes = await instance.methods.setApplications(dailyTimestamp1, [application1.account, application2.account, application3.account]).send({ from: newControllerAddress, gas: 500000 });
+      assert.deepEqual(txRes.events['ApplicationsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[application1.account, application2.account, application3.account]);
+      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String(dailyTimestamp1).toLowerCase());      
+    });
+    it('Active applications list can be updated for next day by controller', async () => {
+      txRes = await instance.methods.setApplications(dailyTimestamp2, [application1.account, application2.account, application4.account]).send({ from: newControllerAddress, gas: 500000 });
+      assert.deepEqual(txRes.events['ApplicationsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[application1.account, application2.account, application4.account]);
+      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String(dailyTimestamp2).toLowerCase());      
+    });
+    it('Correctly retrieve applications list based on timestamp', async () => {        
+      let value = await instance.methods.getEntities(0, dailyTimestamp1).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account, application3.account]);
+      value = await instance.methods.getEntities(0, dailyTimestamp2).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account, application4.account]);
+    });
+    it('Active applications list can be updated for next day again with different count of applications by controller', async () => {
+      txRes = await instance.methods.setApplications(dailyTimestamp2, [application1.account, application2.account]).send({ from: newControllerAddress, gas: 500000 });
+      assert.deepEqual(txRes.events['ApplicationsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[application1.account, application2.account]);
+      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String(dailyTimestamp2).toLowerCase());      
+    });
+    it('Correctly retrieve applications list based on timestamp after second update', async () => {        
+      let value = await instance.methods.getEntities(0, dailyTimestamp1).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account, application3.account]);
+      value = await instance.methods.getEntities(0, dailyTimestamp2).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account]);
+    });
+
+  });
+
+  describe('Validator Management Tests', async () => {
+  
+    it('Validator can add itself', async () => {
+      txRes = await instance.methods.updateValidator(web3.fromAscii(validator1.updatedName), validator1.rewardsAddress, validator1.sidechainAddress).send({ from: validator1.account, gas: 500000 });
+      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['0']).toLowerCase(),String(validator1.account).toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['ValidatorUpdated'].returnValues['1']).toLowerCase()),String(validator1.updatedName).toLowerCase());
+      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['2']).toLowerCase(),String(validator1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['3']).toLowerCase(),String(validator1.sidechainAddress).toLowerCase());
+
+      //add the other validators needed for testing
+      txRes = await instance.methods.updateValidator(web3.fromAscii(validator2.name), validator2.rewardsAddress, validator2.sidechainAddress).send({ from: validator2.account, gas: 500000 });
+      txRes = await instance.methods.updateValidator(web3.fromAscii(validator3.name), validator3.rewardsAddress, validator3.sidechainAddress).send({ from: validator3.account, gas: 500000 });
+      txRes = await instance.methods.updateValidator(web3.fromAscii(validator4.name), validator4.rewardsAddress, validator4.sidechainAddress).send({ from: validator4.account, gas: 500000 });
+    });
+    
+    it('Validator must have valid addresses', async () => {
+      try {
+        expect(await instance.methods.updateValidator(web3.fromAscii(validator2.name), '0x0', validator2.sidechainAddress).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+
+      try {
+        expect(await instance.methods.updateValidator(web3.fromAscii(validator2.name),  validator2.rewardsAddress, '0x0').send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }      
+    });
+    it('Validator can update itself', async () => {
+      txRes = await instance.methods.updateValidator(web3.fromAscii(validator1.name), validator1.rewardsAddress, validator1.sidechainAddress).send({ from: validator1.account, gas: 500000 });
+      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['0']).toLowerCase(),String(validator1.account).toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['ValidatorUpdated'].returnValues['1']).toLowerCase()),String(validator1.name).toLowerCase());
+      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['2']).toLowerCase(),String(validator1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['3']).toLowerCase(),String(validator1.sidechainAddress).toLowerCase());
+    });
+    it('Active validators list cannot be updated by non-controller', async () => {
+      try {        
+        expect(await instance.methods.setValidators(dailyTimestamp1, [validator1.account, validator2.account]).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });
+    it('Active validators list will fail if an app does not yet exist', async () => {
+      try {
+        
+        expect(await instance.methods.setValidators(dailyTimestamp1, [validator1.account, validator2.account, validator5.account]).send({ from: newControllerAddress, gas: 500000 })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }      
+    });
+    it('Active validators list can be updated by controller', async () => {
+      txRes = await instance.methods.setValidators(dailyTimestamp1, [validator1.account, validator2.account, validator3.account]).send({ from: newControllerAddress, gas: 500000 });
+      assert.deepEqual(txRes.events['ValidatorsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[validator1.account, validator2.account, validator3.account]);
+      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String(dailyTimestamp1).toLowerCase());      
+    });
+    it('Active validators list can be updated for next day by controller', async () => {
+      txRes = await instance.methods.setValidators(dailyTimestamp2, [validator1.account, validator2.account, validator4.account]).send({ from: newControllerAddress, gas: 500000 });
+      assert.deepEqual(txRes.events['ValidatorsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[validator1.account, validator2.account, validator4.account]);
+      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String(dailyTimestamp2).toLowerCase());      
+    });
+    it('Correctly retrieve validators list based on timestamp', async () => {        
+      let value = await instance.methods.getEntities(1, dailyTimestamp1).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator3.account]);
+      value = await instance.methods.getEntities(1, dailyTimestamp2).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator4.account]);
+    });
+    it('Active validators list can be updated for next day again with different count of validators by controller', async () => {
+      txRes = await instance.methods.setValidators(dailyTimestamp2, [validator1.account, validator2.account]).send({ from: newControllerAddress, gas: 500000 });
+      assert.deepEqual(txRes.events['ValidatorsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[validator1.account, validator2.account]);
+      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String(dailyTimestamp2).toLowerCase());      
+    });
+    it('Correctly retrieve validators list based on timestamp after second update', async () => {        
+      let value = await instance.methods.getEntities(1, dailyTimestamp1).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator3.account]);
+      value = await instance.methods.getEntities(1, dailyTimestamp2).call();      
+      assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account]);
+    });
+
+  });
+
+    // it('Application can add itself', async () => {
+    //   // const res = await instance.methods.updateApplication(application1.name, application1.rewardsAddress, application1.sidechainAddress)
+    //   // .send({ from: application1.account});
+    //   const res = await instance.methods.updateController('0x5B0Da644CCFc3794d60d33b17975867A5C5dd1aC')
+    //   .send({ from: application1.account});
+    //   // const applications = await instance.applications().call();
+    //   // console.log(applications);
+    //   process.exit(1);
+    //   const transferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+    //   const receiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+    //   transferResult = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });      
+    //   newTransferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+    //   newReceiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+    //   assert.equal(Number(newTransferrerBalance), Number(transferrerBalance) - Number(amount));
+    //   assert.equal(Number(newReceiverBalance), Number(receiverBalance) + Number(amount));
+    // });
 
     // it('Transfer Event Emitted', async () => {
     //   assert.equal(String(transferResult.events['Transfer'].returnValues['1']).toLowerCase(),String(web3.eth.accounts[4]).toLowerCase());
@@ -445,4 +739,4 @@ contract('main', (_accounts) => {
   //     }
   //   });
   // });
-});
+// });

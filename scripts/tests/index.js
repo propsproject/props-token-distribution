@@ -39,53 +39,34 @@ async function main() {
     // const proxyContractJSON = require('/Users/jretina/Programming/PROPSProject/props-token-distribution/node_modules/zos-lib/build/contracts/ProxyAdmin.json');
     // const propsContractJSON = require('/Users/jretina/Programming/PROPSProject/props-token-distribution/build/contracts/PropsToken.json');
     // const instance = web3.eth.contract(proxyContractJSON.abi, '0x68671ecac0fffDcb0cCbebc67c4cE1b264364417');  
+    const controllerAddress = web3.eth.accounts[2];
     const execSync = require('child_process').execSync;
-    cmd = `zos push --deploy-dependencies --network test`;
+    cmd = `zos create PropsToken -v --init initialize --args 0xaBe9b86eB40039993A15D55C6D27822BF9895c94,1548862535,${controllerAddress} --network test --from 0x5B0Da644CCFc3794d60d33b17975867A5C5dd1aC > /tmp/zos-create.output 2> /tmp/zos-create.output`;
+        
   try {
     console.log(`Executing ${cmd}`);
     const cmdOutput = execSync(cmd).toString();
     console.log(`${cmd} returned => ${cmdOutput}`);
+    var fs = require('fs');
+    var contents = fs.readFileSync('/tmp/zos-create.output', 'utf8');    
+    var myRegexp = /Instance created at (.*)/g;
+    var match = myRegexp.exec(contents);
+    console.log(JSON.stringify(match));
+    
   } catch (err) {
     console.warn(err);
   }
-
-  // deploy proxy contract
-  let addressPropsHolder;
-  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
-  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
-    providerOwner = connectionConfig.networks[networkInUse].provider();
-    web3 = new Web3(providerOwner);
-  }
-  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
-    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
-    const accounts = await web3.eth.getAccounts();
-    addressInUse = accounts[1];
-    addressPropsHolder = accounts[2];
-  } else {
-    addressInUse = connectionConfig.networks[networkInUse].wallet_address;
-    addressPropsHolder = connectionConfig.networks[`${networkProvider}2`].wallet_address;
-  }
-
-  cmd = `zos create PropsToken -v --init initialize --args ${addressPropsHolder},${transferStartTime} --network ${networkInUse} --from ${addressInUse}`;
-  try {
-    console.log(`Executing ${cmd}`);
-    const cmdOutput = execSync(cmd).toString();
-    console.log(`${cmd} returned => ${cmdOutput}`);
-    process.exit(0);
-  } catch (err) {
-    console.warn(err);
-  }
-    const _instance = await PropsToken.at('0xE72DCC16049206B2C6270ae5D81De76D33D8b980')
+    const _instance = await PropsToken.at(match[1])
     
     // const token = artifacts.require("PropsToken");
     // console.log('---------------------');
     // console.log(JSON.stringify(propsContractJSON));
     // console.log('---------------------');
     // const instance = web3.eth.contract(propsContractJSON.abi, '0xE72DCC16049206B2C6270ae5D81De76D33D8b980');  
-    const name = await _instance.methods.name().call();
-    const controller = await _instance.methods.controller().call();
-    // console.log('---------------------');
-    console.log('name='+name+", controller="+controller);
+    // const name = await _instance.methods.name().call();
+    // const controller = await _instance.methods.controller().call();
+    // // console.log('---------------------');
+    // console.log('name='+name+", controller="+controller);
     // console.log('---------------------');
     return _instance;
   }

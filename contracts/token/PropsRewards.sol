@@ -48,24 +48,24 @@ contract PropsRewards is Initializable, ERC20 {
         address indexed sidechainAddress
     );
 
-    event ParameterUpdate(
+    event ParameterUpdated(
         PropsRewardsLib.ParameterName param,
         uint256 newValue,
         uint256 oldValue,
         uint256 timestamp
     );
 
-    event ValidatorsListUpdate(
+    event ValidatorsListUpdated(
         address[] validatorsList,
         uint256 indexed dailyTimestamp
     );
 
-    event ApplicationsListUpdate(
-        address[] validatorsList,
+    event ApplicationsListUpdated(
+        address[] applicationsList,
         uint256 indexed dailyTimestamp
     );
 
-    event ControllerUpdate(address indexed newController);
+    event ControllerUpdated(address indexed newController);
 
     /*
     *  Storage
@@ -84,46 +84,6 @@ contract PropsRewards is Initializable, ERC20 {
             "Must be the controller"
         );
         _;
-    }
-
-    modifier onlyValidDailyTimestamp(uint256 _dailyTimestamp) {
-        // assuming the daily timestamp is midnight UTC
-        require(
-            _dailyTimestamp % 86400 == 0 && (
-                _dailyTimestamp >= rewardsLibData.currentDailyTimestamp ||
-                _dailyTimestamp == rewardsLibData.previousDailyTimestamp ||
-                _dailyTimestamp == 0
-            ),
-            "Must be midnight"
-        );
-         _;
-    }
-
-    modifier onlyFutureValidDailyTimestamp(uint256 _dailyTimestamp) {
-        require(
-            _dailyTimestamp % 86400 == 0 &&
-            _dailyTimestamp > rewardsLibData.currentDailyTimestamp,
-            "Must be midnight and > daily timestamp"
-        );
-         _;
-    }
-
-    modifier onlyFutureValidValidatorsDailyTimestamp(uint256 _dailyTimestamp) {
-        require(
-            _dailyTimestamp % 86400 == 0 &&
-            _dailyTimestamp > rewardsLibData.selectedValidators.updateTimestamp,
-            "Must be midnight and > last update timestamp"
-        );
-         _;
-    }
-
-    modifier onlyFutureValidApplicationsDailyTimestamp(uint256 _dailyTimestamp) {
-        require(
-            _dailyTimestamp % 86400 == 0 &&
-            _dailyTimestamp > rewardsLibData.selectedApplications.updateTimestamp,
-            "Must be midnight and > last update timestamp"
-        );
-         _;
     }
 
     /**
@@ -156,11 +116,10 @@ contract PropsRewards is Initializable, ERC20 {
     function setValidators(uint256 _dailyTimestamp, address[] _validators)
         public
         onlyController
-        onlyFutureValidValidatorsDailyTimestamp(_dailyTimestamp)
         returns (bool)
     {
         PropsRewardsLib.setValidators(rewardsLibData, _dailyTimestamp, _validators);
-        emit ValidatorsListUpdate(_validators, _dailyTimestamp);
+        emit ValidatorsListUpdated(_validators, _dailyTimestamp);
         return true;
     }
 
@@ -172,12 +131,24 @@ contract PropsRewards is Initializable, ERC20 {
     function setApplications(uint256 _dailyTimestamp, address[] _applications)
         public
         onlyController
-        onlyFutureValidApplicationsDailyTimestamp(_dailyTimestamp)
         returns (bool)
     {
         PropsRewardsLib.setApplications(rewardsLibData, _dailyTimestamp, _applications);
-        emit ApplicationsListUpdate(_applications, _dailyTimestamp);
+        emit ApplicationsListUpdated(_applications, _dailyTimestamp);
         return true;
+    }
+
+    /**
+    * @dev Get the applications or validators list
+    * @param _entityType RewardedEntityType either application (0) or validator (1)
+    * @param _dailyTimestamp uint256 the daily reward timestamp from which this change should take effect
+    */
+    function getEntities(PropsRewardsLib.RewardedEntityType _entityType, uint256 _dailyTimestamp)
+        public
+        view
+        returns (address[])
+    {
+        return PropsRewardsLib.getEntities(rewardsLibData, _entityType, _dailyTimestamp);
     }
 
     /**
@@ -194,7 +165,6 @@ contract PropsRewards is Initializable, ERC20 {
         uint256[] _amounts
     )
         public
-        onlyValidDailyTimestamp(_dailyTimestamp)
         returns (bool)
     {
         // check and give application rewards if majority of validators agree
@@ -218,7 +188,6 @@ contract PropsRewards is Initializable, ERC20 {
                 rewardsLibData.previousDailyTimestamp,
                 rewardsLibData.previousDailyRewardsHash,
                 maxTotalSupply,
-                totalSupply(),
                 true
             );
             if (previousDayValidatorRewardsAmount > 0) {
@@ -231,7 +200,6 @@ contract PropsRewards is Initializable, ERC20 {
             _dailyTimestamp,
             _rewardsHash,
             maxTotalSupply,
-            totalSupply(),
             false
         );
         if (validatorRewardsAmount > 0) {
@@ -254,11 +222,27 @@ contract PropsRewards is Initializable, ERC20 {
         returns (bool)
     {
         controller = _controller;
-        emit ControllerUpdate
+        emit ControllerUpdated
         (
             _controller
         );
         return true;
+    }
+
+    /**
+    * @dev Allows getting a parameter value based on timestamp
+    * @param _name ParameterName name of the parameter
+    * @param _timestamp starting when should this parameter use the current value
+    */
+    function getParameter(
+        PropsRewardsLib.ParameterName _name,
+        uint256 _timestamp
+    )
+        public
+        view
+        returns (uint256)
+    {
+        return PropsRewardsLib.getParameterValue(rewardsLibData, _name, _timestamp);
     }
 
     /**
@@ -274,11 +258,10 @@ contract PropsRewards is Initializable, ERC20 {
     )
         public
         onlyController
-        onlyFutureValidDailyTimestamp(_timestamp)
         returns (bool)
     {
         bytes32 paramKey = PropsRewardsLib.updateParameter(rewardsLibData, _name, _value, _timestamp);
-        emit ParameterUpdate(
+        emit ParameterUpdated(
             _name,
             rewardsLibData.parameters[paramKey].currentValue,
             rewardsLibData.parameters[paramKey].previousValue,
