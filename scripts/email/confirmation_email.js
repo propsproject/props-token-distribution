@@ -20,7 +20,7 @@ const network = outputDataFile.split('.')[0].split('-')[3];
 
 for (let i = 0; i < outputData.allocations.length; i += 1) {
   const recipient = outputData.allocations[i];
-  if (recipient.email !== 'Ari@blocktower.com') continue;
+  if (recipient.email !== 'test@test.com') continue;
   const body = prepareBody(recipient);
   const params = prepareEmail(recipient.email, body, 'Props Token Distribution Confirmation', '"Team Props" <team@propsproject.com>');
   //sendEmail(params);
