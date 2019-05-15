@@ -183,6 +183,7 @@ library PropsRewardsLib {
                 numOfValidators = _self.dailyRewards[_rewardsHash].confirmations;
             } else {
                 numOfValidators = _requiredValidatorsForValidatorsRewards(_self, _dailyTimestamp);
+                if (numOfValidators > _self.dailyRewards[_rewardsHash].confirmations) return 0;
             }
             _self.dailyRewards[_rewardsHash].finalized = 2;
             return _getValidatorRewardsDailyAmountPerValidator(_self, _dailyTimestamp, numOfValidators, _maxTotalSupply,  _self.dailyRewards[_rewardsHash].totalSupply);
@@ -469,10 +470,15 @@ library PropsRewardsLib {
         public
         returns (bool)
     {
-        _self.previousDailyTimestamp = _self.currentDailyTimestamp;
-        _self.currentDailyTimestamp = _dailyTimestamp;
+        if (_self.currentDailyTimestamp == 0) { // first time daily rewards is run no previous day
+            _self.currentDailyTimestamp = _dailyTimestamp;
+        } else {
+            _self.previousDailyTimestamp = _self.currentDailyTimestamp;
+            _self.currentDailyTimestamp = _dailyTimestamp;
+            _self.previousDailyRewardsHash = _rewardsHash;
+        }
         _self.dailyRewards[_rewardsHash].finalized = 1;
-        _self.previousDailyRewardsHash = _rewardsHash;
+
         return true;
     }
 

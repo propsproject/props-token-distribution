@@ -182,7 +182,10 @@ contract PropsRewards is Initializable, ERC20 {
         }
 
         // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
-        if (rewardsLibData.previousDailyTimestamp > 0) {// no need to look back for first day
+        if (
+            rewardsLibData.previousDailyTimestamp > 0 &&
+            _dailyTimestamp > rewardsLibData.previousDailyTimestamp
+        ) {
             uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
                 rewardsLibData,
                 rewardsLibData.previousDailyTimestamp,
