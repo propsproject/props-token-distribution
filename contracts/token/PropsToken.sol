@@ -32,11 +32,13 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
    * @param _holder address that will receive it's initial supply and be able to transfer before transfers start time
    * @param _transfersStartTime uint256 Unix Timestamp from which transfers are allowed
    * @param _controller address that will have controller functionality on rewards protocol
+   * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
    */
   function initialize(
     address _holder,
     uint256 _transfersStartTime,
-    address _controller
+    address _controller,
+    uint256 _minSecondsBetweenDays
   )
     public
     initializer
@@ -47,20 +49,21 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
 
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
     PropsTimeBasedTransfers.initialize(_transfersStartTime, _holder);
-    PropsRewards.initialize(_controller, decimals);
+    PropsRewards.initialize(_controller, decimals, _minSecondsBetweenDays);
     _mint(_holder, totalSupply);
   }
 
   /**
    * @dev Initializer for upgrade function. Called only once after upgrade
    * @param _controller address that will have controller functionality on rewards protocol
+   * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
    */
-  function initializePostRewardsUpgrade1(address _controller)
+  function initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays)
     public
     initializer
   {
     uint8 decimals = 18;
-    PropsRewards.initializePostRewardsUpgrade1(_controller, decimals);
+    PropsRewards.initializePostRewardsUpgrade1(_controller, decimals, _minSecondsBetweenDays);
   }
 
 }

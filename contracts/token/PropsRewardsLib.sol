@@ -17,7 +17,7 @@ library PropsRewardsLib {
     struct Parameter {
         uint256 currentValue;                   // current value in Pphm valid after timestamp
         uint256 previousValue;                  // previous value in Pphm for use before timestamp
-        uint256 updateTimestamp;                // timestamp of when the value was updated
+        uint256 rewardsDay;                // timestamp of when the value was updated
     }
     // Represents application details
     struct RewardedEntity {
@@ -34,7 +34,7 @@ library PropsRewardsLib {
         mapping (address => bool) previous;
         address[] currentList;
         address[] previousList;
-        uint256 updateTimestamp;
+        uint256 rewardsDay;
     }
 
     // Represents daily reward submissions and confimations
@@ -47,6 +47,12 @@ library PropsRewardsLib {
         uint256 totalSupply;
     }
 
+    //Represent rewards day to its rewardsHash and block.timestamp
+    struct RewardsDayHash {
+        bytes32 rewardsHash;
+        uint256 blockTimestamp;
+    }
+
     // represent the storage structures
     struct Data {
         // applications data
@@ -56,7 +62,7 @@ library PropsRewardsLib {
         mapping (address => RewardedEntity) validators;
         address[] validatorsList;
         // adjustable parameters data
-        mapping (bytes32 => Parameter) parameters; // parameter name which is keccak256(ParameterName.X)
+        mapping (uint256 => Parameter) parameters; // uint256 is the parameter enum index
         // the participating validators
         RewardedEntityList selectedValidators;
         // the participating applications
@@ -64,13 +70,13 @@ library PropsRewardsLib {
         // daily rewards submission data
         mapping (bytes32 => DailyRewards) dailyRewards;
         bytes32[] dailyRewardsList;
-        // previous daily reward hash
-        bytes32 previousDailyRewardsHash;
         // current and previous rewards daily timestamp
-        uint256 currentDailyTimestamp;
-        uint256 previousDailyTimestamp;
+        uint256 rewardsDay;
         // indication to when to cleanup the dailyRewards data
         uint256 maxDailyRewardStorage;
+        // map to hold rewardsDay to its hash and block timestamp
+        mapping (uint256 => RewardsDayHash) dailyRewardHashes;
+        uint256 minSecondsBetweenDays;
     }
     /*
     *  Modifiers
@@ -103,8 +109,8 @@ library PropsRewardsLib {
         _;
     }
 
-    modifier onlySelectedValidators(Data storage _self, uint256 _dailyTimestamp) {
-        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+    modifier onlySelectedValidators(Data storage _self, uint256 _rewardsDay) {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
             require (
                 _self.selectedValidators.current[msg.sender],
                 "Must be a current selected validator"
@@ -118,33 +124,27 @@ library PropsRewardsLib {
         _;
     }
 
-    modifier onlyValidDailyTimestamp(Data storage _self, uint256 _dailyTimestamp) {
-        // assuming the daily timestamp is midnight UTC
+    modifier onlyValidRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
-            _dailyTimestamp % 86400 == 0 && (
-                _dailyTimestamp >= _self.currentDailyTimestamp ||
-                _dailyTimestamp == _self.previousDailyTimestamp ||
-                _dailyTimestamp == 0
-            ),
-            "Must be midnight"
+            _rewardsDay == _self.rewardsDay ||
+            (_rewardsDay == (_self.rewardsDay + 1) && (block.timestamp - _self.dailyRewardHashes[_rewardsDay].blockTimestamp) > _self.minSecondsBetweenDays),
+            "Must be for this round or the next"
         );
          _;
     }
 
-    modifier onlyFutureValidValidatorsDailyTimestamp(Data storage _self, uint256 _dailyTimestamp) {
+    modifier onlyValidValidatorsRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
-            _dailyTimestamp % 86400 == 0 &&
-            _dailyTimestamp >= _self.selectedValidators.updateTimestamp,
-            "Must be midnight and > last update timestamp"
+            _rewardsDay >= _self.selectedValidators.rewardsDay,
+            "Must be existing or future validators rewardsDay"
         );
          _;
     }
 
-    modifier onlyFutureValidApplicationsDailyTimestamp(Data storage _self, uint256 _dailyTimestamp) {
+    modifier onlyValidApplicationsRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
-            _dailyTimestamp % 86400 == 0 &&
-            _dailyTimestamp >= _self.selectedApplications.updateTimestamp,
-            "Must be midnight and > last update timestamp"
+            _rewardsDay >= _self.selectedApplications.rewardsDay,
+            "Must be existing or future applications rewardsDay"
         );
          _;
     }
@@ -161,17 +161,15 @@ library PropsRewardsLib {
     /**
     * @dev The function is called by validators with the calculation of the daily rewards
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the rewards day
     * @param _rewardsHash bytes32 hash of the rewards data
     * @param _maxTotalSupply uint256 max total supply
-    * @param _previousDayRewards uint256 calculating previous day validator rewards
     */
     function calculateValidatorRewards(
         Data storage _self,
-        uint256 _dailyTimestamp,
+        uint256 _rewardsDay,
         bytes32 _rewardsHash,
-        uint256 _maxTotalSupply,
-        bool _previousDayRewards
+        uint256 _maxTotalSupply
     )
         public
         returns (uint256)
@@ -179,14 +177,14 @@ library PropsRewardsLib {
         uint256 numOfValidators;
         if (_self.dailyRewards[_rewardsHash].finalized == 1) // previous daily reward was not finalized
         {
-            if (_previousDayRewards) {
+            if (_rewardsDay < _self.rewardsDay) {
                 numOfValidators = _self.dailyRewards[_rewardsHash].confirmations;
             } else {
-                numOfValidators = _requiredValidatorsForValidatorsRewards(_self, _dailyTimestamp);
+                numOfValidators = _requiredValidatorsForValidatorsRewards(_self, _rewardsDay);
                 if (numOfValidators > _self.dailyRewards[_rewardsHash].confirmations) return 0;
             }
             _self.dailyRewards[_rewardsHash].finalized = 2;
-            return _getValidatorRewardsDailyAmountPerValidator(_self, _dailyTimestamp, numOfValidators, _maxTotalSupply,  _self.dailyRewards[_rewardsHash].totalSupply);
+            return _getValidatorRewardsDailyAmountPerValidator(_self, _rewardsDay, numOfValidators, _maxTotalSupply,  _self.dailyRewards[_rewardsHash].totalSupply);
         }
         return 0;
     }
@@ -194,7 +192,7 @@ library PropsRewardsLib {
     /**
     * @dev The function is called by validators with the calculation of the daily rewards
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the rewards day
     * @param _rewardsHash bytes32 hash of the rewards data
     * @param _applications address[] array of application addresses getting the daily reward
     * @param _amounts uint256[] array of amounts each app should get
@@ -203,7 +201,7 @@ library PropsRewardsLib {
     */
     function calculateApplicationRewards(
         Data storage _self,
-        uint256 _dailyTimestamp,
+        uint256 _rewardsDay,
         bytes32 _rewardsHash,
         address[] _applications,
         uint256[] _amounts,
@@ -211,13 +209,13 @@ library PropsRewardsLib {
         uint256 _currentTotalSupply
     )
         public
-        onlyValidDailyTimestamp(_self, _dailyTimestamp)
+        onlyValidRewardsDay(_self, _rewardsDay)
         onlyOneRewardsHashPerValidator(_self, _rewardsHash)
-        onlySelectedValidators(_self, _dailyTimestamp)
+        onlySelectedValidators(_self, _rewardsDay)
         returns (uint256)
     {
         require(
-                _rewardHashIsvalid(_dailyTimestamp, _rewardsHash, _applications, _amounts),
+                _rewardHashIsvalid(_rewardsDay, _rewardsHash, _applications, _amounts),
                 "Reward Hash is invalid"
         );
         if (_self.dailyRewards[_rewardsHash].initializedState == 0) {
@@ -227,14 +225,14 @@ library PropsRewardsLib {
         _self.dailyRewards[_rewardsHash].submissions[msg.sender] = true;
         _self.dailyRewards[_rewardsHash].confirmations++;
         _self.dailyRewards[_rewardsHash].submissionValidators.push(msg.sender);
-        if (_self.dailyRewards[_rewardsHash].confirmations == _requiredValidatorsForAppRewards(_self, _dailyTimestamp)) {
+        if (_self.dailyRewards[_rewardsHash].confirmations == _requiredValidatorsForAppRewards(_self, _rewardsDay)) {
             _self.dailyRewards[_rewardsHash].totalSupply = _currentTotalSupply;
             uint256 sum = _validateSubmittedData(_self, _applications, _amounts);
             require(
-                sum <= _getMaxAppRewardsDailyAmount(_self, _dailyTimestamp, _maxTotalSupply, _currentTotalSupply),
+                sum <= _getMaxAppRewardsDailyAmount(_self, _rewardsDay, _maxTotalSupply, _currentTotalSupply),
                 "Rewards data is invalid - exceed daily variation"
             );
-            _updateDailyTimestampAndRewardsHash(_self, _dailyTimestamp, _rewardsHash);
+            _updateDailyRewardsHash(_self, _rewardsDay, _rewardsHash);
             return sum;
         }
         return 0;
@@ -244,35 +242,22 @@ library PropsRewardsLib {
     * @dev Get parameter's value
     * @param _self Data pointer to storage
     * @param _name ParameterName name of the parameter
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the rewards day
     */
     function getParameterValue(
         Data storage _self,
         ParameterName _name,
-        uint256 _dailyTimestamp
+        uint256 _rewardsDay
     )
         public
         view
         returns (uint256)
     {
-        Parameter memory param = _self.parameters[getParameterKey(_name)];
-        if (_dailyTimestamp >= param.updateTimestamp) {
-            return param.currentValue;
+        if (_rewardsDay >= _self.parameters[uint256(_name)].rewardsDay) {
+            return _self.parameters[uint256(_name)].currentValue;
         } else {
-            return param.previousValue;
+            return _self.parameters[uint256(_name)].previousValue;
         }
-    }
-
-    /**
-    * @dev Get parameter's bytes32 encoding
-    * @param _name ParameterName name of the parameter
-    */
-    function getParameterKey(ParameterName _name)
-        public
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encodePacked(_name));
     }
 
     /**
@@ -280,27 +265,27 @@ library PropsRewardsLib {
     * @param _self Data pointer to storage
     * @param _name ParameterName name of the parameter
     * @param _value uint256 new value for the parameter
-    * @param _timestamp starting when should this parameter use the current value
+    * @param _rewardsDay uint256 the rewards day
     */
     function updateParameter(
         Data storage _self,
         ParameterName _name,
         uint256 _value,
-        uint256 _timestamp
+        uint256 _rewardsDay
     )
         public
-        returns (bytes32)
+        onlyValidRewardsDay(_self, _rewardsDay)
+        returns (bool)
     {
-        bytes32 paramKey = getParameterKey(_name);
-        if (_timestamp <= _self.parameters[paramKey].updateTimestamp) {
-           _self.parameters[paramKey].currentValue = _value;
-           _self.parameters[paramKey].updateTimestamp = _timestamp;
+        if (_rewardsDay <= _self.parameters[uint256(_name)].rewardsDay) {
+           _self.parameters[uint256(_name)].currentValue = _value;
+           _self.parameters[uint256(_name)].rewardsDay = _rewardsDay;
         } else {
-            _self.parameters[paramKey].previousValue = _self.parameters[paramKey].currentValue;
-            _self.parameters[paramKey].currentValue = _value;
-           _self.parameters[paramKey].updateTimestamp = _timestamp;
+            _self.parameters[uint256(_name)].previousValue = _self.parameters[uint256(_name)].currentValue;
+            _self.parameters[uint256(_name)].currentValue = _value;
+           _self.parameters[uint256(_name)].rewardsDay = _rewardsDay;
         }
-        return paramKey;
+        return true;
     }
 
     /**
@@ -362,16 +347,16 @@ library PropsRewardsLib {
     /**
     * @dev Set new validators list
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp from which this change should take effect
+    * @param _rewardsDay uint256 the rewards day from which the list should be active
     * @param _validators address[] array of validators
     */
     function setValidators(
         Data storage _self,
-        uint256 _dailyTimestamp,
+        uint256 _rewardsDay,
         address[] _validators
     )
         public
-        onlyFutureValidValidatorsDailyTimestamp(_self, _dailyTimestamp)
+        onlyValidValidatorsRewardsDay(_self, _rewardsDay)
         onlyExistingValidators(_self, _validators)
         returns (bool)
     {
@@ -379,26 +364,27 @@ library PropsRewardsLib {
         if (_self.selectedValidators.currentList.length == 0) { // first time the daily validators list is set
             _updateCurrentEntityList(_self.selectedValidators, _validators);
         } else {
-            if (_dailyTimestamp > _self.selectedValidators.updateTimestamp)
+            if (_rewardsDay > _self.selectedValidators.rewardsDay)
                 _updatePreviousEntityList(_self.selectedValidators);
             _updateCurrentEntityList(_self.selectedValidators, _validators);
         }
-        _self.selectedValidators.updateTimestamp = _dailyTimestamp;
+        _self.selectedValidators.rewardsDay = _rewardsDay;
         return true;
     }
 
    /**
     * @dev Set new applications list
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp from which this change should take effect
+    * @param _rewardsDay uint256 the rewards day from which the list should be active
     * @param _applications address[] array of applications
     */
     function setApplications(
         Data storage _self,
-        uint256 _dailyTimestamp,
+        uint256 _rewardsDay,
         address[] _applications
     )
         public
+        onlyValidApplicationsRewardsDay(_self, _rewardsDay)
         onlyExistingApplications(_self, _applications)
         returns (bool)
     {
@@ -406,11 +392,11 @@ library PropsRewardsLib {
         if (_self.selectedApplications.currentList.length == 0) { // first time the daily validators list is set
             _updateCurrentEntityList(_self.selectedApplications, _applications);
         } else {
-            if (_dailyTimestamp > _self.selectedApplications.updateTimestamp)
+            if (_rewardsDay > _self.selectedApplications.rewardsDay)
                 _updatePreviousEntityList(_self.selectedApplications);
             _updateCurrentEntityList(_self.selectedApplications, _applications);
         }
-        _self.selectedApplications.updateTimestamp = _dailyTimestamp;
+        _self.selectedApplications.rewardsDay = _rewardsDay;
         return true;
     }
 
@@ -418,25 +404,25 @@ library PropsRewardsLib {
     * @dev Get applications or validators list
     * @param _self Data pointer to storage
     * @param _entityType RewardedEntityType either application (0) or validator (1)
-    * @param _dailyTimestamp uint256 the daily reward timestamp to determine which list to get
+    * @param _rewardsDay uint256 the reward day to determine which list to get
     */
     function getEntities(
         Data storage _self,
         RewardedEntityType _entityType,
-        uint256 _dailyTimestamp
+        uint256 _rewardsDay
     )
         public
         view
         returns (address[])
     {
         if (_entityType == RewardedEntityType.Application) {
-            if (_getSelectedRewardedEntityListType(_self.selectedApplications, _dailyTimestamp) == 0) {
+            if (_getSelectedRewardedEntityListType(_self.selectedApplications, _rewardsDay) == 0) {
                 return _self.selectedApplications.currentList;
             } else {
                 return _self.selectedApplications.previousList;
             }
         } else {
-            if (_getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+            if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
                 return _self.selectedValidators.currentList;
             } else {
                 return _self.selectedValidators.previousList;
@@ -447,14 +433,14 @@ library PropsRewardsLib {
     /**
     * @dev Get which entity list to use. Current = 0, previous = 1
     * @param _rewardedEntitylist RewardedEntityList pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the reward day to determine which list to get
     */
-    function _getSelectedRewardedEntityListType(RewardedEntityList _rewardedEntitylist, uint256 _dailyTimestamp)
+    function _getSelectedRewardedEntityListType(RewardedEntityList _rewardedEntitylist, uint256 _rewardsDay)
         internal
         pure
         returns (uint256)
     {
-        if (_dailyTimestamp >= _rewardedEntitylist.updateTimestamp) {
+        if (_rewardsDay >= _rewardedEntitylist.rewardsDay) {
             return 0;
         } else {
             return 1;
@@ -464,34 +450,29 @@ library PropsRewardsLib {
     /**
     * @dev Updates the current dailyTimestamp and previous one
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the reward day
     */
-    function _updateDailyTimestampAndRewardsHash(Data storage _self, uint256 _dailyTimestamp, bytes32 _rewardsHash)
+    function _updateDailyRewardsHash(Data storage _self, uint256 _rewardsDay, bytes32 _rewardsHash)
         public
         returns (bool)
     {
-        if (_self.currentDailyTimestamp == 0) { // first time daily rewards is run no previous day
-            _self.currentDailyTimestamp = _dailyTimestamp;
-        } else {
-            _self.previousDailyTimestamp = _self.currentDailyTimestamp;
-            _self.currentDailyTimestamp = _dailyTimestamp;
-            _self.previousDailyRewardsHash = _rewardsHash;
-        }
+        _self.dailyRewardHashes[_rewardsDay].rewardsHash = _rewardsHash;
+        _self.dailyRewardHashes[_rewardsDay].blockTimestamp = block.timestamp;
         _self.dailyRewards[_rewardsHash].finalized = 1;
-
+        _self.rewardsDay = (_rewardsDay + 1);
         return true;
     }
 
     /**
     * @dev Checks how many validators are needed for app rewards
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the reward day
     * @param _maxTotalSupply uint256 max total supply
     * @param _currentTotalSupply uint256 current total supply
     */
     function _getMaxAppRewardsDailyAmount(
         Data storage _self,
-        uint256 _dailyTimestamp,
+        uint256 _rewardsDay,
         uint256 _maxTotalSupply,
         uint256 _currentTotalSupply
     )
@@ -500,22 +481,22 @@ library PropsRewardsLib {
         returns (uint256)
     {
         return ((_maxTotalSupply - _currentTotalSupply) *
-        getParameterValue(_self, ParameterName.ApplicationRewardsPercent, _dailyTimestamp) *
-        getParameterValue(_self, ParameterName.ApplicationRewardsMaxVariationPercent, _dailyTimestamp)) / 1e8;
+        getParameterValue(_self, ParameterName.ApplicationRewardsPercent, _rewardsDay) *
+        getParameterValue(_self, ParameterName.ApplicationRewardsMaxVariationPercent, _rewardsDay)) / 1e8;
     }
 
 
     /**
     * @dev Checks how many validators are needed for app rewards
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the reward day
     * @param _numOfValidators uint256 number of validators
     * @param _maxTotalSupply uint256 max total supply
     * @param _currentTotalSupply uint256 current total supply
     */
     function _getValidatorRewardsDailyAmountPerValidator(
         Data storage _self,
-        uint256 _dailyTimestamp,
+        uint256 _rewardsDay,
         uint256 _numOfValidators,
         uint256 _maxTotalSupply,
         uint256 _currentTotalSupply
@@ -525,7 +506,7 @@ library PropsRewardsLib {
         returns (uint256)
     {
         return (((_maxTotalSupply - _currentTotalSupply) *
-        getParameterValue(_self, ParameterName.ValidatorRewardsPercent, _dailyTimestamp)) / 1e8) / _numOfValidators;
+        getParameterValue(_self, ParameterName.ValidatorRewardsPercent, _rewardsDay)) / 1e8) / _numOfValidators;
     }
 
     /**
@@ -558,13 +539,13 @@ library PropsRewardsLib {
 
     /**
     * @dev Checks if submitted data matches reward hash
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the reward day
     * @param _rewardsHash bytes32 hash of the rewards data
     * @param _applications address[] array of application addresses getting the daily reward
     * @param _amounts uint256[] array of amounts each app should get
     */
     function _rewardHashIsvalid(
-        uint256 _dailyTimestamp,
+        uint256 _rewardsDay,
         bytes32 _rewardsHash,
         address[] _applications,
         uint256[] _amounts
@@ -573,20 +554,20 @@ library PropsRewardsLib {
         pure
         returns (bool)
     {
-        return keccak256(abi.encodePacked(_dailyTimestamp, _applications, _amounts)) == _rewardsHash;
+        return keccak256(abi.encodePacked(_rewardsDay, _applications, _amounts)) == _rewardsHash;
     }
 
     /**
     * @dev Checks how many validators are needed for app rewards
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the reward day
     */
-    function _requiredValidatorsForValidatorsRewards(Data storage _self, uint256 _dailyTimestamp)
+    function _requiredValidatorsForValidatorsRewards(Data storage _self, uint256 _rewardsDay)
         public
         view
         returns (uint256)
     {
-        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
             return _self.selectedValidators.currentList.length;
         } else {
             return _self.selectedValidators.previousList.length;
@@ -596,17 +577,17 @@ library PropsRewardsLib {
     /**
     * @dev Checks how many validators are needed for app rewards
     * @param _self Data pointer to storage
-    * @param _dailyTimestamp uint256 the daily reward timestamp (midnight UTC of each day)
+    * @param _rewardsDay uint256 the reward day
     */
-    function _requiredValidatorsForAppRewards(Data storage _self, uint256 _dailyTimestamp)
+    function _requiredValidatorsForAppRewards(Data storage _self, uint256 _rewardsDay)
         public
         view
         returns (uint256)
     {
-        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _dailyTimestamp) == 0) {
-            return ((_self.selectedValidators.currentList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
+            return ((_self.selectedValidators.currentList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _rewardsDay)) / 1e8)+1;
         } else {
-            return ((_self.selectedValidators.previousList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _dailyTimestamp)) / 1e8)+1;
+            return ((_self.selectedValidators.previousList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _rewardsDay)) / 1e8)+1;
         }
     }
 

@@ -13,6 +13,7 @@ async function main() {
   const controllerAddress = web3.eth.accounts[2];
   // const initializerAddress = web3.eth.accounts[2];
   const tokenHolderAddress = web3.eth.accounts[3];
+  const secondsDiffBetweenDays = 10; // 10 seconds for testing purposes on the contract itself should be around 86400 (24 hours)
   const myProject = new SimpleProject('PropsToken', { from: creatorAddress });
   if (!global.dontCreateProxy) {
     console.log('Creating an upgradeable instance of PropsToken...');
@@ -20,7 +21,7 @@ async function main() {
       MyLibrary = Contracts.getFromLocal("PropsRewardsLib")
       const lib = await myProject.setImplementation(MyLibrary, "PropsRewardsLib");
       PropsToken.link({ "PropsRewardsLib": lib.address });
-      const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp, controllerAddress] });
+      const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp, controllerAddress, secondsDiffBetweenDays] });
       const name = await instance.methods.name().call();
       
       // for (a in instance) {
@@ -45,8 +46,9 @@ async function main() {
     // const instance = web3.eth.contract(proxyContractJSON.abi, '0x68671ecac0fffDcb0cCbebc67c4cE1b264364417');  
     const controllerAddress = web3.eth.accounts[2];
     const tokenHolderAddress = web3.eth.accounts[3];
+    const secondsDiffBetweenDays = 10; // 10 seconds for testing purposes on the contract itself should be around 86400 (24 hours)
     const execSync = require('child_process').execSync;
-    cmd = `zos create PropsToken -v --init initialize --args ${tokenHolderAddress},${global.timestamp},${controllerAddress} --network test --from 0x5B0Da644CCFc3794d60d33b17975867A5C5dd1aC > /tmp/zos-create.output 2> /tmp/zos-create.output`;
+    cmd = `zos create PropsToken -v --init initialize --args ${tokenHolderAddress},${global.timestamp},${controllerAddress},${secondsDiffBetweenDays} --network test --from 0x5B0Da644CCFc3794d60d33b17975867A5C5dd1aC > /tmp/zos-create.output 2> /tmp/zos-create.output`;
         
   try {
     console.log(`Executing ${cmd}`);

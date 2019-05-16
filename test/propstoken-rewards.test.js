@@ -21,19 +21,9 @@ const main = require('../scripts/tests/index.js').main;
 const utils = require('../scripts_utils/utils');
 const { soliditySha3 } = require('web3-utils');
 
-// const formattedAddress = address => Buffer.from(ethUtil.stripHexPrefix(address), 'hex');
-// const formattedInt = int => ethUtil.setLengthLeft(int, 32);
-// const formattedBytes32 = bytes => ethUtil.addHexPrefix(bytes.toString('hex'));
-// const hashedTightPacked = args => ethUtil.sha3(Buffer.concat(args));
-// global.dontCreateProxy = true;
 let newControllerAddress;
 let txRes;
 let instance;
-const now = Math.floor(Date.now()/1000);
-const todayTimestamp = now - (now % 86400) + 86400; //today
-const tomorrowTimestamp = todayTimestamp + (86400); //tomorrow
-const dayAfterTomorrowTimestamp = tomorrowTimestamp + (86400); //day after tomorrow
-const yesterdayTimestamp = todayTimestamp - (86400); //yesterday
 const application1 = {
   account: web3.eth.accounts[11],
   name: "application1",
@@ -145,25 +135,25 @@ contract('main', (_accounts) => {
       maxTotalSupply = (await instance.methods.maxTotalSupply().call());
       assert.equal(String(web3.fromWei(maxTotalSupply)), "1000000000");
     });
-
+    
     // enum ParameterName { ApplicationRewardsPercent, ApplicationRewardsMaxVariationPercent, ValidatorMajorityPercent, ValidatorRewardsPercent}
     it('Parameter ApplicationRewardsPercent is properly set', async () => {          
-      const value = await instance.methods.getParameter(0, todayTimestamp).call();      
+      const value = await instance.methods.getParameter(0, 0).call();      
       assert.equal(value, 34750); //pphm
     });
 
     it('Parameter ApplicationRewardsMaxVariationPercent is properly set', async () => {      
-      const value = await instance.methods.getParameter(1, todayTimestamp).call();      
+      const value = await instance.methods.getParameter(1, 0).call();      
       assert.equal(value, 150000000); //pphm
     });
 
     it('Parameter ValidatorMajorityPercent is properly set', async () => {      
-      const value = await instance.methods.getParameter(2, todayTimestamp).call();      
+      const value = await instance.methods.getParameter(2, 0).call();      
       assert.equal(value, 50000000); //pphm
     });
 
     it('Parameter ValidatorRewardsPercent is properly set', async () => {      
-      const value = await instance.methods.getParameter(3, todayTimestamp).call();      
+      const value = await instance.methods.getParameter(3, 0).call();      
       assert.equal(value, 1829); //pphm
     });
   });
@@ -171,10 +161,10 @@ contract('main', (_accounts) => {
   describe('Parameter Management Tests', async () => {        
     // enum ParameterName { ApplicationRewardsPercent, ApplicationRewardsMaxVariationPercent, ValidatorMajorityPercent, ValidatorRewardsPercent}
     it('Can update a parameter value and read both values', async () => {  
-      txRes = await instance.methods.updateParameter(3, 1830, tomorrowTimestamp).send({ from: newControllerAddress });    
-      let value = await instance.methods.getParameter(3, todayTimestamp).call();      
+      txRes = await instance.methods.updateParameter(3, 1830, 1).send({ from: newControllerAddress });    
+      let value = await instance.methods.getParameter(3, 0).call();      
       assert.equal(value, 1829); //pphm
-      value = await instance.methods.getParameter(3, tomorrowTimestamp).call();
+      value = await instance.methods.getParameter(3, 1).call();
       assert.equal(value, 1830); //pphm      
     });
 
@@ -182,15 +172,15 @@ contract('main', (_accounts) => {
       assert.equal(String(txRes.events['ParameterUpdated'].returnValues['0']).toLowerCase(),String('3'));
       assert.equal(String(txRes.events['ParameterUpdated'].returnValues['1']).toLowerCase(),String('1830').toLowerCase());
       assert.equal(String(txRes.events['ParameterUpdated'].returnValues['2']).toLowerCase(),String('1829').toLowerCase());
-      assert.equal(String(txRes.events['ParameterUpdated'].returnValues['3']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());
+      assert.equal(String(txRes.events['ParameterUpdated'].returnValues['3']).toLowerCase(),String('1').toLowerCase());
 
     });
 
     it('Updating a parameter before the previous update took place', async () => {  
-      await instance.methods.updateParameter(0, 34752, tomorrowTimestamp).send({ from: newControllerAddress });    
-      let value = await instance.methods.getParameter(0, todayTimestamp).call();      
+      await instance.methods.updateParameter(0, 34752, 1).send({ from: newControllerAddress });    
+      let value = await instance.methods.getParameter(0, 0).call();      
       assert.equal(value, 34750); //pphm
-      value = await instance.methods.getParameter(0, tomorrowTimestamp).call();      
+      value = await instance.methods.getParameter(0, 1).call();      
       assert.equal(value, 34752); //pphm      
     });    
   });
@@ -233,7 +223,7 @@ contract('main', (_accounts) => {
 
     it('Active applications list cannot be updated by non-controller', async () => {
       try {        
-        expect(await instance.methods.setApplications(todayTimestamp, [application1.account, application2.account]).send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.setApplications(0, [application1.account, application2.account]).send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }
@@ -241,41 +231,41 @@ contract('main', (_accounts) => {
 
     it('Active applications list will fail if an app does not yet exist', async () => {
       try {        
-        expect(await instance.methods.setApplications(todayTimestamp, [application1.account, application2.account, application5.account]).send({ from: newControllerAddress, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.setApplications(0, [application1.account, application2.account, application5.account]).send({ from: newControllerAddress, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
     });
 
     it('Active applications list can be updated by controller', async () => {
-      txRes = await instance.methods.setApplications(todayTimestamp, [application1.account, application2.account, application3.account]).send({ from: newControllerAddress, gas: 500000 });
+      txRes = await instance.methods.setApplications(0, [application1.account, application2.account, application3.account]).send({ from: newControllerAddress, gas: 500000 });
       assert.deepEqual(txRes.events['ApplicationsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[application1.account, application2.account, application3.account]);
-      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String(todayTimestamp).toLowerCase());      
+      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String('0').toLowerCase());      
     });
 
     it('Active applications list can be updated for next day by controller', async () => {
-      txRes = await instance.methods.setApplications(tomorrowTimestamp, [application1.account, application2.account, application4.account]).send({ from: newControllerAddress, gas: 500000 });
+      txRes = await instance.methods.setApplications(1, [application1.account, application2.account, application4.account]).send({ from: newControllerAddress, gas: 500000 });
       assert.deepEqual(txRes.events['ApplicationsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[application1.account, application2.account, application4.account]);
-      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());      
+      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String('1').toLowerCase());      
     });
 
-    it('Correctly retrieve applications list based on timestamp', async () => {        
-      let value = await instance.methods.getEntities(0, todayTimestamp).call();      
+    it('Correctly retrieve applications list based on rewards day', async () => {        
+      let value = await instance.methods.getEntities(0, 0).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account, application3.account]);
-      value = await instance.methods.getEntities(0, tomorrowTimestamp).call();      
+      value = await instance.methods.getEntities(0, 1).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account, application4.account]);
     });
 
     it('Active applications list can be updated for next day again with different count of applications by controller', async () => {
-      txRes = await instance.methods.setApplications(tomorrowTimestamp, [application1.account, application2.account]).send({ from: newControllerAddress, gas: 500000 });
+      txRes = await instance.methods.setApplications(1, [application1.account, application2.account]).send({ from: newControllerAddress, gas: 500000 });
       assert.deepEqual(txRes.events['ApplicationsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[application1.account, application2.account]);
-      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());      
+      assert.equal(String(txRes.events['ApplicationsListUpdated'].returnValues['1']).toLowerCase(),String('1').toLowerCase());      
     });
 
-    it('Correctly retrieve applications list based on timestamp after second update', async () => {        
-      let value = await instance.methods.getEntities(0, todayTimestamp).call();      
+    it('Correctly retrieve applications list based on rewards day after second update', async () => {        
+      let value = await instance.methods.getEntities(0, 0).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account, application3.account]);
-      value = await instance.methods.getEntities(0, tomorrowTimestamp).call();      
+      value = await instance.methods.getEntities(0, 1).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [application1.account, application2.account]);
     });
   });
@@ -317,7 +307,7 @@ contract('main', (_accounts) => {
 
     it('Active validators list cannot be updated by non-controller', async () => {
       try {        
-        expect(await instance.methods.setValidators(todayTimestamp, [validator1.account, validator2.account]).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.setValidators(0, [validator1.account, validator2.account]).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }
@@ -326,49 +316,45 @@ contract('main', (_accounts) => {
     it('Active validators list will fail if an app does not yet exist', async () => {
       try {
         
-        expect(await instance.methods.setValidators(todayTimestamp, [validator1.account, validator2.account, validator5.account]).send({ from: newControllerAddress, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.setValidators(0, [validator1.account, validator2.account, validator5.account]).send({ from: newControllerAddress, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
     });
 
     it('Active validators list can be updated by controller', async () => {
-      txRes = await instance.methods.setValidators(todayTimestamp, [validator1.account, validator2.account, validator3.account]).send({ from: newControllerAddress, gas: 500000 });
+      txRes = await instance.methods.setValidators(0, [validator1.account, validator2.account, validator3.account]).send({ from: newControllerAddress, gas: 500000 });
       assert.deepEqual(txRes.events['ValidatorsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[validator1.account, validator2.account, validator3.account]);
-      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String(todayTimestamp).toLowerCase());      
+      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String('0').toLowerCase());      
     });
 
     it('Active validators list can be updated for next day by controller', async () => {
-      txRes = await instance.methods.setValidators(tomorrowTimestamp, [validator1.account, validator2.account, validator4.account]).send({ from: newControllerAddress, gas: 500000 });
+      txRes = await instance.methods.setValidators(1, [validator1.account, validator2.account, validator4.account]).send({ from: newControllerAddress, gas: 500000 });
       assert.deepEqual(txRes.events['ValidatorsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[validator1.account, validator2.account, validator4.account]);
-      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());      
+      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String('1').toLowerCase());      
     });
 
-    it('Correctly retrieve validators list based on timestamp', async () => {        
-      let value = await instance.methods.getEntities(1, todayTimestamp).call();      
+    it('Correctly retrieve validators list based on rewards day', async () => {        
+      let value = await instance.methods.getEntities(1, 0).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator3.account]);
-      value = await instance.methods.getEntities(1, tomorrowTimestamp).call();      
+      value = await instance.methods.getEntities(1, 1).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator4.account]);
     });
 
     it('Active validators list can be updated for next day again with different count of validators by controller', async () => {
-      txRes = await instance.methods.setValidators(tomorrowTimestamp, [validator1.account, validator2.account, validator3.account, validator4.account]).send({ from: newControllerAddress, gas: 500000 });
+      txRes = await instance.methods.setValidators(1, [validator1.account, validator2.account, validator3.account, validator4.account]).send({ from: newControllerAddress, gas: 500000 });
       assert.deepEqual(txRes.events['ValidatorsListUpdated'].returnValues['0'].map(function(item) { return item.toLowerCase()}),[validator1.account, validator2.account, validator3.account, validator4.account]);
-      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());      
+      assert.equal(String(txRes.events['ValidatorsListUpdated'].returnValues['1']).toLowerCase(),String('1').toLowerCase());      
     });
 
-    it('Correctly retrieve validators list based on timestamp after second update', async () => {        
-      let value = await instance.methods.getEntities(1, todayTimestamp).call();      
+    it('Correctly retrieve validators list based on rewards day after second update', async () => {        
+      let value = await instance.methods.getEntities(1, 0).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator3.account]);
-      value = await instance.methods.getEntities(1, tomorrowTimestamp).call();      
+      value = await instance.methods.getEntities(1, 1).call();      
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator3.account, validator4.account]);
     });
   });
-  describe('Submissions and Rewards Tests', async () => {
-    const formattedAddress = address => Buffer.from(ethUtil.stripHexPrefix(address), 'hex');
-    const formattedAddressNoStrip = address => Buffer.from(address, 'hex');
-    const formattedInt = int => ethUtil.setLengthLeft(int, 32);
-    const formattedBytes32 = bytes => ethUtil.addHexPrefix(bytes.toString('hex'));
+  describe('Submissions and Rewards Tests', async () => {    
     const formatArrayForSha3 = function(arr, type) {      
       return { type, value: arr};
     }
@@ -391,34 +377,34 @@ contract('main', (_accounts) => {
       amounts: [web3.toWei(120000), web3.toWei(72000), web3.toWei(36000)]
     }
 
-    const timestamp1SelectedValidators = [validator1, validator2, validator3];    
-    const validApplicationRewardsHash = soliditySha3(todayTimestamp, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const tomorrowValidApplicationRewardsHash = soliditySha3(tomorrowTimestamp, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const dayAfterTomorrowValidApplicationRewardsHash = soliditySha3(dayAfterTomorrowTimestamp, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const exceedMaxApplicationRewardsHash = soliditySha3(todayTimestamp, formatArrayForSha3(exceedMaxApplicationRewards.applications, 'address'), formatArrayForSha3(exceedMaxApplicationRewards.amounts, 'uint256'));
-    const nonExistentAppApplicationRewardsHash = soliditySha3(todayTimestamp, formatArrayForSha3(nonExistentAppApplicationRewards.applications, 'address'), formatArrayForSha3(nonExistentAppApplicationRewards.amounts, 'uint256'));
-    const appExistsButNotInListApplicationRewardsHash = soliditySha3(todayTimestamp, formatArrayForSha3(appExistsButNotInListApplicationRewards.applications, 'address'), formatArrayForSha3(appExistsButNotInListApplicationRewards.amounts, 'uint256'));
+    const day0SelectedValidators = [validator1, validator2, validator3];    
+    const day0ValidApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day1ValidApplicationRewardsHash = soliditySha3(1, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day2ValidApplicationRewardsHash = soliditySha3(2, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const exceedMaxApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(exceedMaxApplicationRewards.applications, 'address'), formatArrayForSha3(exceedMaxApplicationRewards.amounts, 'uint256'));
+    const nonExistentAppApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(nonExistentAppApplicationRewards.applications, 'address'), formatArrayForSha3(nonExistentAppApplicationRewards.amounts, 'uint256'));
+    const appExistsButNotInListApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(appExistsButNotInListApplicationRewards.applications, 'address'), formatArrayForSha3(appExistsButNotInListApplicationRewards.amounts, 'uint256'));
     
     it('Reward hash must match submitted data', async () => {  
       try {
         
-        expect(await instance.methods.submitDailyRewards(todayTimestamp, exceedMaxApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.submitDailyRewards(0, exceedMaxApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
     });
 
     it('Validator on the list can submit valid data', async() => {
-      txRes = await instance.methods.submitDailyRewards(todayTimestamp, validApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(validApplicationRewardsHash).toLowerCase());      
+      txRes = await instance.methods.submitDailyRewards(0, day0ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(day0ValidApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator1.account).toLowerCase());      
     });
 
     it('Validator not on the list cannot submit', async () => {  
       try {
         
-        expect(await instance.methods.submitDailyRewards(todayTimestamp, validApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator4.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.submitDailyRewards(0, day0ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator4.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
@@ -427,7 +413,7 @@ contract('main', (_accounts) => {
     it('Validator cannot submit more than once', async () => {  
       try {
         
-        expect(await instance.methods.submitDailyRewards(todayTimestamp, validApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.submitDailyRewards(0, day0ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
@@ -435,13 +421,13 @@ contract('main', (_accounts) => {
 
     it('Reaching Validator majority with non existent application is rejected', async() => {
       // get current props balances for rewarded applications      
-      txRes = await instance.methods.submitDailyRewards(todayTimestamp, nonExistentAppApplicationRewardsHash, nonExistentAppApplicationRewards.applications, nonExistentAppApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
+      txRes = await instance.methods.submitDailyRewards(0, nonExistentAppApplicationRewardsHash, nonExistentAppApplicationRewards.applications, nonExistentAppApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
       // exepct DailyRewardsSubmitted
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(nonExistentAppApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator1.account).toLowerCase());
       try {
-        expect(txRes = await instance.methods.submitDailyRewards(todayTimestamp, nonExistentAppApplicationRewardsHash, nonExistentAppApplicationRewards.applications, nonExistentAppApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error)
+        expect(txRes = await instance.methods.submitDailyRewards(0, nonExistentAppApplicationRewardsHash, nonExistentAppApplicationRewards.applications, nonExistentAppApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error)
       }
       catch (error) {
         //
@@ -451,13 +437,13 @@ contract('main', (_accounts) => {
 
     it('Reaching Validator majority with existing application but not on list is rejected', async() => {
       // get current props balances for rewarded applications      
-      txRes = await instance.methods.submitDailyRewards(todayTimestamp, appExistsButNotInListApplicationRewardsHash, appExistsButNotInListApplicationRewards.applications, appExistsButNotInListApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
+      txRes = await instance.methods.submitDailyRewards(0, appExistsButNotInListApplicationRewardsHash, appExistsButNotInListApplicationRewards.applications, appExistsButNotInListApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
       // exepct DailyRewardsSubmitted
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(appExistsButNotInListApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator1.account).toLowerCase());
       try {
-        expect(txRes = await instance.methods.submitDailyRewards(todayTimestamp, appExistsButNotInListApplicationRewardsHash, appExistsButNotInListApplicationRewards.applications, appExistsButNotInListApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error)
+        expect(txRes = await instance.methods.submitDailyRewards(0, appExistsButNotInListApplicationRewardsHash, appExistsButNotInListApplicationRewards.applications, appExistsButNotInListApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error)
       }
       catch (error) {
         //
@@ -465,13 +451,13 @@ contract('main', (_accounts) => {
     });
 
     it('Reaching Validator majority with amount that exceeds allowed is rejected', async() => {
-      txRes = await instance.methods.submitDailyRewards(todayTimestamp, exceedMaxApplicationRewardsHash, exceedMaxApplicationRewards.applications, exceedMaxApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
+      txRes = await instance.methods.submitDailyRewards(0, exceedMaxApplicationRewardsHash, exceedMaxApplicationRewards.applications, exceedMaxApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
       // exepct DailyRewardsSubmitted
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(exceedMaxApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator1.account).toLowerCase());
       try {
-        expect(txRes = await instance.methods.submitDailyRewards(todayTimestamp, exceedMaxApplicationRewardsHash, exceedMaxApplicationRewards.applications, exceedMaxApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error)
+        expect(txRes = await instance.methods.submitDailyRewards(0, exceedMaxApplicationRewardsHash, exceedMaxApplicationRewards.applications, exceedMaxApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error)
       }
       catch (error) {
         //
@@ -485,18 +471,21 @@ contract('main', (_accounts) => {
       const application1Balance = (await instance.methods.balanceOf(application1.rewardsAddress).call());
       const application2Balance = (await instance.methods.balanceOf(application2.rewardsAddress).call());
       const application3Balance = (await instance.methods.balanceOf(application3.rewardsAddress).call());
-      txRes = await instance.methods.submitDailyRewards(todayTimestamp, validApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 });
+      txRes = await instance.methods.submitDailyRewards(0, day0ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 });
       // exepct DailyRewardsSubmitted
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(validApplicationRewardsHash).toLowerCase());      
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(day0ValidApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator2.account).toLowerCase());
       // expect DailyRewardsApplicationsMinted
-      assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
-      assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['1']).toLowerCase(),String(validApplicationRewardsHash).toLowerCase());      
+      assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['1']).toLowerCase(),String(day0ValidApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['2']).toLowerCase(),String(validApplicationRewards.applications.length).toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['3']).toLowerCase(),String(BigNumber.sum.apply(null, validApplicationRewards.amounts).toString()).toLowerCase());
       // expect no DailyRewardsValidatorsMinted event        
       assert.equal('DailyRewardsValidatorsMinted' in txRes.events, false);
+      // expect the current day to increase after application rewards were minted
+      const rewardsDay = await instance.methods.rewardsDay().call();
+      assert.equal(rewardsDay, 1);
       // expect application balances to change
       const newApplication1Balance = (await instance.methods.balanceOf(application1.rewardsAddress).call());
       const newApplication2Balance = (await instance.methods.balanceOf(application2.rewardsAddress).call());
@@ -507,22 +496,22 @@ contract('main', (_accounts) => {
     });
 
     it('Reaching All Validators submitted mints rewards for validators', async() => {      
-      const expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -currentTotalSupply).times(0.001829).div(100).div(timestamp1SelectedValidators.length).integerValue(BigNumber.ROUND_DOWN);
-      const expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(timestamp1SelectedValidators.length);
+      const expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -currentTotalSupply).times(0.001829).div(100).div(day0SelectedValidators.length).integerValue(BigNumber.ROUND_DOWN);
+      const expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(day0SelectedValidators.length);
       const validator1Balance = (await instance.methods.balanceOf(validator1.rewardsAddress).call());
       const validator2Balance = (await instance.methods.balanceOf(validator2.rewardsAddress).call());
       const validator3Balance = (await instance.methods.balanceOf(validator3.rewardsAddress).call());
-      txRes = await instance.methods.submitDailyRewards(todayTimestamp, validApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator3.account, gas: 500000 });
+      txRes = await instance.methods.submitDailyRewards(0, day0ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator3.account, gas: 500000 });
       // exepct DailyRewardsSubmitted
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(validApplicationRewardsHash).toLowerCase());      
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(day0ValidApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator3.account).toLowerCase());
       // expect no DailyRewardsApplicationsMinted event
       assert.equal('DailyRewardsApplicationsMinted' in txRes.events, false);      
       // expect DailyRewardsValidatorsMinted
-      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),String(todayTimestamp).toLowerCase());
-      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),String(validApplicationRewardsHash).toLowerCase());      
-      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),String(timestamp1SelectedValidators.length).toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),String(day0ValidApplicationRewardsHash).toLowerCase());      
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),String(day0SelectedValidators.length).toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),String(expectedValidatorRewardsAmountSum.toString()).toLowerCase());
       // expect validators balances to change
       const newValidator1Balance = (await instance.methods.balanceOf(validator1.rewardsAddress).call());
@@ -537,29 +526,22 @@ contract('main', (_accounts) => {
       // get current total supply before minting tomorrow
       currentTotalSupply = await instance.methods.totalSupply().call();
       
-      txRes = await instance.methods.submitDailyRewards(tomorrowTimestamp, tomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
-      txRes = await instance.methods.submitDailyRewards(tomorrowTimestamp, tomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 });
-      txRes = await instance.methods.submitDailyRewards(tomorrowTimestamp, tomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator3.account, gas: 500000 });
-      assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['0']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());
+      txRes = await instance.methods.submitDailyRewards(1, day1ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
+      txRes = await instance.methods.submitDailyRewards(1, day1ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 });
+      txRes = await instance.methods.submitDailyRewards(1, day1ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator3.account, gas: 500000 });
+      assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['0']).toLowerCase(),String('1').toLowerCase());
       // expect no DailyRewardsValidatorsMinted event        
       assert.equal('DailyRewardsValidatorsMinted' in txRes.events, false);
       // application rewards were given here now submit for next day
-      txRes = await instance.methods.submitDailyRewards(dayAfterTomorrowTimestamp, dayAfterTomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
-      // nextTotalSupply = await instance.methods.totalSupply().call();
+      txRes = await instance.methods.submitDailyRewards(2, day2ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });      
       // expect no DailyRewardsApplicationsMinted event
       assert.equal('DailyRewardsApplicationsMinted' in txRes.events, false);
       assert.equal('DailyRewardsValidatorsMinted' in txRes.events, true);
       // expect DailyRewardsValidatorsMinted for tomorrowTimestamp for only 3 validators out of 4
       const expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -currentTotalSupply).times(0.001830).div(100).div(3).integerValue(BigNumber.ROUND_DOWN);
-      const expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(3);
-      // const __expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -nextTotalSupply).times(0.001829).div(100).div(3).integerValue(BigNumber.ROUND_DOWN);
-      // const __expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(3);
-      // console.log(`currentTotalSupply=${currentTotalSupply}, nextTotalSupply=${nextTotalSupply}, expectedValidatorRewardsAmountSum=${expectedValidatorRewardsAmountSum}, __expectedValidatorRewardsAmountSum=${__expectedValidatorRewardsAmountSum}`);
-      // console.log(JSON.stringify(txRes.events));
-      // console.log(`todayTimestamp=${todayTimestamp}, tomorrowTimestamp=${tomorrowTimestamp}, dayAfterTomorrowTimestamp=${dayAfterTomorrowTimestamp}`);
-      // console.log(`validApplicationRewardsHash=${validApplicationRewardsHash}, tomorrowValidApplicationRewardsHash=${tomorrowValidApplicationRewardsHash}, dayAfterTomorrowTimestamp=${dayAfterTomorrowTimestamp}`);
-      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());
-      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),String(tomorrowValidApplicationRewardsHash).toLowerCase());      
+      const expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(3);      
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),String('1').toLowerCase());
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),String(day1ValidApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),String('3').toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),String(expectedValidatorRewardsAmountSum.toString()).toLowerCase());         
     });
