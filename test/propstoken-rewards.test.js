@@ -174,7 +174,7 @@ contract('main', (_accounts) => {
       txRes = await instance.methods.updateParameter(3, 1830, tomorrowTimestamp).send({ from: newControllerAddress });    
       let value = await instance.methods.getParameter(3, todayTimestamp).call();      
       assert.equal(value, 1829); //pphm
-      value = await instance.methods.getParameter(3, tomorrowTimestamp).call();      
+      value = await instance.methods.getParameter(3, tomorrowTimestamp).call();
       assert.equal(value, 1830); //pphm      
     });
 
@@ -533,9 +533,10 @@ contract('main', (_accounts) => {
       assert.equal(newValidator3Balance, BigNumber.sum(validator3Balance, expectedValidatorRewardsAmountPerValidator));
     });
 
-    it('Submitting next day rewards when not all validators submitted will give the submitting validators from yesterdays their rewards', async() => {
-      // get current total supply before minting
+    it('Submitting next day rewards when not all validators submitted will give the submitting validators from yesterdays their rewards using the new validator reward percent param', async() => {
+      // get current total supply before minting tomorrow
       currentTotalSupply = await instance.methods.totalSupply().call();
+      
       txRes = await instance.methods.submitDailyRewards(tomorrowTimestamp, tomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
       txRes = await instance.methods.submitDailyRewards(tomorrowTimestamp, tomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator2.account, gas: 500000 });
       txRes = await instance.methods.submitDailyRewards(tomorrowTimestamp, tomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator3.account, gas: 500000 });
@@ -544,12 +545,19 @@ contract('main', (_accounts) => {
       assert.equal('DailyRewardsValidatorsMinted' in txRes.events, false);
       // application rewards were given here now submit for next day
       txRes = await instance.methods.submitDailyRewards(dayAfterTomorrowTimestamp, dayAfterTomorrowValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });
+      // nextTotalSupply = await instance.methods.totalSupply().call();
       // expect no DailyRewardsApplicationsMinted event
       assert.equal('DailyRewardsApplicationsMinted' in txRes.events, false);
       assert.equal('DailyRewardsValidatorsMinted' in txRes.events, true);
       // expect DailyRewardsValidatorsMinted for tomorrowTimestamp for only 3 validators out of 4
-      const expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -currentTotalSupply).times(0.001829).div(100).div(3).integerValue(BigNumber.ROUND_DOWN);
+      const expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -currentTotalSupply).times(0.001830).div(100).div(3).integerValue(BigNumber.ROUND_DOWN);
       const expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(3);
+      // const __expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -nextTotalSupply).times(0.001829).div(100).div(3).integerValue(BigNumber.ROUND_DOWN);
+      // const __expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(3);
+      // console.log(`currentTotalSupply=${currentTotalSupply}, nextTotalSupply=${nextTotalSupply}, expectedValidatorRewardsAmountSum=${expectedValidatorRewardsAmountSum}, __expectedValidatorRewardsAmountSum=${__expectedValidatorRewardsAmountSum}`);
+      // console.log(JSON.stringify(txRes.events));
+      // console.log(`todayTimestamp=${todayTimestamp}, tomorrowTimestamp=${tomorrowTimestamp}, dayAfterTomorrowTimestamp=${dayAfterTomorrowTimestamp}`);
+      // console.log(`validApplicationRewardsHash=${validApplicationRewardsHash}, tomorrowValidApplicationRewardsHash=${tomorrowValidApplicationRewardsHash}, dayAfterTomorrowTimestamp=${dayAfterTomorrowTimestamp}`);
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),String(tomorrowTimestamp).toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),String(tomorrowValidApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),String('3').toLowerCase());

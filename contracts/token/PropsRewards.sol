@@ -167,6 +167,22 @@ contract PropsRewards is Initializable, ERC20 {
         public
         returns (bool)
     {
+        // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
+        if (
+            rewardsLibData.previousDailyTimestamp > 0 &&
+            _dailyTimestamp > rewardsLibData.currentDailyTimestamp
+        ) {
+            uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
+                rewardsLibData,
+                rewardsLibData.currentDailyTimestamp,
+                rewardsLibData.previousDailyRewardsHash,
+                maxTotalSupply,
+                true
+            );
+            if (previousDayValidatorRewardsAmount > 0) {
+                _mintDailyRewardsForValidators(rewardsLibData.currentDailyTimestamp, rewardsLibData.previousDailyRewardsHash, previousDayValidatorRewardsAmount);
+            }
+        }
         // check and give application rewards if majority of validators agree
         uint256 appRewardsSum = PropsRewardsLib.calculateApplicationRewards(
             rewardsLibData,
@@ -181,22 +197,6 @@ contract PropsRewards is Initializable, ERC20 {
             _mintDailyRewardsForApps(_dailyTimestamp, _rewardsHash, _applications, _amounts, appRewardsSum);
         }
 
-        // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
-        if (
-            rewardsLibData.previousDailyTimestamp > 0 &&
-            _dailyTimestamp > rewardsLibData.previousDailyTimestamp
-        ) {
-            uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
-                rewardsLibData,
-                rewardsLibData.previousDailyTimestamp,
-                rewardsLibData.previousDailyRewardsHash,
-                maxTotalSupply,
-                true
-            );
-            if (previousDayValidatorRewardsAmount > 0) {
-                _mintDailyRewardsForValidators(rewardsLibData.previousDailyTimestamp, rewardsLibData.previousDailyRewardsHash, previousDayValidatorRewardsAmount);
-            }
-        }
         // check and give validator rewards if all validators submitted
         uint256 validatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
             rewardsLibData,
