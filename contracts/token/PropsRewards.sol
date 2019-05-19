@@ -34,15 +34,9 @@ contract PropsRewards is Initializable, ERC20 {
         uint256 amount
     );
 
-    event ApplicationUpdated(
+    event EntityUpdated(
         address indexed id,
-        bytes32 name,
-        address rewardsAddress,
-        address indexed sidechainAddress
-    );
-
-    event ValidatorUpdated(
-        address indexed id,
+        PropsRewardsLib.RewardedEntityType indexed entityType,
         bytes32 name,
         address rewardsAddress,
         address indexed sidechainAddress
@@ -284,12 +278,14 @@ contract PropsRewards is Initializable, ERC20 {
     }
 
     /**
-    * @dev Allows an application to add/update its details
+    * @dev Allows an application or validator to add/update its details
+    * @param _entityType RewardedEntityType either application (0) or validator (1)
     * @param _name bytes32 name of the app
     * @param _rewardsAddress address an address for the app to receive the rewards
     * @param _sidechainAddress address the address used for using the sidechain
     */
-    function updateApplication(
+    function updateEntity(
+        PropsRewardsLib.RewardedEntityType _entityType,
         bytes32 _name,
         address _rewardsAddress,
         address _sidechainAddress
@@ -297,27 +293,8 @@ contract PropsRewards is Initializable, ERC20 {
         public
         returns (bool)
     {
-        PropsRewardsLib.updateApplication(rewardsLibData, _name, _rewardsAddress, _sidechainAddress);
-        emit ApplicationUpdated(msg.sender, _name, _rewardsAddress, _sidechainAddress);
-        return true;
-    }
-
-    /**
-    * @dev Allows a validator to add/update its details
-    * @param _name bytes32 name of the validator
-    * @param _rewardsAddress address an address for the validator to receive the rewards
-    * @param _sidechainAddress address the address used for using the sidechain
-    */
-    function updateValidator(
-        bytes32 _name,
-        address _rewardsAddress,
-        address _sidechainAddress
-    )
-        public
-        returns (bool)
-    {
-        PropsRewardsLib.updateValidator(rewardsLibData, _name, _rewardsAddress, _sidechainAddress);
-        emit ValidatorUpdated(msg.sender, _name, _rewardsAddress, _sidechainAddress);
+        PropsRewardsLib.updateEntity(rewardsLibData, _entityType, _name, _rewardsAddress, _sidechainAddress);
+        emit EntityUpdated(msg.sender, _entityType, _name, _rewardsAddress, _sidechainAddress);
         return true;
     }
 

@@ -128,7 +128,6 @@ library PropsRewardsLib {
     modifier onlyValidRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
             _rewardsDay == 0 ||
-            _rewardsDay == _self.rewardsDay - 1 ||
             (block.timestamp - _self.dailyRewardHashes[_rewardsDay - 1].blockTimestamp) > _self.minSecondsBetweenDays &&
             (_rewardsDay == _self.rewardsDay || _rewardsDay == (_self.rewardsDay + 1)),
             "Must be for this round or the next"
@@ -338,6 +337,33 @@ library PropsRewardsLib {
     /**
     * @dev Allows an application to add/update its details
     * @param _self Data pointer to storage
+    * @param _entityType RewardedEntityType either application (0) or validator (1)
+    * @param _name bytes32 name of the app
+    * @param _rewardsAddress address an address for the app to receive the rewards
+    * @param _sidechainAddress address the address used for using the sidechain
+    */
+    function updateEntity(
+        Data storage _self,
+        RewardedEntityType _entityType,
+        bytes32 _name,
+        address _rewardsAddress,
+        address _sidechainAddress
+    )
+        public
+        onlyValidAddresses(_rewardsAddress, _sidechainAddress)
+        returns (bool)
+    {
+        if (_entityType == RewardedEntityType.Application) {
+            updateApplication(_self, _name, _rewardsAddress, _sidechainAddress);
+        } else {
+            updateValidator(_self, _name, _rewardsAddress, _sidechainAddress);
+        }
+        return true;
+    }
+
+    /**
+    * @dev Allows an application to add/update its details
+    * @param _self Data pointer to storage
     * @param _name bytes32 name of the app
     * @param _rewardsAddress address an address for the app to receive the rewards
     * @param _sidechainAddress address the address used for using the sidechain
@@ -349,8 +375,7 @@ library PropsRewardsLib {
         address _sidechainAddress
     )
         public
-        onlyValidAddresses(_rewardsAddress, _sidechainAddress)
-        returns (bool)
+        returns (uint256)
     {
         _self.applications[msg.sender].name = _name;
         _self.applications[msg.sender].rewardsAddress = _rewardsAddress;
@@ -360,7 +385,7 @@ library PropsRewardsLib {
             _self.applications[msg.sender].initializedState = 1;
             _self.applications[msg.sender].entityType = RewardedEntityType.Application;
         }
-        return true;
+        return uint256(RewardedEntityType.Application);
     }
 
     /**
@@ -377,8 +402,7 @@ library PropsRewardsLib {
         address _sidechainAddress
     )
         public
-        onlyValidAddresses(_rewardsAddress, _sidechainAddress)
-        returns (bool)
+        returns (uint256)
     {
         _self.validators[msg.sender].name = _name;
         _self.validators[msg.sender].rewardsAddress = _rewardsAddress;
@@ -388,7 +412,7 @@ library PropsRewardsLib {
             _self.validators[msg.sender].initializedState = 1;
             _self.validators[msg.sender].entityType = RewardedEntityType.Validator;
         }
-        return true;
+        return uint256(RewardedEntityType.Validator);
     }
 
     /**

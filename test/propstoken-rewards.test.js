@@ -187,38 +187,40 @@ contract('main', (_accounts) => {
 
   describe('Application Management Tests', async () => {
     it('Application can add itself', async () => {
-      txRes = await instance.methods.updateApplication(web3.fromAscii(application1.updatedName), application1.rewardsAddress, application1.sidechainAddress).send({ from: application1.account, gas: 500000 });
-      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['0']).toLowerCase(),String(application1.account).toLowerCase());
-      assert.equal(web3.toUtf8(String(txRes.events['ApplicationUpdated'].returnValues['1']).toLowerCase()),String(application1.updatedName).toLowerCase());
-      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['2']).toLowerCase(),String(application1.rewardsAddress).toLowerCase());
-      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['3']).toLowerCase(),String(application1.sidechainAddress).toLowerCase());
+      txRes = await instance.methods.updateEntity(0,web3.fromAscii(application1.updatedName), application1.rewardsAddress, application1.sidechainAddress).send({ from: application1.account, gas: 500000 });
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['0']).toLowerCase(),String(application1.account).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['1']).toLowerCase(),String('0').toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['EntityUpdated'].returnValues['2']).toLowerCase()),String(application1.updatedName).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['3']).toLowerCase(),String(application1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['4']).toLowerCase(),String(application1.sidechainAddress).toLowerCase());
 
       //add the other applications needed for testing
-      txRes = await instance.methods.updateApplication(web3.fromAscii(application2.name), application2.rewardsAddress, application2.sidechainAddress).send({ from: application2.account, gas: 500000 });
-      txRes = await instance.methods.updateApplication(web3.fromAscii(application3.name), application3.rewardsAddress, application3.sidechainAddress).send({ from: application3.account, gas: 500000 });
-      txRes = await instance.methods.updateApplication(web3.fromAscii(application4.name), application4.rewardsAddress, application4.sidechainAddress).send({ from: application4.account, gas: 500000 });
+      txRes = await instance.methods.updateEntity(0,web3.fromAscii(application2.name), application2.rewardsAddress, application2.sidechainAddress).send({ from: application2.account, gas: 500000 });
+      txRes = await instance.methods.updateEntity(0,web3.fromAscii(application3.name), application3.rewardsAddress, application3.sidechainAddress).send({ from: application3.account, gas: 500000 });
+      txRes = await instance.methods.updateEntity(0,web3.fromAscii(application4.name), application4.rewardsAddress, application4.sidechainAddress).send({ from: application4.account, gas: 500000 });
     });
     
     it('Application must have valid addresses', async () => {
       try {
-        expect(await instance.methods.updateApplication(web3.fromAscii(application2.name), '0x0', application2.sidechainAddress).send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.updateEntity(0,web3.fromAscii(application2.name), '0x0', application2.sidechainAddress).send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }
 
       try {
-        expect(await instance.methods.updateApplication(web3.fromAscii(application2.name),  application2.rewardsAddress, '0x0').send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.updateEntity(0,web3.fromAscii(application2.name),  application2.rewardsAddress, '0x0').send({ from: application2.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
     });
 
     it('Application can update itself', async () => {
-      txRes = await instance.methods.updateApplication(web3.fromAscii(application1.name), application1.rewardsAddress, application1.sidechainAddress).send({ from: application1.account, gas: 500000 });
-      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['0']).toLowerCase(),String(application1.account).toLowerCase());
-      assert.equal(web3.toUtf8(String(txRes.events['ApplicationUpdated'].returnValues['1']).toLowerCase()),String(application1.name).toLowerCase());
-      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['2']).toLowerCase(),String(application1.rewardsAddress).toLowerCase());
-      assert.equal(String(txRes.events['ApplicationUpdated'].returnValues['3']).toLowerCase(),String(application1.sidechainAddress).toLowerCase());
+      txRes = await instance.methods.updateEntity(0,web3.fromAscii(application1.name), application1.rewardsAddress, application1.sidechainAddress).send({ from: application1.account, gas: 500000 });
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['0']).toLowerCase(),String(application1.account).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['1']).toLowerCase(),String('0').toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['EntityUpdated'].returnValues['2']).toLowerCase()),String(application1.name).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['3']).toLowerCase(),String(application1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['4']).toLowerCase(),String(application1.sidechainAddress).toLowerCase());
     });
 
     it('Active applications list cannot be updated by non-controller', async () => {
@@ -272,37 +274,39 @@ contract('main', (_accounts) => {
 
   describe('Validator Management Tests', async () => {
     it('Validator can add itself', async () => {
-      txRes = await instance.methods.updateValidator(web3.fromAscii(validator1.updatedName), validator1.rewardsAddress, validator1.sidechainAddress).send({ from: validator1.account, gas: 500000 });
-      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['0']).toLowerCase(),String(validator1.account).toLowerCase());
-      assert.equal(web3.toUtf8(String(txRes.events['ValidatorUpdated'].returnValues['1']).toLowerCase()),String(validator1.updatedName).toLowerCase());
-      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['2']).toLowerCase(),String(validator1.rewardsAddress).toLowerCase());
-      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['3']).toLowerCase(),String(validator1.sidechainAddress).toLowerCase());
+      txRes = await instance.methods.updateEntity(1,web3.fromAscii(validator1.updatedName), validator1.rewardsAddress, validator1.sidechainAddress).send({ from: validator1.account, gas: 500000 });
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['0']).toLowerCase(),String(validator1.account).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['1']).toLowerCase(),String('1').toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['EntityUpdated'].returnValues['2']).toLowerCase()),String(validator1.updatedName).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['3']).toLowerCase(),String(validator1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['4']).toLowerCase(),String(validator1.sidechainAddress).toLowerCase());
       //add the other validators needed for testing
-      txRes = await instance.methods.updateValidator(web3.fromAscii(validator2.name), validator2.rewardsAddress, validator2.sidechainAddress).send({ from: validator2.account, gas: 500000 });
-      txRes = await instance.methods.updateValidator(web3.fromAscii(validator3.name), validator3.rewardsAddress, validator3.sidechainAddress).send({ from: validator3.account, gas: 500000 });
-      txRes = await instance.methods.updateValidator(web3.fromAscii(validator4.name), validator4.rewardsAddress, validator4.sidechainAddress).send({ from: validator4.account, gas: 500000 });
+      txRes = await instance.methods.updateEntity(1,web3.fromAscii(validator2.name), validator2.rewardsAddress, validator2.sidechainAddress).send({ from: validator2.account, gas: 500000 });
+      txRes = await instance.methods.updateEntity(1,web3.fromAscii(validator3.name), validator3.rewardsAddress, validator3.sidechainAddress).send({ from: validator3.account, gas: 500000 });
+      txRes = await instance.methods.updateEntity(1,web3.fromAscii(validator4.name), validator4.rewardsAddress, validator4.sidechainAddress).send({ from: validator4.account, gas: 500000 });
     });
     
     it('Validator must have valid addresses', async () => {
       try {
-        expect(await instance.methods.updateValidator(web3.fromAscii(validator2.name), '0x0', validator2.sidechainAddress).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.updateEntity(1,web3.fromAscii(validator2.name), '0x0', validator2.sidechainAddress).send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }
 
       try {
-        expect(await instance.methods.updateValidator(web3.fromAscii(validator2.name),  validator2.rewardsAddress, '0x0').send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
+        expect(await instance.methods.updateEntity(1,web3.fromAscii(validator2.name),  validator2.rewardsAddress, '0x0').send({ from: validator2.account, gas: 500000 })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
     });
 
     it('Validator can update itself', async () => {
-      txRes = await instance.methods.updateValidator(web3.fromAscii(validator1.name), validator1.rewardsAddress, validator1.sidechainAddress).send({ from: validator1.account, gas: 500000 });
-      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['0']).toLowerCase(),String(validator1.account).toLowerCase());
-      assert.equal(web3.toUtf8(String(txRes.events['ValidatorUpdated'].returnValues['1']).toLowerCase()),String(validator1.name).toLowerCase());
-      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['2']).toLowerCase(),String(validator1.rewardsAddress).toLowerCase());
-      assert.equal(String(txRes.events['ValidatorUpdated'].returnValues['3']).toLowerCase(),String(validator1.sidechainAddress).toLowerCase());
+      txRes = await instance.methods.updateEntity(1,web3.fromAscii(validator1.name), validator1.rewardsAddress, validator1.sidechainAddress).send({ from: validator1.account, gas: 500000 });
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['0']).toLowerCase(),String(validator1.account).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['1']).toLowerCase(),String('1').toLowerCase());
+      assert.equal(web3.toUtf8(String(txRes.events['EntityUpdated'].returnValues['2']).toLowerCase()),String(validator1.name).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['3']).toLowerCase(),String(validator1.rewardsAddress).toLowerCase());
+      assert.equal(String(txRes.events['EntityUpdated'].returnValues['4']).toLowerCase(),String(validator1.sidechainAddress).toLowerCase());
     });
 
     it('Active validators list cannot be updated by non-controller', async () => {
