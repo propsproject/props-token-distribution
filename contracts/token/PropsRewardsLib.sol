@@ -45,6 +45,7 @@ library PropsRewardsLib {
         uint256 initializedState;               // A way to check if there's something in the map and whether already added to list
         uint256 finalized;
         uint256 totalSupply;
+        uint256 rewardsDay;
     }
 
     //Represent rewards day to its rewardsHash and block.timestamp
@@ -246,7 +247,9 @@ library PropsRewardsLib {
                 "Reward Hash is invalid"
         );
         if (_self.dailyRewards[_rewardsHash].initializedState == 0) {
-            _self.dailyRewardsList.push(_rewardsHash);
+            if (_self.dailyRewardsList.push(_rewardsHash) > _self.maxDailyRewardStorage) {
+                _deleteFirstDailyRewardEntry(_self);
+            }
             _self.dailyRewards[_rewardsHash].initializedState = 1;
         }
         _self.dailyRewards[_rewardsHash].submissions[msg.sender] = true;
@@ -277,6 +280,7 @@ library PropsRewardsLib {
     {
         _self.dailyRewards[_rewardsHash].totalSupply = _currentTotalSupply;
         _self.dailyRewards[_rewardsHash].finalized = 1;
+        _self.dailyRewards[_rewardsHash].rewardsDay = _rewardsDay;
         _self.dailyRewardHashes[_rewardsDay].rewardsHash = _rewardsHash;
         _self.dailyRewardHashes[_rewardsDay].blockTimestamp = block.timestamp;
         return true;
@@ -719,5 +723,25 @@ library PropsRewardsLib {
         }
         delete _rewardedEntitylist.previousList;
         return true;
+    }
+
+    /**
+    * @dev Delete existing values from the previous applications list
+    * @param _self Data pointer to storage
+    */
+    function _deleteFirstDailyRewardEntry(Data storage _self)
+        public
+        returns (bool)
+    {
+        bytes32 rewardsDayHashToDelete = _self.dailyRewardsList[0];
+        uint256 rewardsDayToDelete = _self.dailyRewards[rewardsDayHashToDelete].rewardsDay;
+
+        for (uint256 i = 1; i < _self.dailyRewardsList.length; i++) {
+            _self.dailyRewardsList[i-1] = _self.dailyRewardsList[i];
+        }
+        delete( _self.dailyRewardsList[_self.dailyRewardsList.length - 1]);
+        _self.dailyRewardsList.length--;
+        delete(_self.dailyRewards[rewardsDayHashToDelete]);
+        delete(_self.dailyRewardHashes[rewardsDayToDelete]);
     }
 }
