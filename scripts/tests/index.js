@@ -13,7 +13,7 @@ async function main() {
   const controllerAddress = web3.eth.accounts[2];
   // const initializerAddress = web3.eth.accounts[2];
   const tokenHolderAddress = web3.eth.accounts[3];
-  const secondsDiffBetweenDays = 10; // 10 seconds for testing purposes on the contract itself should be around 86400 (24 hours)
+  const secondsDiffBetweenDays = 10; // 10 seconds for testing purposes on the production contract itself should be around 86400 (24 hours)
   const myProject = new SimpleProject('PropsToken', { from: creatorAddress });
   if (!global.dontCreateProxy) {
     console.log('Creating an upgradeable instance of PropsToken...');

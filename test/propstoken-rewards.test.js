@@ -482,10 +482,7 @@ contract('main', (_accounts) => {
       assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['2']).toLowerCase(),String(validApplicationRewards.applications.length).toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsApplicationsMinted'].returnValues['3']).toLowerCase(),String(BigNumber.sum.apply(null, validApplicationRewards.amounts).toString()).toLowerCase());
       // expect no DailyRewardsValidatorsMinted event        
-      assert.equal('DailyRewardsValidatorsMinted' in txRes.events, false);
-      // expect the current day to increase after application rewards were minted
-      const rewardsDay = await instance.methods.rewardsDay().call();
-      assert.equal(rewardsDay, 1);
+      assert.equal('DailyRewardsValidatorsMinted' in txRes.events, false);      
       // expect application balances to change
       const newApplication1Balance = (await instance.methods.balanceOf(application1.rewardsAddress).call());
       const newApplication2Balance = (await instance.methods.balanceOf(application2.rewardsAddress).call());
@@ -495,13 +492,13 @@ contract('main', (_accounts) => {
       assert.equal(newApplication3Balance, BigNumber.sum(application3Balance, validApplicationRewards.amounts[2]));    
     });
 
-    it('Reaching All Validators submitted mints rewards for validators', async() => {      
+    it('Reaching All Validators submitted mints rewards for validators and increments rewardsDay', async() => {      
       const expectedValidatorRewardsAmountPerValidator = BigNumber.sum(maxTotalSupply, -currentTotalSupply).times(0.001829).div(100).div(day0SelectedValidators.length).integerValue(BigNumber.ROUND_DOWN);
       const expectedValidatorRewardsAmountSum = expectedValidatorRewardsAmountPerValidator.times(day0SelectedValidators.length);
       const validator1Balance = (await instance.methods.balanceOf(validator1.rewardsAddress).call());
       const validator2Balance = (await instance.methods.balanceOf(validator2.rewardsAddress).call());
-      const validator3Balance = (await instance.methods.balanceOf(validator3.rewardsAddress).call());
-      txRes = await instance.methods.submitDailyRewards(0, day0ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator3.account, gas: 500000 });
+      const validator3Balance = (await instance.methods.balanceOf(validator3.rewardsAddress).call());      
+      txRes = await instance.methods.submitDailyRewards(0, day0ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator3.account, gas: 500000 });      
       // exepct DailyRewardsSubmitted
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),String('0').toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),String(day0ValidApplicationRewardsHash).toLowerCase());      
@@ -513,6 +510,9 @@ contract('main', (_accounts) => {
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),String(day0ValidApplicationRewardsHash).toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),String(day0SelectedValidators.length).toLowerCase());
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),String(expectedValidatorRewardsAmountSum.toString()).toLowerCase());
+      // expect the current day to increase after application rewards were minted
+      const rewardsDay = await instance.methods.rewardsDay().call();
+      assert.equal(rewardsDay, 1);
       // expect validators balances to change
       const newValidator1Balance = (await instance.methods.balanceOf(validator1.rewardsAddress).call());
       const newValidator2Balance = (await instance.methods.balanceOf(validator2.rewardsAddress).call());
@@ -522,7 +522,23 @@ contract('main', (_accounts) => {
       assert.equal(newValidator3Balance, BigNumber.sum(validator3Balance, expectedValidatorRewardsAmountPerValidator));
     });
 
+    it('Submitting next day rewards before 24 hours (using 10 seconds in test) is rejected', async() => {      
+      try {
+        expect(txRes = await instance.methods.submitDailyRewards(1, day1ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 })).to.be.rejectedWith(Error)
+      }
+      catch (error) {
+        //
+      }             
+    });
+
     it('Submitting next day rewards when not all validators submitted will give the submitting validators from yesterdays their rewards using the new validator reward percent param', async() => {
+      let timestamp = Math.floor(Date.now() / 1000) + 10; // wait for 10 seconds
+      console.log(`will wait for ${timestamp - Math.floor(Date.now() / 1000)} seconds before submitting day 1`);
+      let result = await waitUntil(() => {
+      let timePassed = timestamp - Math.floor(Date.now() / 1000);
+        return timePassed < 0;
+      }, 90000, 1000);
+
       // get current total supply before minting tomorrow
       currentTotalSupply = await instance.methods.totalSupply().call();
       
@@ -533,6 +549,13 @@ contract('main', (_accounts) => {
       // expect no DailyRewardsValidatorsMinted event        
       assert.equal('DailyRewardsValidatorsMinted' in txRes.events, false);
       // application rewards were given here now submit for next day
+      timestamp = Math.floor(Date.now() / 1000) + 10; // wait for 10 seconds
+      console.log(`Submitted for day 1 will wait for ${timestamp - Math.floor(Date.now() / 1000)} seconds beofre day 2`);
+      result = await waitUntil(() => {
+        timePassed = timestamp - Math.floor(Date.now() / 1000);
+        return timePassed < 0;
+      }, 90000, 1000);
+
       txRes = await instance.methods.submitDailyRewards(2, day2ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });      
       // expect no DailyRewardsApplicationsMinted event
       assert.equal('DailyRewardsApplicationsMinted' in txRes.events, false);
