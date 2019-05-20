@@ -61,6 +61,7 @@ contract PropsRewards is Initializable, ERC20 {
 
     event ControllerUpdated(address indexed newController);
 
+    event DailyRewardsDataPruned(uint256 entires);
     /*
     *  Storage
     */
@@ -85,12 +86,18 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _controller address that will have controller functionality on rewards protocol
     * @param _decimals uint256 number of decimals used in total supply
     * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
+    * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
     */
-    function initializePostRewardsUpgrade1(address _controller, uint256 _decimals, uint256 _minSecondsBetweenDays)
+    function initializePostRewardsUpgrade1(
+        address _controller,
+        uint256 _decimals,
+        uint256 _minSecondsBetweenDays,
+        uint256 _maxRewardsStorageDays
+    )
         public
         initializer
     {
-        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays);
+        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _maxRewardsStorageDays);
     }
 
     /**
@@ -98,12 +105,18 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _controller address that will have controller functionality on rewards protocol
     * @param _decimals uint256 number of decimals used in total supply
     * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
+    * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
     */
-    function initialize(address _controller, uint256 _decimals, uint256 _minSecondsBetweenDays)
+    function initialize(
+        address _controller,
+        uint256 _decimals,
+        uint256 _minSecondsBetweenDays,
+        uint256 _maxRewardsStorageDays
+    )
         public
         initializer
     {
-        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays);
+        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _maxRewardsStorageDays);
     }
 
     /**
@@ -303,8 +316,14 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _controller address that will have controller functionality on rewards protocol
     * @param _decimals uint256 number of decimals used in total supply
     * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
+    * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
     */
-    function _initializePostRewardsUpgrade1(address _controller, uint256 _decimals, uint256 _minSecondsBetweenDays)
+    function _initializePostRewardsUpgrade1(
+        address _controller,
+        uint256 _decimals,
+        uint256 _minSecondsBetweenDays,
+        uint256 _maxRewardsStorageDays
+    )
         internal
     {
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
@@ -318,7 +337,7 @@ contract PropsRewards is Initializable, ERC20 {
          // ValidatorRewardsPercent pphm ==> 0.001829%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
         controller = _controller;
-        rewardsLibData.maxDailyRewardStorage = 7; // keep daily rewards data for up to 7 days
+        rewardsLibData.maxDailyRewardStorage = _maxRewardsStorageDays; // keep daily rewards data for up to _maxRewardsStorageDays days
         rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
     }
 

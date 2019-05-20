@@ -4,11 +4,13 @@ const zos = require('zos-lib');
 const fs = require('fs');
 // eslint-disable-next-line prefer-destructuring
 const proxyContractABI = require('zos-lib/build/contracts/AdminUpgradeabilityProxy.json');
+const propsTokenContractABI = require('../../build/contracts/PropsToken.json');
 const connectionConfig = require('../../truffle');
 const utils = require('../../scripts_utils/utils');
 
 const networkProvider = process.argv[2];
 const multisigWalletForPropsTokenProxy = process.argv[3];
+const min
 let networkInUse;
 let web3;
 
@@ -25,12 +27,6 @@ if (typeof (multisigWalletForPropsTokenProxy) === 'undefined') {
 
 const zosData = JSON.parse(fs.readFileSync(`zos.${networkProvider}.json`, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
-const OldPropsTokenLogicContractAddress = zosData.proxies['PropsToken/PropsToken'][0].implementation;
-const NewPropsTokenLogicContractAddress = zosData.contracts.PropsToken.address;
-if (OldPropsTokenLogicContractAddress === NewPropsTokenLogicContractAddress) {
-  console.warn('New logic contract must be deployed first using zos push');
-  process.exit(0);
-}
 
 const multisigWalletABI = require('../../build/contracts/MultiSigWallet.json');
 
@@ -58,10 +54,14 @@ async function main() {
   const providerDevOps1 = connectionConfig.networks[networkInUse].provider();
   web3 = new Web3(providerDevOps1);
   const multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
-  const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
+  // const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
+  const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);  
   // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();
-  const upgradeToEncoded = zos.encodeCall('upgradeTo', ['address'], [NewPropsTokenLogicContractAddress]);
-  console.log(`upgradeToEncoded=${upgradeToEncoded}`);
+  //initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _maxRewardsStorageDays)
+  const initializeToEncoded = zos.encodeCall('initializePostRewardsUpgrade1', ['address','uint256','uint256'], [multisigWalletForPropsTokenProxy,86400,]);
+  console.log(`upgradeToEncoded=${upgradeToEncoded}`);  
+  // 0x3659cfe6000000000000000000000000d848527867b66b29f87708c3cc1d9c39bc56d340
+
   console.log(`Issuing upgradeTo to ${NewPropsTokenLogicContractAddress} via multisig wallet ${multisigWalletForPropsTokenProxy}`);
   // eslint-disable-next-line no-await-in-loop
   await multiSigContractInstance.methods.submitTransaction(

@@ -6,6 +6,11 @@ pragma solidity ^0.4.24;
  **/
 library PropsRewardsLib {
     /*
+    *  Events
+    */
+    event DailyRewardsDataPruned(uint256 entires);
+
+    /*
     *  Storage
     */
 
@@ -52,6 +57,7 @@ library PropsRewardsLib {
     struct RewardsDayHash {
         bytes32 rewardsHash;
         uint256 blockTimestamp;
+        uint256 initializedState;
     }
 
     // represent the storage structures
@@ -246,9 +252,7 @@ library PropsRewardsLib {
                 "Reward Hash is invalid"
         );
         if (_self.dailyRewards[_rewardsHash].initializedState == 0) {
-            if (_self.dailyRewardsList.push(_rewardsHash) > _self.maxDailyRewardStorage) {
-                _deleteFirstDailyRewardEntry(_self);
-            }
+            _self.dailyRewardsList.push(_rewardsHash);
             _self.dailyRewards[_rewardsHash].initializedState = 1;
         }
         _self.dailyRewards[_rewardsHash].submissions[msg.sender] = true;
@@ -282,6 +286,9 @@ library PropsRewardsLib {
         _self.dailyRewards[_rewardsHash].rewardsDay = _rewardsDay;
         _self.dailyRewardHashes[_rewardsDay].rewardsHash = _rewardsHash;
         _self.dailyRewardHashes[_rewardsDay].blockTimestamp = block.timestamp;
+        _self.dailyRewardHashes[_rewardsDay].initializedState = 1;
+        // _pruneDailyRewardEntries(_self);
+
         return true;
     }
     /**
@@ -750,22 +757,35 @@ library PropsRewardsLib {
     }
 
     /**
-    * @dev Delete existing values from the previous applications list
+    * @dev Delete old/unused values
     * @param _self Data pointer to storage
     */
-    function _deleteFirstDailyRewardEntry(Data storage _self)
-        public
-        returns (bool)
-    {
-        bytes32 rewardsDayHashToDelete = _self.dailyRewardsList[0];
-        uint256 rewardsDayToDelete = _self.dailyRewards[rewardsDayHashToDelete].rewardsDay;
-
-        for (uint256 i = 1; i < _self.dailyRewardsList.length; i++) {
-            _self.dailyRewardsList[i-1] = _self.dailyRewardsList[i];
-        }
-        delete( _self.dailyRewardsList[_self.dailyRewardsList.length - 1]);
-        _self.dailyRewardsList.length--;
-        delete(_self.dailyRewards[rewardsDayHashToDelete]);
-        delete(_self.dailyRewardHashes[rewardsDayToDelete]);
-    }
+    // function _pruneDailyRewardEntries(Data storage _self)
+    //     public
+    //     returns (bool)
+    // {
+    //     uint256 deletedItems = 0;
+    //     uint256 i;
+    //     for (i = 0; i < _self.dailyRewardsList.length; i++) {
+    //         if (_self.rewardsDay - _self.dailyRewards[_self.dailyRewardsList[i]].rewardsDay > _self.maxDailyRewardStorage) {
+    //             _self.dailyRewardsList[i] = _self.dailyRewardsList[i + 1];
+    //             deletedItems++;
+    //             if (_self.dailyRewardHashes[_self.dailyRewards[_self.dailyRewardsList[i]].rewardsDay].initializedState == 1) {
+    //                 delete _self.dailyRewardHashes[_self.dailyRewards[_self.dailyRewardsList[i]].rewardsDay];
+    //             }
+    //             for (uint256 j = 0; j < _self.dailyRewards[_self.dailyRewardsList[i]].submissionValidators.length; j++) {
+    //                 delete _self.dailyRewards[_self.dailyRewardsList[i]].submissions[_self.dailyRewards[_self.dailyRewardsList[i]].submissionValidators[j]];
+    //             }
+    //             delete _self.dailyRewards[_self.dailyRewardsList[i]];
+    //         }
+    //     }
+    //     if (deletedItems > 0) {
+    //         for (i = 0; i < deletedItems; i ++) {
+    //             delete  _self.dailyRewardsList[_self.dailyRewardsList.length - 1 - i];
+    //         }
+    //         _self.dailyRewardsList.length = _self.dailyRewardsList.length - deletedItems;
+    //         emit DailyRewardsDataPruned(deletedItems);
+    //     }
+    //     return true;
+    // }
 }
