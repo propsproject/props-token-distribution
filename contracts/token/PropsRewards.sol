@@ -61,13 +61,13 @@ contract PropsRewards is Initializable, ERC20 {
 
     event ControllerUpdated(address indexed newController);
 
-    event DailyRewardsDataPruned(uint256 entires);
     /*
     *  Storage
     */
 
     PropsRewardsLib.Data internal rewardsLibData;
     uint256 public maxTotalSupply;
+    uint256 public rewardsStartTimestamp;
     address public controller; // controller entity
 
     /*
@@ -86,18 +86,18 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _controller address that will have controller functionality on rewards protocol
     * @param _decimals uint256 number of decimals used in total supply
     * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-    * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
+    * @param _rewardsStartTimestamp uint256 day 0 timestamp
     */
     function initializePostRewardsUpgrade1(
         address _controller,
         uint256 _decimals,
         uint256 _minSecondsBetweenDays,
-        uint256 _maxRewardsStorageDays
+        uint256 _rewardsStartTimestamp
     )
         public
         initializer
     {
-        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _maxRewardsStorageDays);
+        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
     }
 
     /**
@@ -105,18 +105,18 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _controller address that will have controller functionality on rewards protocol
     * @param _decimals uint256 number of decimals used in total supply
     * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-    * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
+    * @param _rewardsStartTimestamp uint256 day 0 timestamp
     */
     function initialize(
         address _controller,
         uint256 _decimals,
         uint256 _minSecondsBetweenDays,
-        uint256 _maxRewardsStorageDays
+        uint256 _rewardsStartTimestamp
     )
         public
         initializer
     {
-        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _maxRewardsStorageDays);
+        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
     }
 
     /**
@@ -179,15 +179,15 @@ contract PropsRewards is Initializable, ERC20 {
         returns (bool)
     {
         // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
-        if (_rewardsDay > 0) {
-            uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculatePreviousDayValidatorRewards(
+        if (_rewardsDay > 0 && (_rewardsDay > rewardsLibData.dailyRewards.lastRewardsDay)) {
+            uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
                 rewardsLibData,
-                (_rewardsDay - 1),
-                rewardsLibData.dailyRewardHashes[(_rewardsDay - 1)].rewardsHash,
-                maxTotalSupply
+                rewardsLibData.dailyRewards.lastRewardsDay,
+                rewardsLibData.dailyRewards.lastConfirmedRewardsHash,
+                false
             );
             if (previousDayValidatorRewardsAmount > 0) {
-                _mintDailyRewardsForValidators((_rewardsDay - 1), rewardsLibData.dailyRewardHashes[(_rewardsDay - 1)].rewardsHash, previousDayValidatorRewardsAmount);
+                _mintDailyRewardsForValidators(rewardsLibData.dailyRewards.lastRewardsDay, rewardsLibData.dailyRewards.lastConfirmedRewardsHash, previousDayValidatorRewardsAmount);
             }
         }
         // check and give application rewards if majority of validators agree
@@ -197,7 +197,6 @@ contract PropsRewards is Initializable, ERC20 {
             _rewardsHash,
             _applications,
             _amounts,
-            maxTotalSupply,
             totalSupply()
         );
         if (appRewardsSum > 0) {
@@ -209,7 +208,7 @@ contract PropsRewards is Initializable, ERC20 {
             rewardsLibData,
             _rewardsDay,
             _rewardsHash,
-            maxTotalSupply
+            true
         );
         if (validatorRewardsAmount > 0) {
             _mintDailyRewardsForValidators(_rewardsDay, _rewardsHash, validatorRewardsAmount);
@@ -252,17 +251,6 @@ contract PropsRewards is Initializable, ERC20 {
         returns (uint256)
     {
         return PropsRewardsLib.getParameterValue(rewardsLibData, _name, _rewardsDay);
-    }
-
-    /**
-    * @dev Allows getting the current rewards day value
-    */
-    function rewardsDay()
-        public
-        view
-        returns (uint256)
-    {
-        return rewardsLibData.rewardsDay;
     }
 
     /**
@@ -316,18 +304,21 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _controller address that will have controller functionality on rewards protocol
     * @param _decimals uint256 number of decimals used in total supply
     * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-    * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
+    * @param _rewardsStartTimestamp uint256 day 0 timestamp
     */
     function _initializePostRewardsUpgrade1(
         address _controller,
         uint256 _decimals,
         uint256 _minSecondsBetweenDays,
-        uint256 _maxRewardsStorageDays
+        uint256 _rewardsStartTimestamp
     )
         internal
     {
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
-        maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
+        rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
+        rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;
+        rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
+        controller = _controller;
         // ApplicationRewardsPercent pphm ==> 0.03475%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
         // ApplicationRewardsMaxVariationPercent pphm ==> 150%
@@ -336,9 +327,6 @@ contract PropsRewards is Initializable, ERC20 {
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
          // ValidatorRewardsPercent pphm ==> 0.001829%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
-        controller = _controller;
-        rewardsLibData.maxDailyRewardStorage = _maxRewardsStorageDays; // keep daily rewards data for up to _maxRewardsStorageDays days
-        rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
     }
 
     /**
@@ -350,10 +338,11 @@ contract PropsRewards is Initializable, ERC20 {
     function _mintDailyRewardsForValidators(uint256 _rewardsDay, bytes32 _rewardsHash, uint256 _amount)
         internal
     {
-        uint256 validatorsCount = rewardsLibData.dailyRewards[_rewardsHash].submissionValidators.length;
+        uint256 validatorsCount = rewardsLibData.dailyRewards.submissions[_rewardsHash].validatorsList.length;
         for (uint256 i = 0; i < validatorsCount; i++) {
-            _mint(rewardsLibData.validators[rewardsLibData.dailyRewards[_rewardsHash].submissionValidators[i]].rewardsAddress,_amount);
+            _mint(rewardsLibData.validators[rewardsLibData.dailyRewards.submissions[_rewardsHash].validatorsList[i]].rewardsAddress,_amount);
         }
+        PropsRewardsLib._resetDailyRewards(rewardsLibData);
         emit DailyRewardsValidatorsMinted(
             _rewardsDay,
             _rewardsHash,

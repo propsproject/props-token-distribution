@@ -44,21 +44,21 @@ library PropsRewardsLib {
 
     // Represents daily reward submissions and confimations
     struct DailyRewards {
-        mapping (address => bool) submissions;
-        address[] submissionValidators;
-        uint256 confirmations;
-        uint256 initializedState;               // A way to check if there's something in the map and whether already added to list
-        uint256 finalized;
+        mapping (bytes32 => Submission) submissions;
+        bytes32[] submittedRewardHashes;
         uint256 totalSupply;
-        uint256 rewardsDay;
+        bytes32 lastConfirmedRewardsHash;
+        uint256 lastRewardsDay;
     }
 
-    //Represent rewards day to its rewardsHash and block.timestamp
-    struct RewardsDayHash {
-        bytes32 rewardsHash;
-        uint256 blockTimestamp;
-        uint256 initializedState;
+    struct Submission {
+        mapping (address => bool) validators;
+        address[] validatorsList;
+        uint256 confirmations;
+        uint256 finalized;
+        uint256 initializedState;               // A way to check if there's something in the map and whether already added to list
     }
+
 
     // represent the storage structures
     struct Data {
@@ -75,22 +75,17 @@ library PropsRewardsLib {
         // the participating applications
         RewardedEntityList selectedApplications;
         // daily rewards submission data
-        mapping (bytes32 => DailyRewards) dailyRewards;
-        bytes32[] dailyRewardsList;
-        // current and previous rewards daily timestamp
-        uint256 rewardsDay;
-        // indication to when to cleanup the dailyRewards data
-        uint256 maxDailyRewardStorage;
-        // map to hold rewardsDay to its hash and block timestamp
-        mapping (uint256 => RewardsDayHash) dailyRewardHashes;
+        DailyRewards dailyRewards;
         uint256 minSecondsBetweenDays;
+        uint256 rewardsStartTimestamp;
+        uint256 maxTotalSupply;
     }
     /*
     *  Modifiers
     */
     modifier onlyOneRewardsHashPerValidator(Data storage _self, bytes32 _rewardsHash) {
         require(
-            !_self.dailyRewards[_rewardsHash].submissions[msg.sender],
+            !_self.dailyRewards.submissions[_rewardsHash].validators[msg.sender],
             "Must be one submission per validator"
         );
          _;
@@ -133,26 +128,16 @@ library PropsRewardsLib {
 
     modifier onlyValidRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
-            _rewardsDay == 0 ||
-            (block.timestamp - _self.dailyRewardHashes[_rewardsDay - 1].blockTimestamp) > _self.minSecondsBetweenDays &&
-            (_rewardsDay == _self.rewardsDay || _rewardsDay == (_self.rewardsDay + 1)),
-            "Must be for this round or the next"
+            _currentRewardsDay(_self) == _rewardsDay,
+            "Must be for current day"
         );
          _;
     }
 
-    modifier onlyValidValidatorsRewardsDay(Data storage _self, uint256 _rewardsDay) {
+    modifier onlyValidFutureRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
-            _rewardsDay >= _self.selectedValidators.rewardsDay,
-            "Must be existing or future validators rewardsDay"
-        );
-         _;
-    }
-
-    modifier onlyValidApplicationsRewardsDay(Data storage _self, uint256 _rewardsDay) {
-        require(
-            _rewardsDay >= _self.selectedApplications.rewardsDay,
-            "Must be existing or future applications rewardsDay"
+            _rewardsDay >= _currentRewardsDay(_self),
+            "Must be future rewardsDay"
         );
          _;
     }
@@ -166,58 +151,33 @@ library PropsRewardsLib {
         _;
     }
 
-
-    /**
-    * @dev The function is called by validators with the calculation of the daily rewards for previous day
-    * @param _self Data pointer to storage
-    * @param _rewardsDay uint256 the rewards day
-    * @param _rewardsHash bytes32 hash of the rewards data
-    * @param _maxTotalSupply uint256 max total supply
-    */
-    function calculatePreviousDayValidatorRewards(
-        Data storage _self,
-        uint256 _rewardsDay,
-        bytes32 _rewardsHash,
-        uint256 _maxTotalSupply
-    )
-        public
-        returns (uint256)
-    {
-        uint256 numOfValidators;
-        if (_self.dailyRewards[_rewardsHash].finalized == 1) // previous daily reward was not finalized
-        {
-            numOfValidators = _self.dailyRewards[_rewardsHash].confirmations;
-            _self.dailyRewards[_rewardsHash].finalized = 2;
-            _incrementRewardsDay(_self, _rewardsDay);
-            return _getValidatorRewardsDailyAmountPerValidator(_self, _rewardsDay, numOfValidators, _maxTotalSupply,  _self.dailyRewards[_rewardsHash].totalSupply);
-        }
-        return 0;
-    }
-
     /**
     * @dev The function is called by validators with the calculation of the daily rewards
     * @param _self Data pointer to storage
     * @param _rewardsDay uint256 the rewards day
     * @param _rewardsHash bytes32 hash of the rewards data
-    * @param _maxTotalSupply uint256 max total supply
     */
     function calculateValidatorRewards(
         Data storage _self,
         uint256 _rewardsDay,
         bytes32 _rewardsHash,
-        uint256 _maxTotalSupply
+        bool _allValidators
     )
         public
+        view
         returns (uint256)
     {
         uint256 numOfValidators;
-        if (_self.dailyRewards[_rewardsHash].finalized == 1)
+        if (_self.dailyRewards.submissions[_rewardsHash].finalized == 1)
         {
-            numOfValidators = _requiredValidatorsForValidatorsRewards(_self, _rewardsDay);
-            if (numOfValidators > _self.dailyRewards[_rewardsHash].confirmations) return 0;
-            _self.dailyRewards[_rewardsHash].finalized = 2;
-            _incrementRewardsDay(_self, _rewardsDay);
-            return _getValidatorRewardsDailyAmountPerValidator(_self, _rewardsDay, numOfValidators, _maxTotalSupply,  _self.dailyRewards[_rewardsHash].totalSupply);
+            if (_allValidators) {
+                numOfValidators = _requiredValidatorsForValidatorsRewards(_self, _rewardsDay);
+                if (numOfValidators > _self.dailyRewards.submissions[_rewardsHash].confirmations) return 0;
+            } else {
+                numOfValidators = _self.dailyRewards.submissions[_rewardsHash].confirmations;
+            }
+            uint256 rewardPerValidator = _getValidatorRewardsDailyAmountPerValidator(_self, _rewardsDay, numOfValidators, _self.dailyRewards.totalSupply);
+            return rewardPerValidator;
         }
         return 0;
     }
@@ -229,7 +189,6 @@ library PropsRewardsLib {
     * @param _rewardsHash bytes32 hash of the rewards data
     * @param _applications address[] array of application addresses getting the daily reward
     * @param _amounts uint256[] array of amounts each app should get
-    * @param _maxTotalSupply uint256 max total supply
     * @param _currentTotalSupply uint256 current total supply
     */
     function calculateApplicationRewards(
@@ -238,7 +197,6 @@ library PropsRewardsLib {
         bytes32 _rewardsHash,
         address[] _applications,
         uint256[] _amounts,
-        uint256 _maxTotalSupply,
         uint256 _currentTotalSupply
     )
         public
@@ -251,17 +209,18 @@ library PropsRewardsLib {
                 _rewardHashIsvalid(_rewardsDay, _rewardsHash, _applications, _amounts),
                 "Reward Hash is invalid"
         );
-        if (_self.dailyRewards[_rewardsHash].initializedState == 0) {
-            _self.dailyRewardsList.push(_rewardsHash);
-            _self.dailyRewards[_rewardsHash].initializedState = 1;
+        if (_self.dailyRewards.submissions[_rewardsHash].initializedState == 0) {
+            _self.dailyRewards.submissions[_rewardsHash].initializedState = 1;
+            _self.dailyRewards.submittedRewardHashes.push(_rewardsHash);
         }
-        _self.dailyRewards[_rewardsHash].submissions[msg.sender] = true;
-        _self.dailyRewards[_rewardsHash].confirmations++;
-        _self.dailyRewards[_rewardsHash].submissionValidators.push(msg.sender);
-        if (_self.dailyRewards[_rewardsHash].confirmations == _requiredValidatorsForAppRewards(_self, _rewardsDay)) {
+        _self.dailyRewards.submissions[_rewardsHash].validators[msg.sender] = true;
+        _self.dailyRewards.submissions[_rewardsHash].validatorsList.push(msg.sender);
+        _self.dailyRewards.submissions[_rewardsHash].confirmations++;
+
+        if (_self.dailyRewards.submissions[_rewardsHash].confirmations == _requiredValidatorsForAppRewards(_self, _rewardsDay)) {
             uint256 sum = _validateSubmittedData(_self, _applications, _amounts);
             require(
-                sum <= _getMaxAppRewardsDailyAmount(_self, _rewardsDay, _maxTotalSupply, _currentTotalSupply),
+                sum <= _getMaxAppRewardsDailyAmount(_self, _rewardsDay, _currentTotalSupply),
                 "Rewards data is invalid - exceed daily variation"
             );
             _finalizeDailyApplicationRewards(_self, _rewardsDay, _rewardsHash, _currentTotalSupply);
@@ -281,16 +240,13 @@ library PropsRewardsLib {
         public
         returns (bool)
     {
-        _self.dailyRewards[_rewardsHash].totalSupply = _currentTotalSupply;
-        _self.dailyRewards[_rewardsHash].finalized = 1;
-        _self.dailyRewards[_rewardsHash].rewardsDay = _rewardsDay;
-        _self.dailyRewardHashes[_rewardsDay].rewardsHash = _rewardsHash;
-        _self.dailyRewardHashes[_rewardsDay].blockTimestamp = block.timestamp;
-        _self.dailyRewardHashes[_rewardsDay].initializedState = 1;
-        // _pruneDailyRewardEntries(_self);
-
+        _self.dailyRewards.totalSupply = _currentTotalSupply;
+        _self.dailyRewards.lastConfirmedRewardsHash = _rewardsHash;
+        _self.dailyRewards.lastRewardsDay = _rewardsDay;
+        _self.dailyRewards.submissions[_rewardsHash].finalized = 1;
         return true;
     }
+
     /**
     * @dev Get parameter's value
     * @param _self Data pointer to storage
@@ -434,7 +390,7 @@ library PropsRewardsLib {
         address[] _validators
     )
         public
-        onlyValidValidatorsRewardsDay(_self, _rewardsDay)
+        onlyValidFutureRewardsDay(_self, _rewardsDay)
         onlyExistingValidators(_self, _validators)
         returns (bool)
     {
@@ -462,7 +418,7 @@ library PropsRewardsLib {
         address[] _applications
     )
         public
-        onlyValidApplicationsRewardsDay(_self, _rewardsDay)
+        onlyValidFutureRewardsDay(_self, _rewardsDay)
         onlyExistingApplications(_self, _applications)
         returns (bool)
     {
@@ -526,36 +482,21 @@ library PropsRewardsLib {
     }
 
     /**
-    * @dev Updates the current dailyTimestamp and previous one
-    * @param _self Data pointer to storage
-    * @param _rewardsDay uint256 the reward day
-    */
-    function _incrementRewardsDay(Data storage _self, uint256 _rewardsDay)
-        public
-        returns (bool)
-    {
-        _self.rewardsDay = (_rewardsDay + 1);
-        return true;
-    }
-
-    /**
     * @dev Checks how many validators are needed for app rewards
     * @param _self Data pointer to storage
     * @param _rewardsDay uint256 the reward day
-    * @param _maxTotalSupply uint256 max total supply
     * @param _currentTotalSupply uint256 current total supply
     */
     function _getMaxAppRewardsDailyAmount(
         Data storage _self,
         uint256 _rewardsDay,
-        uint256 _maxTotalSupply,
         uint256 _currentTotalSupply
     )
         public
         view
         returns (uint256)
     {
-        return ((_maxTotalSupply - _currentTotalSupply) *
+        return ((_self.maxTotalSupply - _currentTotalSupply) *
         getParameterValue(_self, ParameterName.ApplicationRewardsPercent, _rewardsDay) *
         getParameterValue(_self, ParameterName.ApplicationRewardsMaxVariationPercent, _rewardsDay)) / 1e16;
     }
@@ -566,21 +507,19 @@ library PropsRewardsLib {
     * @param _self Data pointer to storage
     * @param _rewardsDay uint256 the reward day
     * @param _numOfValidators uint256 number of validators
-    * @param _maxTotalSupply uint256 max total supply
     * @param _currentTotalSupply uint256 current total supply
     */
     function _getValidatorRewardsDailyAmountPerValidator(
         Data storage _self,
         uint256 _rewardsDay,
         uint256 _numOfValidators,
-        uint256 _maxTotalSupply,
         uint256 _currentTotalSupply
     )
         public
         view
         returns (uint256)
     {
-        return (((_maxTotalSupply - _currentTotalSupply) *
+        return (((_self.maxTotalSupply - _currentTotalSupply) *
         getParameterValue(_self, ParameterName.ValidatorRewardsPercent, _rewardsDay)) / 1e8) / _numOfValidators;
     }
 
@@ -664,6 +603,19 @@ library PropsRewardsLib {
         } else {
             return ((_self.selectedValidators.previousList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _rewardsDay)) / 1e8)+1;
         }
+    }
+
+    /**
+    * @dev Get rewards day from block.timestamp
+    * @param _self Data pointer to storage
+    */
+    function _currentRewardsDay(Data storage _self)
+        public
+        view
+        returns (uint256)
+    {
+        //the the start time - floor timestamp to previous midnight divided by seconds in a day will give the rewards day number
+        return (_self.rewardsStartTimestamp - (block.timestamp - (block.timestamp % _self.minSecondsBetweenDays))) / _self.minSecondsBetweenDays;
     }
 
     /**
@@ -754,6 +706,31 @@ library PropsRewardsLib {
         }
         delete _rewardedEntitylist.previousList;
         return true;
+    }
+
+    /**
+    * @dev Deletes reward day submission data
+    * @param _self Data pointer to storage
+    */
+    function _resetDailyRewards(
+        Data storage _self
+    )
+        public
+        returns (bool)
+    {
+        bytes32[] memory rewardHashes = _self.dailyRewards.submittedRewardHashes;
+        for (uint256 i = 0; i < rewardHashes.length; i++) {
+            for (uint256 j = 0; j < _self.dailyRewards.submissions[rewardHashes[i]].validatorsList.length; j++) {
+                delete(
+                    _self.dailyRewards.submissions[rewardHashes[i]].validators[_self.dailyRewards.submissions[rewardHashes[i]].validatorsList[j]]
+                );
+            }
+            delete _self.dailyRewards.submissions[rewardHashes[i]].validatorsList;
+            _self.dailyRewards.submissions[rewardHashes[i]].confirmations = 0;
+            _self.dailyRewards.submissions[rewardHashes[i]].finalized = 0;
+            _self.dailyRewards.submissions[rewardHashes[i]].initializedState = 0;
+        }
+        delete _self.dailyRewards.submittedRewardHashes;
     }
 
     /**

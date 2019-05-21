@@ -10,7 +10,8 @@ const utils = require('../../scripts_utils/utils');
 
 const networkProvider = process.argv[2];
 const multisigWalletForPropsTokenProxy = process.argv[3];
-const min
+const minSecondsBetweenDailySubmissions = process.argv[4];
+const maxStorageDays = 
 let networkInUse;
 let web3;
 
