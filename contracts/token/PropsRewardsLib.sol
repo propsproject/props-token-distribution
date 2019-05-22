@@ -8,7 +8,6 @@ library PropsRewardsLib {
     /*
     *  Events
     */
-    event DailyRewardsDataPruned(uint256 entires);
 
     /*
     *  Storage
@@ -176,7 +175,7 @@ library PropsRewardsLib {
             } else {
                 numOfValidators = _self.dailyRewards.submissions[_rewardsHash].confirmations;
             }
-            uint256 rewardPerValidator = _getValidatorRewardsDailyAmountPerValidator(_self, _rewardsDay, numOfValidators, _self.dailyRewards.totalSupply);
+            uint256 rewardPerValidator = _getValidatorRewardsDailyAmountPerValidator(_self, _rewardsDay, numOfValidators);
             return rewardPerValidator;
         }
         return 0;
@@ -283,7 +282,7 @@ library PropsRewardsLib {
         uint256 _rewardsDay
     )
         public
-        onlyValidRewardsDay(_self, _rewardsDay)
+        onlyValidFutureRewardsDay(_self, _rewardsDay)
         returns (bool)
     {
         if (_rewardsDay <= _self.parameters[uint256(_name)].rewardsDay) {
@@ -507,19 +506,17 @@ library PropsRewardsLib {
     * @param _self Data pointer to storage
     * @param _rewardsDay uint256 the reward day
     * @param _numOfValidators uint256 number of validators
-    * @param _currentTotalSupply uint256 current total supply
     */
     function _getValidatorRewardsDailyAmountPerValidator(
         Data storage _self,
         uint256 _rewardsDay,
-        uint256 _numOfValidators,
-        uint256 _currentTotalSupply
+        uint256 _numOfValidators
     )
         public
         view
         returns (uint256)
     {
-        return (((_self.maxTotalSupply - _currentTotalSupply) *
+        return (((_self.maxTotalSupply - _self.dailyRewards.totalSupply) *
         getParameterValue(_self, ParameterName.ValidatorRewardsPercent, _rewardsDay)) / 1e8) / _numOfValidators;
     }
 
@@ -615,7 +612,7 @@ library PropsRewardsLib {
         returns (uint256)
     {
         //the the start time - floor timestamp to previous midnight divided by seconds in a day will give the rewards day number
-        return (_self.rewardsStartTimestamp - (block.timestamp - (block.timestamp % _self.minSecondsBetweenDays))) / _self.minSecondsBetweenDays;
+        return ((block.timestamp - (block.timestamp % _self.minSecondsBetweenDays)) - _self.rewardsStartTimestamp) / _self.minSecondsBetweenDays;
     }
 
     /**
@@ -732,37 +729,4 @@ library PropsRewardsLib {
         }
         delete _self.dailyRewards.submittedRewardHashes;
     }
-
-    /**
-    * @dev Delete old/unused values
-    * @param _self Data pointer to storage
-    */
-    // function _pruneDailyRewardEntries(Data storage _self)
-    //     public
-    //     returns (bool)
-    // {
-    //     uint256 deletedItems = 0;
-    //     uint256 i;
-    //     for (i = 0; i < _self.dailyRewardsList.length; i++) {
-    //         if (_self.rewardsDay - _self.dailyRewards[_self.dailyRewardsList[i]].rewardsDay > _self.maxDailyRewardStorage) {
-    //             _self.dailyRewardsList[i] = _self.dailyRewardsList[i + 1];
-    //             deletedItems++;
-    //             if (_self.dailyRewardHashes[_self.dailyRewards[_self.dailyRewardsList[i]].rewardsDay].initializedState == 1) {
-    //                 delete _self.dailyRewardHashes[_self.dailyRewards[_self.dailyRewardsList[i]].rewardsDay];
-    //             }
-    //             for (uint256 j = 0; j < _self.dailyRewards[_self.dailyRewardsList[i]].submissionValidators.length; j++) {
-    //                 delete _self.dailyRewards[_self.dailyRewardsList[i]].submissions[_self.dailyRewards[_self.dailyRewardsList[i]].submissionValidators[j]];
-    //             }
-    //             delete _self.dailyRewards[_self.dailyRewardsList[i]];
-    //         }
-    //     }
-    //     if (deletedItems > 0) {
-    //         for (i = 0; i < deletedItems; i ++) {
-    //             delete  _self.dailyRewardsList[_self.dailyRewardsList.length - 1 - i];
-    //         }
-    //         _self.dailyRewardsList.length = _self.dailyRewardsList.length - deletedItems;
-    //         emit DailyRewardsDataPruned(deletedItems);
-    //     }
-    //     return true;
-    // }
 }

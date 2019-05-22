@@ -33,14 +33,14 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
    * @param _transfersStartTime uint256 Unix Timestamp from which transfers are allowed
    * @param _controller address that will have controller functionality on rewards protocol
    * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-   * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
+   * @param _rewardsStartTimestamp uint256 day 0 timestamp
    */
   function initialize(
     address _holder,
     uint256 _transfersStartTime,
     address _controller,
     uint256 _minSecondsBetweenDays,
-    uint256 _maxRewardsStorageDays
+    uint256 _rewardsStartTimestamp
   )
     public
     initializer
@@ -51,7 +51,7 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
 
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
     PropsTimeBasedTransfers.initialize(_transfersStartTime, _holder);
-    PropsRewards.initialize(_controller, decimals, _minSecondsBetweenDays, _maxRewardsStorageDays);
+    PropsRewards.initialize(_controller, decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
     _mint(_holder, totalSupply);
   }
 
@@ -59,14 +59,14 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
    * @dev Initializer for upgrade function. Called only once after upgrade
    * @param _controller address that will have controller functionality on rewards protocol
    * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-   * @param _maxRewardsStorageDays uint256 entries from which we start to delete past entries
+   * @param _rewardsStartTimestamp uint256 day 0 timestamp
    */
-  function initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _maxRewardsStorageDays)
+  function initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _rewardsStartTimestamp)
     public
     initializer
   {
     uint8 decimals = 18;
-    PropsRewards.initializePostRewardsUpgrade1(_controller, decimals, _minSecondsBetweenDays, _maxRewardsStorageDays);
+    PropsRewards.initializePostRewardsUpgrade1(_controller, decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
   }
 
 }
