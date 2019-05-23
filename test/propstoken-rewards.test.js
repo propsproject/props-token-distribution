@@ -452,6 +452,7 @@ contract('main', (_accounts) => {
     const day2ValidApplicationRewardsHash = soliditySha3(2, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
     const day3ValidApplicationRewardsHash = soliditySha3(3, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
     const day4ValidApplicationRewardsHash = soliditySha3(4, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day5ValidApplicationRewardsHash = soliditySha3(5, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
     const exceedMaxApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(exceedMaxApplicationRewards.applications, 'address'), formatArrayForSha3(exceedMaxApplicationRewards.amounts, 'uint256'));
     const nonExistentAppApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(nonExistentAppApplicationRewards.applications, 'address'), formatArrayForSha3(nonExistentAppApplicationRewards.amounts, 'uint256'));
     const appExistsButNotInListApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(appExistsButNotInListApplicationRewards.applications, 'address'), formatArrayForSha3(appExistsButNotInListApplicationRewards.amounts, 'uint256'));
@@ -683,6 +684,27 @@ contract('main', (_accounts) => {
       const expectedValidatorRewardsAmountSum = (new BigNumber(maxTotalSupply)).minus(currentTotalSupply).times(1830).div(1e8).integerValue(BigNumber.ROUND_DOWN);            
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),'3');
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),day3ValidApplicationRewardsHash.toLowerCase());      
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),'1');
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),expectedValidatorRewardsAmountSum.toString());        
+    });
+
+    it('App rewards and validator rewards work after a gap in the days', async() => {      
+      console.log(`will wait for ${rewardsDayInfo.secondsLeft*2} seconds before submitting day 5`);      
+      let result = await waitUntil(() => {
+        rewardsDayInfo = calcRewardsDay();
+        return rewardsDayInfo.rewardsDay == 5;
+      }, 90000, 1000);
+      process.stdout.clearLine();
+      process.stdout.cursorTo(0);
+      currentTotalSupply = await instance.methods.totalSupply().call();
+      txRes = await instance.methods.submitDailyRewards(5, day5ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });      
+      logGasUsed('submitDailyRewards', txRes.gasUsed);
+      // expect both applications and validators to be minted
+      assert.equal('DailyRewardsApplicationsMinted' in txRes.events, true);
+      assert.equal('DailyRewardsValidatorsMinted' in txRes.events, true);            
+      const expectedValidatorRewardsAmountSum = (new BigNumber(maxTotalSupply)).minus(currentTotalSupply).times(1830).div(1e8).integerValue(BigNumber.ROUND_DOWN);            
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),'5');
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),day5ValidApplicationRewardsHash.toLowerCase());      
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),'1');
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),expectedValidatorRewardsAmountSum.toString());        
     });

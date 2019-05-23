@@ -11,7 +11,7 @@ const utils = require('../../scripts_utils/utils');
 const networkProvider = process.argv[2];
 const multisigWalletForPropsTokenProxy = process.argv[3];
 const minSecondsBetweenDailySubmissions = process.argv[4];
-const maxStorageDays = 
+const rewardsStartTimestamp = process.argv[5];
 let networkInUse;
 let web3;
 
@@ -22,6 +22,16 @@ if (typeof (networkProvider) === 'undefined') {
 
 if (typeof (multisigWalletForPropsTokenProxy) === 'undefined') {
   console.log('Must supply multisigWalletForPropsTokenProxy');
+  process.exit(0);
+}
+
+if (typeof (minSecondsBetweenDailySubmissions) === 'undefined') {
+  console.log('Must supply minSecondsBetweenDailySubmissions');
+  process.exit(0);
+}
+
+if (typeof (rewardsStartTimestamp) === 'undefined') {
+  console.log('Must supply rewardsStartTimestamp');
   process.exit(0);
 }
 
@@ -59,25 +69,23 @@ async function main() {
   const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);  
   // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();
   //initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _maxRewardsStorageDays)
-  const initializeToEncoded = zos.encodeCall('initializePostRewardsUpgrade1', ['address','uint256','uint256'], [multisigWalletForPropsTokenProxy,86400,]);
-  console.log(`upgradeToEncoded=${upgradeToEncoded}`);  
-  // 0x3659cfe6000000000000000000000000d848527867b66b29f87708c3cc1d9c39bc56d340
-
-  console.log(`Issuing upgradeTo to ${NewPropsTokenLogicContractAddress} via multisig wallet ${multisigWalletForPropsTokenProxy}`);
+  const initializeToEncoded = zos.encodeCall('initializePostRewardsUpgrade1', ['address','uint256','uint256'], [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp]);
+  console.log(`initializeToEncoded=${initializeToEncoded}`);  
+  console.log(`Issuing initializePostRewardsUpgrade1 to ${NewPropsTokenLogicContractAddress} via multisig wallet ${multisigWalletForPropsTokenProxy}`);
   // eslint-disable-next-line no-await-in-loop
   await multiSigContractInstance.methods.submitTransaction(
     PropsTokenContractAddress,
     0,
-    upgradeToEncoded,
+    initializeToEncoded,
   ).send({
     from: DevOps1MultiSigOwnerAddress,
     gas: utils.gasLimit('multisig'),
     gasPrice: utils.gasPrice(),
     // eslint-disable-next-line no-loop-func
   }).then((receipt) => {
-    upgradeDataEntry.newLogicContract = NewPropsTokenLogicContractAddress;
+    upgradeDataEntry.initializeData = [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp];
     upgradeDataEntry.multisigTx = receipt.transactionHash;
-    console.log('Multisig transaction for upgrade sent');
+    console.log('Multisig transaction for initialization sent');
   }).catch((error) => {
     console.warn(`Error sending multisig transaction:${error}`);
   });
