@@ -36,10 +36,11 @@ if (typeof (rewardsStartTimestamp) === 'undefined') {
 }
 
 
-const zosData = JSON.parse(fs.readFileSync(`zos.${networkProvider}.json`, 'utf8'));
+const zosDataFileName = networkProvider === 'test' ? 'zos.dev-5777.json' : `zos.${networkProvider}.json`;
+const zosData = JSON.parse(fs.readFileSync(zosDataFileName, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 
-const multisigWalletABI = require('../../build/contracts/MultiSigWallet.json');
+const multisigWalletABI = require('./MultiSigWallet.json');
 
 const upgradeMetadataFilename = `output/upgrades-${networkProvider}.json`;
 let upgradeData;
@@ -60,10 +61,22 @@ const upgradeDataEntry = {
 
 async function main() {
   // instantiate multisig wallet
-  networkInUse = `${networkProvider}1`;
-  const DevOps1MultiSigOwnerAddress = connectionConfig.networks[networkInUse].wallet_address;
-  const providerDevOps1 = connectionConfig.networks[networkInUse].provider();
-  web3 = new Web3(providerDevOps1);
+  let providerDevOps1;
+  let DevOps1MultiSigOwnerAddress;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
+    if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+      providerDevOps1 = connectionConfig.networks[networkInUse].provider();
+      web3 = new Web3(providerTransferrer);
+    }
+    if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+      web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+      accounts = await web3.eth.getAccounts();
+      // eslint-disable-next-line prefer-destructuring
+      DevOps1MultiSigOwnerAddress = accounts[2];
+    } else {
+      DevOps1MultiSigOwnerAddress = connectionConfig.networks[networkInUse].wallet_address;
+    }
+  
   const multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
   // const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
   const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);  
@@ -71,7 +84,7 @@ async function main() {
   //initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _maxRewardsStorageDays)
   const initializeToEncoded = zos.encodeCall('initializePostRewardsUpgrade1', ['address','uint256','uint256'], [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp]);
   console.log(`initializeToEncoded=${initializeToEncoded}`);  
-  console.log(`Issuing initializePostRewardsUpgrade1 to ${NewPropsTokenLogicContractAddress} via multisig wallet ${multisigWalletForPropsTokenProxy}`);
+  console.log(`Issuing initializePostRewardsUpgrade1 via multisig wallet ${multisigWalletForPropsTokenProxy}`);
   // eslint-disable-next-line no-await-in-loop
   await multiSigContractInstance.methods.submitTransaction(
     PropsTokenContractAddress,

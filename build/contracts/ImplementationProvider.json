@@ -1,19 +1,19 @@
 {
-  "contractName": "IERC165",
+  "contractName": "ImplementationProvider",
   "abi": [
     {
       "constant": true,
       "inputs": [
         {
-          "name": "interfaceId",
-          "type": "bytes4"
+          "name": "contractName",
+          "type": "string"
         }
       ],
-      "name": "supportsInterface",
+      "name": "getImplementation",
       "outputs": [
         {
           "name": "",
-          "type": "bool"
+          "type": "address"
         }
       ],
       "payable": false,
@@ -25,20 +25,20 @@
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title IERC165\n * @dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md\n */\ninterface IERC165 {\n\n  /**\n   * @notice Query if a contract implements an interface\n   * @param interfaceId The interface identifier, as specified in ERC-165\n   * @dev Interface identification is specified in ERC-165. This function\n   * uses less than 30,000 gas.\n   */\n  function supportsInterface(bytes4 interfaceId)\n    external\n    view\n    returns (bool);\n}\n",
-  "sourcePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/openzeppelin-eth/contracts/introspection/IERC165.sol",
+  "source": "pragma solidity ^0.4.24;\n\n/**\n * @title ImplementationProvider\n * @dev Interface for providing implementation addresses for other contracts by name.\n */\ninterface ImplementationProvider {\n  /**\n   * @dev Abstract function to return the implementation address of a contract.\n   * @param contractName Name of the contract.\n   * @return Implementation address of the contract.\n   */\n  function getImplementation(string contractName) public view returns (address);\n}\n\n",
+  "sourcePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/zos-lib/contracts/application/ImplementationProvider.sol",
   "ast": {
-    "absolutePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/openzeppelin-eth/contracts/introspection/IERC165.sol",
+    "absolutePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/zos-lib/contracts/application/ImplementationProvider.sol",
     "exportedSymbols": {
-      "IERC165": [
-        6405
+      "ImplementationProvider": [
+        8394
       ]
     },
-    "id": 6406,
+    "id": 8395,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6397,
+        "id": 8386,
         "literals": [
           "solidity",
           "^",
@@ -46,123 +46,123 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:30"
+        "src": "0:24:69"
       },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "interface",
-        "documentation": "@title IERC165\n@dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md",
+        "documentation": "@title ImplementationProvider\n@dev Interface for providing implementation addresses for other contracts by name.",
         "fullyImplemented": false,
-        "id": 6405,
+        "id": 8394,
         "linearizedBaseContracts": [
-          6405
+          8394
         ],
-        "name": "IERC165",
+        "name": "ImplementationProvider",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": null,
-            "documentation": "@notice Query if a contract implements an interface\n@param interfaceId The interface identifier, as specified in ERC-165\n@dev Interface identification is specified in ERC-165. This function\nuses less than 30,000 gas.",
-            "id": 6404,
+            "documentation": "@dev Abstract function to return the implementation address of a contract.\n@param contractName Name of the contract.\n@return Implementation address of the contract.",
+            "id": 8393,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
             "modifiers": [],
-            "name": "supportsInterface",
+            "name": "getImplementation",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6400,
+              "id": 8389,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6399,
-                  "name": "interfaceId",
+                  "id": 8388,
+                  "name": "contractName",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6404,
-                  "src": "421:18:30",
+                  "scope": 8393,
+                  "src": "409:19:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_bytes4",
-                    "typeString": "bytes4"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
-                    "id": 6398,
-                    "name": "bytes4",
+                    "id": 8387,
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "421:6:30",
+                    "src": "409:6:69",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bytes4",
-                      "typeString": "bytes4"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "420:20:30"
+              "src": "408:21:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6403,
+              "id": 8392,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6402,
+                  "id": 8391,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6404,
-                  "src": "476:4:30",
+                  "scope": 8393,
+                  "src": "451:7:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_bool",
-                    "typeString": "bool"
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6401,
-                    "name": "bool",
+                    "id": 8390,
+                    "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "476:4:30",
+                    "src": "451:7:69",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "475:6:30"
+              "src": "450:9:69"
             },
-            "scope": 6405,
-            "src": "394:88:30",
+            "scope": 8394,
+            "src": "382:78:69",
             "stateMutability": "view",
             "superFunction": null,
-            "visibility": "external"
+            "visibility": "public"
           }
         ],
-        "scope": 6406,
-        "src": "122:362:30"
+        "scope": 8395,
+        "src": "153:309:69"
       }
     ],
-    "src": "0:485:30"
+    "src": "0:464:69"
   },
   "legacyAST": {
-    "absolutePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/openzeppelin-eth/contracts/introspection/IERC165.sol",
+    "absolutePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/zos-lib/contracts/application/ImplementationProvider.sol",
     "exportedSymbols": {
-      "IERC165": [
-        6405
+      "ImplementationProvider": [
+        8394
       ]
     },
-    "id": 6406,
+    "id": 8395,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6397,
+        "id": 8386,
         "literals": [
           "solidity",
           "^",
@@ -170,110 +170,110 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:30"
+        "src": "0:24:69"
       },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "interface",
-        "documentation": "@title IERC165\n@dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md",
+        "documentation": "@title ImplementationProvider\n@dev Interface for providing implementation addresses for other contracts by name.",
         "fullyImplemented": false,
-        "id": 6405,
+        "id": 8394,
         "linearizedBaseContracts": [
-          6405
+          8394
         ],
-        "name": "IERC165",
+        "name": "ImplementationProvider",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": null,
-            "documentation": "@notice Query if a contract implements an interface\n@param interfaceId The interface identifier, as specified in ERC-165\n@dev Interface identification is specified in ERC-165. This function\nuses less than 30,000 gas.",
-            "id": 6404,
+            "documentation": "@dev Abstract function to return the implementation address of a contract.\n@param contractName Name of the contract.\n@return Implementation address of the contract.",
+            "id": 8393,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
             "modifiers": [],
-            "name": "supportsInterface",
+            "name": "getImplementation",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6400,
+              "id": 8389,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6399,
-                  "name": "interfaceId",
+                  "id": 8388,
+                  "name": "contractName",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6404,
-                  "src": "421:18:30",
+                  "scope": 8393,
+                  "src": "409:19:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_bytes4",
-                    "typeString": "bytes4"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
-                    "id": 6398,
-                    "name": "bytes4",
+                    "id": 8387,
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "421:6:30",
+                    "src": "409:6:69",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bytes4",
-                      "typeString": "bytes4"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "420:20:30"
+              "src": "408:21:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6403,
+              "id": 8392,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6402,
+                  "id": 8391,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6404,
-                  "src": "476:4:30",
+                  "scope": 8393,
+                  "src": "451:7:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_bool",
-                    "typeString": "bool"
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6401,
-                    "name": "bool",
+                    "id": 8390,
+                    "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "476:4:30",
+                    "src": "451:7:69",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "475:6:30"
+              "src": "450:9:69"
             },
-            "scope": 6405,
-            "src": "394:88:30",
+            "scope": 8394,
+            "src": "382:78:69",
             "stateMutability": "view",
             "superFunction": null,
-            "visibility": "external"
+            "visibility": "public"
           }
         ],
-        "scope": 6406,
-        "src": "122:362:30"
+        "scope": 8395,
+        "src": "153:309:69"
       }
     ],
-    "src": "0:485:30"
+    "src": "0:464:69"
   },
   "compiler": {
     "name": "solc",
@@ -281,5 +281,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.1",
-  "updatedAt": "2019-05-23T15:23:26.875Z"
+  "updatedAt": "2019-05-23T12:34:11.804Z"
 }
