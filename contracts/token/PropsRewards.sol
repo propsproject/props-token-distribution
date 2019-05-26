@@ -94,7 +94,7 @@ contract PropsRewards is Initializable, ERC20 {
     )
         public
     {
-        uint8 decimals = 18;
+        uint256 decimals = 18;
         _initializePostRewardsUpgrade1(_controller, decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
     }
 
@@ -294,23 +294,20 @@ contract PropsRewards is Initializable, ERC20 {
         internal
     {
         require(maxTotalSupply==0, "Initialize rewards upgrade1 can happen only once");
+        // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
         rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
         rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;
         rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
 
         controller = _controller;
         // ApplicationRewardsPercent pphm ==> 0.03475%
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsPercent)].currentValue = 34750;
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsPercent)].rewardsDay = 0;
-        // ApplicationRewardsMaxVariationPercent pphm ==> 150%
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent)].currentValue = 150 * 1e6;
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent)].rewardsDay = 0;
-        // ValidatorMajorityPercent pphm ==> 50%
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorMajorityPercent)].currentValue = 50 * 1e6;
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorMajorityPercent)].rewardsDay = 0;
-        // ValidatorRewardsPercent pphm ==> 0.001829%
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorRewardsPercent)].currentValue = 1829;
-        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorRewardsPercent)].rewardsDay = 0;
+        updateParameter(PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
+        // // ApplicationRewardsMaxVariationPercent pphm ==> 150%
+        updateParameter(PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 150 * 1e6, 0);
+        // // ValidatorMajorityPercent pphm ==> 50%
+        updateParameter(PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
+        //  // ValidatorRewardsPercent pphm ==> 0.001829%
+        updateParameter(PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
     }
 
     /**

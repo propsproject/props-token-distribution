@@ -612,7 +612,11 @@ library PropsRewardsLib {
         returns (uint256)
     {
         //the the start time - floor timestamp to previous midnight divided by seconds in a day will give the rewards day number
-        return ((block.timestamp - (block.timestamp % _self.minSecondsBetweenDays)) - _self.rewardsStartTimestamp) / _self.minSecondsBetweenDays;
+        if (_self.minSecondsBetweenDays > 0) {
+            return ((block.timestamp - (block.timestamp % _self.minSecondsBetweenDays)) - _self.rewardsStartTimestamp) / _self.minSecondsBetweenDays;
+        } else {
+            return 0;
+        }
     }
 
     /**
