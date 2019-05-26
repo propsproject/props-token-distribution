@@ -300,14 +300,17 @@ contract PropsRewards is Initializable, ERC20 {
 
         controller = _controller;
         // ApplicationRewardsPercent pphm ==> 0.03475%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsPercent)].currentValue = 34750;
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsPercent)].rewardsDay = 0;
         // ApplicationRewardsMaxVariationPercent pphm ==> 150%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent, 150 * 1e6, 0);
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent)].currentValue = 150 * 1e6;
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ApplicationRewardsMaxVariationPercent)].rewardsDay = 0;
         // ValidatorMajorityPercent pphm ==> 50%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
-         // ValidatorRewardsPercent pphm ==> 0.001829%
-        PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
-        // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorMajorityPercent)].currentValue = 50 * 1e6;
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorMajorityPercent)].rewardsDay = 0;
+        // ValidatorRewardsPercent pphm ==> 0.001829%
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorRewardsPercent)].currentValue = 1829;
+        rewardsLibData.parameters[uint256(PropsRewardsLib.ParameterName.ValidatorRewardsPercent)].rewardsDay = 0;
     }
 
     /**
