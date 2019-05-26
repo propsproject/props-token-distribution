@@ -76,6 +76,40 @@ async function main() {
 
   const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
   
+  await propsContractInstance.methods.initializePostRewardsUpgrade1(
+    multisigWalletForPropsTokenProxy,
+    minSecondsBetweenDailySubmissions,
+    rewardsStartTimestamp,
+  ).send({
+    from: DevOps1MultiSigOwnerAddress,
+    gas: utils.gasLimit('multisig'),
+    gasPrice: utils.gasPrice(),
+    // eslint-disable-next-line no-loop-func
+  }).then((receipt) => {
+    upgradeDataEntry.initializeData = [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp];
+    upgradeDataEntry.initializeTx = receipt.transactionHash;
+    console.log('Initialized rewards upgrade contract');
+  }).catch((error) => {
+    console.warn(`Error initializing rewards upgrade:${error}`);
+  });
+
+  
+  upgradeData.upgrades.push(upgradeDataEntry);
+  fs.writeFile(
+    upgradeMetadataFilename,
+    JSON.stringify(upgradeData),
+    { flag: 'w' },
+    (err) => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      console.log(`metadata written to ${upgradeMetadataFilename}`);
+      console.log(JSON.stringify(upgradeData, null, 2));
+      process.exit(0);
+    },
+  );
+
   await propsContractInstance.methods.maxTotalSupply().call().then((bal) => {
     const maxSupply = new BigNumber(bal);
     console.log(`Got maxTotalSupply ${maxSupply.toString()}=${bal}`);
@@ -94,42 +128,7 @@ async function main() {
   }).catch((error) => {
     console.warn(`Error getting controller:${error}`);
   });
-  process.exit(1);  
   
-  
-  
-  await propsContractInstance.methods.initializePostRewardsUpgrade1(
-    multisigWalletForPropsTokenProxy,
-    minSecondsBetweenDailySubmissions,
-    rewardsStartTimestamp,
-  ).send({
-    from: DevOps1MultiSigOwnerAddress,
-    gas: utils.gasLimit('multisig'),
-    gasPrice: utils.gasPrice(),
-    // eslint-disable-next-line no-loop-func
-  }).then((receipt) => {
-    upgradeDataEntry.initializeData = [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp];
-    upgradeDataEntry.initializeTx = receipt.transactionHash;
-    console.log('Initialized rewards upgrade contract');
-  }).catch((error) => {
-    console.warn(`Error initializing rewards upgrade:${error}`);
-  });
-
-  upgradeData.upgrades.push(upgradeDataEntry);
-  fs.writeFile(
-    upgradeMetadataFilename,
-    JSON.stringify(upgradeData),
-    { flag: 'w' },
-    (err) => {
-      if (err) {
-        console.error(err);
-        process.exit(1);
-      }
-      console.log(`metadata written to ${upgradeMetadataFilename}`);
-      console.log(JSON.stringify(upgradeData, null, 2));
-      process.exit(0);
-    },
-  );
 }
 
 try {
