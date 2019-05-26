@@ -314,10 +314,6 @@ contract PropsRewards is Initializable, ERC20 {
         internal
     {
         require(maxTotalSupply==0, "Initialize rewards upgrade1 can happen only once");
-        // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
-        rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
-        rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;
-        rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
         controller = _controller;
         // ApplicationRewardsPercent pphm ==> 0.03475%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
@@ -327,6 +323,10 @@ contract PropsRewards is Initializable, ERC20 {
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorMajorityPercent, 50 * 1e6, 0);
          // ValidatorRewardsPercent pphm ==> 0.001829%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
+        // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
+        rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
+        rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;
+        rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
     }
 
     /**
