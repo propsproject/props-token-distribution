@@ -82,7 +82,7 @@ async function main() {
     rewardsStartTimestamp,
   ).send({
     from: DevOps1MultiSigOwnerAddress,
-    gas: utils.gasLimit('multisig'),
+    gas: utils.gasLimit('deployJurisdiction'),
     gasPrice: utils.gasPrice(),
     // eslint-disable-next-line no-loop-func
   }).then((receipt) => {
