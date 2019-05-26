@@ -1,9 +1,8 @@
 const Web3 = require('web3');
 const zos = require('zos-lib');
-// const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js');
 const fs = require('fs');
 // eslint-disable-next-line prefer-destructuring
-const proxyContractABI = require('zos-lib/build/contracts/AdminUpgradeabilityProxy.json');
 const propsTokenContractABI = require('../../build/contracts/PropsToken.json');
 const connectionConfig = require('../../truffle');
 const utils = require('../../scripts_utils/utils');
@@ -40,8 +39,6 @@ const zosDataFileName = networkProvider === 'test' ? 'zos.dev-5777.json' : `zos.
 const zosData = JSON.parse(fs.readFileSync(zosDataFileName, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 
-const multisigWalletABI = require('./MultiSigWallet.json');
-
 const upgradeMetadataFilename = `output/upgrades-${networkProvider}.json`;
 let upgradeData;
 try {
@@ -76,20 +73,35 @@ async function main() {
     } else {
       DevOps1MultiSigOwnerAddress = connectionConfig.networks[networkInUse].wallet_address;
     }
+
+  const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
   
-  const multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
-  // const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
-  const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);  
-  // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();
-  //initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _maxRewardsStorageDays)
-  const initializeToEncoded = zos.encodeCall('initializePostRewardsUpgrade1', ['address','uint256','uint256'], [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp]);
-  console.log(`initializeToEncoded=${initializeToEncoded}`);  
-  console.log(`Issuing initializePostRewardsUpgrade1 via multisig wallet ${multisigWalletForPropsTokenProxy}`);
-  // eslint-disable-next-line no-await-in-loop
-  await multiSigContractInstance.methods.submitTransaction(
-    PropsTokenContractAddress,
-    0,
-    initializeToEncoded,
+  await propsContractInstance.methods.maxTotalSupply().call().then((bal) => {
+    const maxSupply = new BigNumber(bal);
+    console.log(`Got maxTotalSupply ${maxSupply.toString()}=${bal}`);
+  }).catch((error) => {
+    console.warn(`Error getting maxTotalSupply:${error}`);
+  });
+  await propsContractInstance.methods.rewardsStartTimestamp().call().then((bal) => {
+    const rewardsStartTimestamp = new BigNumber(bal);
+    console.log(`Got rewardsStartTimestamp ${rewardsStartTimestamp.toString()}=${bal}`);
+  }).catch((error) => {
+    console.warn(`Error getting rewardsStartTimestamp:${error}`);
+  });
+  await propsContractInstance.methods.controller().call().then((bal) => {
+    const controller = bal;
+    console.log(`Got controller ${controller.toString()}=${controller}`);
+  }).catch((error) => {
+    console.warn(`Error getting controller:${error}`);
+  });
+  process.exit(1);  
+  
+  
+  
+  await propsContractInstance.methods.initializePostRewardsUpgrade1(
+    multisigWalletForPropsTokenProxy,
+    minSecondsBetweenDailySubmissions,
+    rewardsStartTimestamp,
   ).send({
     from: DevOps1MultiSigOwnerAddress,
     gas: utils.gasLimit('multisig'),
@@ -97,10 +109,10 @@ async function main() {
     // eslint-disable-next-line no-loop-func
   }).then((receipt) => {
     upgradeDataEntry.initializeData = [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp];
-    upgradeDataEntry.multisigTx = receipt.transactionHash;
-    console.log('Multisig transaction for initialization sent');
+    upgradeDataEntry.initializeTx = receipt.transactionHash;
+    console.log('Initialized rewards upgrade contract');
   }).catch((error) => {
-    console.warn(`Error sending multisig transaction:${error}`);
+    console.warn(`Error initializing rewards upgrade:${error}`);
   });
 
   upgradeData.upgrades.push(upgradeDataEntry);
