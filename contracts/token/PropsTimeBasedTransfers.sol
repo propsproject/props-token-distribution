@@ -8,7 +8,6 @@ import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
  * @dev Contract allows to set a transfer start time (unix timestamp) from which transfers are allowed excluding one address defined in initialize
  **/
 contract PropsTimeBasedTransfers is Initializable, ERC20 {
-    
     uint256 public transfersStartTime;
     address public canTransferBeforeStartTime;
 
