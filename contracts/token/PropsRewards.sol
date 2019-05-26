@@ -84,7 +84,6 @@ contract PropsRewards is Initializable, ERC20 {
     /**
     * @dev The initializer function for upgrade as initialize was already called, get the decimals used in the token to initialize the params
     * @param _controller address that will have controller functionality on rewards protocol
-    * @param _decimals uint256 number of decimals used in total supply
     * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
     * @param _rewardsStartTimestamp uint256 day 0 timestamp
     */
