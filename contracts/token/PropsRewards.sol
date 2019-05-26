@@ -90,13 +90,13 @@ contract PropsRewards is Initializable, ERC20 {
     */
     function initializePostRewardsUpgrade1(
         address _controller,
-        uint256 _decimals,
         uint256 _minSecondsBetweenDays,
         uint256 _rewardsStartTimestamp
     )
         public
     {
-        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
+        uint8 decimals = 18;
+        _initializePostRewardsUpgrade1(_controller, decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
     }
 
     /**

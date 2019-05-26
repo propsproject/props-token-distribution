@@ -54,18 +54,4 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     PropsRewards.initialize(_controller, decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
     _mint(_holder, totalSupply);
   }
-
-  /**
-   * @dev Initializer for upgrade function. Called only once after upgrade
-   * @param _controller address that will have controller functionality on rewards protocol
-   * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-   * @param _rewardsStartTimestamp uint256 day 0 timestamp
-   */
-  function initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _rewardsStartTimestamp)
-    public
-  {
-    uint8 decimals = 18;
-    PropsRewards.initializePostRewardsUpgrade1(_controller, decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
-  }
-
 }
