@@ -95,7 +95,6 @@ contract PropsRewards is Initializable, ERC20 {
         uint256 _rewardsStartTimestamp
     )
         public
-        initializer
     {
         _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
     }
@@ -314,6 +313,7 @@ contract PropsRewards is Initializable, ERC20 {
     )
         internal
     {
+        require(maxTotalSupply==0, "Initialize rewards upgrade1 can happen only once");
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
         rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
         rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;

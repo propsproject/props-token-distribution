@@ -63,7 +63,6 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
    */
   function initializePostRewardsUpgrade1(address _controller, uint256 _minSecondsBetweenDays, uint256 _rewardsStartTimestamp)
     public
-    initializer
   {
     uint8 decimals = 18;
     PropsRewards.initializePostRewardsUpgrade1(_controller, decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
