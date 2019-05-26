@@ -1,6 +1,6 @@
 module.exports = {
     port: 8555,
-    testrpcOptions: '-p 8555 -m "asset member awake bring mosquito lab sustain muscle elephant equip someone obvious"',
+    testrpcOptions: '-a 100 -p 8555 -m "asset member awake bring mosquito lab sustain muscle elephant equip someone obvious"',
     testCommand: 'NODE_ENV=test truffle test ./test/*.test.js --network coverage',
     // norpc: true,
     // dir: './secretDirectory',

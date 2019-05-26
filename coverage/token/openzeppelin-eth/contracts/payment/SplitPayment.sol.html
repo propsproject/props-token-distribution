@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for token/openzeppelin-eth/contracts/payment/SplitPayment.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../../index.html">all files</a> / <a href="index.html">token/openzeppelin-eth/contracts/payment/</a> SplitPayment.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/14</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/9</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/22</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.24;
+&nbsp;
+import "zos-lib/contracts/Initializable.sol";
+import "../math/SafeMath.sol";
+&nbsp;
+&nbsp;
+/**
+ * @title SplitPayment
+ * @dev This contract can be used when payments need to be received by a group
+ * of people and split proportionately to some number of shares they own.
+ */
+contract SplitPayment is Initializable {
+  using SafeMath for uint256;
+&nbsp;
+  uint256 private _totalShares;
+  uint256 private _totalReleased;
+&nbsp;
+  mapping(address =&gt; uint256) private _shares;
+  mapping(address =&gt; uint256) private _released;
+  address[] private _payees;
+&nbsp;
+  /**
+   * @dev Constructor
+   */
+<span class="fstat-no" title="function not covered" >  function initialize(address[] payees, uint256[] shares) public payable initializer </span>{
+<span class="cstat-no" title="statement not covered" >    require(payees.length == shares.length)</span>;
+<span class="cstat-no" title="statement not covered" >    require(payees.length &gt; 0)</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    for (uint256 i = 0; i &lt; payees.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >      _addPayee(payees[i], shares[i])</span>;
+    }
+  }
+&nbsp;
+  /**
+   * @dev payable fallback
+   */
+<span class="fstat-no" title="function not covered" >  function () external payable </span>{}
+&nbsp;
+  /**
+   * @return the total shares of the contract.
+   */
+<span class="fstat-no" title="function not covered" >  function totalShares() public view returns(uint256) </span>{
+<span class="cstat-no" title="statement not covered" >    return _totalShares;</span>
+  }
+&nbsp;
+  /**
+   * @return the total amount already released.
+   */
+<span class="fstat-no" title="function not covered" >  function totalReleased() public view returns(uint256) </span>{
+<span class="cstat-no" title="statement not covered" >    return _totalReleased;</span>
+  }
+&nbsp;
+  /**
+   * @return the shares of an account.
+   */
+<span class="fstat-no" title="function not covered" >  function shares(address account) public view returns(uint256) </span>{
+<span class="cstat-no" title="statement not covered" >    return _shares[account];</span>
+  }
+&nbsp;
+  /**
+   * @return the amount already released to an account.
+   */
+<span class="fstat-no" title="function not covered" >  function released(address account) public view returns(uint256) </span>{
+<span class="cstat-no" title="statement not covered" >    return _released[account];</span>
+  }
+&nbsp;
+  /**
+   * @return the address of a payee.
+   */
+<span class="fstat-no" title="function not covered" >  function payee(uint256 index) public view returns(address) </span>{
+<span class="cstat-no" title="statement not covered" >    return _payees[index];</span>
+  }
+&nbsp;
+  /**
+   * @dev Release one of the payee's proportional payment.
+   * @param account Whose payments will be released.
+   */
+<span class="fstat-no" title="function not covered" >  function release(address account) public </span>{
+<span class="cstat-no" title="statement not covered" >    require(_shares[account] &gt; 0)</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    uint256 totalReceived = address(this).balance.add(_totalReleased)</span>;
+<span class="cstat-no" title="statement not covered" >    uint256 payment = totalReceived.mul(</span>
+      _shares[account]).div(
+        _totalShares).sub(
+          _released[account]
+    );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    require(payment != 0)</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    _released[account] = _released[account].add(payment)</span>;
+<span class="cstat-no" title="statement not covered" >    _totalReleased = _totalReleased.add(payment)</span>;
+&nbsp;
+    account.transfer(payment);
+  }
+&nbsp;
+  /**
+   * @dev Add a new payee to the contract.
+   * @param account The address of the payee to add.
+   * @param shares_ The number of shares owned by the payee.
+   */
+<span class="fstat-no" title="function not covered" >  function _addPayee(address account, uint256 shares_) internal </span>{
+<span class="cstat-no" title="statement not covered" >    require(account != address(0))</span>;
+<span class="cstat-no" title="statement not covered" >    require(shares_ &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >    require(_shares[account] == 0)</span>;
+&nbsp;
+    _payees.push(account);
+<span class="cstat-no" title="statement not covered" >    _shares[account] = shares_</span>;
+<span class="cstat-no" title="statement not covered" >    _totalShares = _totalShares.add(shares_)</span>;
+  }
+&nbsp;
+  uint256[50] private ______gap;
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun May 26 2019 12:59:19 GMT-0400 (EDT)
+</div>
+</div>
+<script src="../../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../../sorter.js"></script>
+</body>
+</html>

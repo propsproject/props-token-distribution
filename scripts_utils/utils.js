@@ -24,6 +24,8 @@ const gasLimit = (type) => {
       return 60000;
     case 'vestingContract': // token vestion proxy (864753)
       return 1100000;
+    case 'rewardtest':
+        return 5000000;      
     default:
       return 100000;
   }
