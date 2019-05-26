@@ -99,25 +99,6 @@ contract PropsRewards is Initializable, ERC20 {
     }
 
     /**
-    * @dev The initializer function, get the decimals used in the token to initialize the params
-    * @param _controller address that will have controller functionality on rewards protocol
-    * @param _decimals uint256 number of decimals used in total supply
-    * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-    * @param _rewardsStartTimestamp uint256 day 0 timestamp
-    */
-    function initialize(
-        address _controller,
-        uint256 _decimals,
-        uint256 _minSecondsBetweenDays,
-        uint256 _rewardsStartTimestamp
-    )
-        public
-        initializer
-    {
-        _initializePostRewardsUpgrade1(_controller, _decimals, _minSecondsBetweenDays, _rewardsStartTimestamp);
-    }
-
-    /**
     * @dev Set new validators list
     * @param _rewardsDay uint256 the rewards day from which this change should take effect
     * @param _validators address[] array of validators
@@ -313,6 +294,10 @@ contract PropsRewards is Initializable, ERC20 {
         internal
     {
         require(maxTotalSupply==0, "Initialize rewards upgrade1 can happen only once");
+        rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
+        rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;
+        rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
+
         controller = _controller;
         // ApplicationRewardsPercent pphm ==> 0.03475%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ApplicationRewardsPercent, 34750, 0);
@@ -323,9 +308,6 @@ contract PropsRewards is Initializable, ERC20 {
          // ValidatorRewardsPercent pphm ==> 0.001829%
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
-        rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
-        rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;
-        rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
     }
 
     /**

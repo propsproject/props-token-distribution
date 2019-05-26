@@ -6,6 +6,8 @@ const connectionConfig = require('../../truffle');
 
 const networkProvider = process.argv[2];
 const transferStartTime = process.argv[3];
+const minSecondsBetweenDailySubmissions = process.argv[4];
+const rewardsStartTimestamp = process.argv[5];
 let networkInUse;
 let addressInUse;
 let cmd;
@@ -17,6 +19,16 @@ if (typeof (networkProvider) === 'undefined') {
 
 if (typeof (transferStartTime) === 'undefined') {
   console.log('Must supply transfer start time');
+  process.exit(0);
+}
+
+if (typeof (minSecondsBetweenDailySubmissions) === 'undefined') {
+  console.log('Must supply minSecondsBetweenDailySubmissions');
+  process.exit(0);
+}
+
+if (typeof (rewardsStartTimestamp) === 'undefined') {
+  console.log('Must supply rewardsStartTimestamp');
   process.exit(0);
 }
 
@@ -63,7 +75,7 @@ async function main() {
     addressPropsHolder = connectionConfig.networks[`${networkProvider}2`].wallet_address;
   }
 
-  cmd = `zos create PropsToken -v --init initialize --args ${addressPropsHolder},${transferStartTime} --network ${networkInUse} --from ${addressInUse}`;
+  cmd = `zos create PropsToken -v --init initialize --args ${addressPropsHolder},${transferStartTime},${addressPropsHolder},${minSecondsBetweenDailySubmissions},${rewardsStartTimestamp} --network ${networkInUse} --from ${addressInUse}`;
   try {
     console.log(`Executing ${cmd}`);
     const cmdOutput = execSync(cmd).toString();

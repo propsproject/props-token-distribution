@@ -14,7 +14,11 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
 
     modifier canTransfer(address _account)
     {
-        require(now > transfersStartTime || _account==canTransferBeforeStartTime, "Cannot transfer before transfers start time from this account");
+        require(
+            now > transfersStartTime ||
+            _account==canTransferBeforeStartTime,
+            "Cannot transfer before transfers start time from this account"
+        );
         _;
     }
 
@@ -22,7 +26,7 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
     * @dev The initializer function, with transfers start time `transfersStartTime` (unix timestamp)
     * and `canTransferBeforeStartTime` address which is exempt from start time restrictions
     * @param start uint Unix timestamp of when transfers can start
-    * @param account uint256 address exempt from the start date check    
+    * @param account uint256 address exempt from the start date check
     */
     function initialize(
         uint256 start,
@@ -43,10 +47,10 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
         address to,
         uint256 value
     )
-    public canTransfer(msg.sender)   
+    public canTransfer(msg.sender)
     returns (bool)
-    {        
-        return super.transfer(to, value);        
+    {
+        return super.transfer(to, value);
     }
 
     /**
@@ -62,9 +66,9 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
         address to,
         uint256 value
     )
-    public canTransfer(from)    
+    public canTransfer(from)
     returns (bool)
-    {        
-        return super.transferFrom(from, to, value);        
-    }    
+    {
+        return super.transferFrom(from, to, value);
+    }
 }
