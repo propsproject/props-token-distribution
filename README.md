@@ -53,6 +53,9 @@ $ npm run test
 $ NODE_ENV=test truffle test ./test/propstoken.test.js --network test
 ```
 
+### [Test Coverage](https://htmlpreview.github.io/?https://raw.githubusercontent.com/propsproject/props-token-distribution/feature/rewards-contracts/coverage/token/index.html)
+
+
 ### Deployment and Distribution
 
 Located under [scripts/distribution](scripts/distribution) directory and should be executed in order.
