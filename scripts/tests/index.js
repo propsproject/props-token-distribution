@@ -16,7 +16,7 @@ const calcRewardsDay = function() {
     rewardsDay: ((currentTimestamp - (currentTimestamp % global.secondsBetweenDailyRewards)) - global.rewardsStartTimestamp) / global.secondsBetweenDailyRewards,
     secondsLeft
   }
-  process.stdout.write('.');
+  // process.stdout.write('.');
   // process.stdout.clearLine();
   //process.stdout.cursorTo(0);
   // process.stdout.write("\n"); // end the line
@@ -40,9 +40,9 @@ async function main() {
     let result = await waitUntil(() => {
       rewardsDayInfo = calcRewardsDay();
       return rewardsDayInfo.rewardsDay == 0;
-    }, 90000, 1000);
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
+    }, 90000, 1000);    
+    // process.stdout.clearLine();
+    // process.stdout.cursorTo(0);
   const myProject = new SimpleProject('PropsToken', { from: creatorAddress });
   
   console.log('Creating an upgradeable instance of PropsToken...');

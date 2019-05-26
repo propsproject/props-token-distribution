@@ -142,8 +142,8 @@ contract('main', (_accounts) => {
       rewardsDayInfo = calcRewardsDay();
       return rewardsDayInfo.rewardsDay == 0;
     }, 90000, 1000);
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
+    // process.stdout.clearLine();
+    // process.stdout.cursorTo(0);
   });
 
   describe('Initialization values are correct and generic controller function', async () => {    
@@ -613,8 +613,8 @@ contract('main', (_accounts) => {
         rewardsDayInfo = calcRewardsDay();
         return rewardsDayInfo.rewardsDay == 1;
       }, 90000, 1000);
-      process.stdout.clearLine();
-      process.stdout.cursorTo(0);
+      // process.stdout.clearLine();
+      // process.stdout.cursorTo(0);
 
       // get current total supply before minting tomorrow
       currentTotalSupply = await instance.methods.totalSupply().call();
@@ -635,8 +635,8 @@ contract('main', (_accounts) => {
         rewardsDayInfo = calcRewardsDay();
         return rewardsDayInfo.rewardsDay == 2;
       }, 90000, 1000);
-      process.stdout.clearLine();
-      process.stdout.cursorTo(0);
+      // process.stdout.clearLine();
+      // process.stdout.cursorTo(0);
 
       txRes = await instance.methods.submitDailyRewards(2, day2ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });      
       logGasUsed('submitDailyRewards', txRes.gasUsed);
@@ -673,8 +673,8 @@ contract('main', (_accounts) => {
         rewardsDayInfo = calcRewardsDay();
         return rewardsDayInfo.rewardsDay == 3;
       }, 90000, 1000);
-      process.stdout.clearLine();
-      process.stdout.cursorTo(0);
+      // process.stdout.clearLine();
+      // process.stdout.cursorTo(0);
       
       txRes = await instance.methods.submitDailyRewards(3, day3ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });      
       logGasUsed('submitDailyRewards', txRes.gasUsed);
@@ -694,8 +694,8 @@ contract('main', (_accounts) => {
         rewardsDayInfo = calcRewardsDay();
         return rewardsDayInfo.rewardsDay == 5;
       }, 90000, 1000);
-      process.stdout.clearLine();
-      process.stdout.cursorTo(0);
+      // process.stdout.clearLine();
+      // process.stdout.cursorTo(0);
       currentTotalSupply = await instance.methods.totalSupply().call();
       txRes = await instance.methods.submitDailyRewards(5, day5ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: 500000 });      
       logGasUsed('submitDailyRewards', txRes.gasUsed);
