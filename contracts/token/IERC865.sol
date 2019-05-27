@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
@@ -15,7 +15,7 @@ contract IERC865 is Initializable, ERC20 {
     event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
 
     function transferPreSigned(
-        bytes _signature,
+        bytes memory _signature,
         address _to,
         uint256 _value,
         uint256 _fee,
@@ -25,7 +25,7 @@ contract IERC865 is Initializable, ERC20 {
         returns (bool);
 
     function approvePreSigned(
-        bytes _signature,
+        bytes memory _signature,
         address _spender,
         uint256 _value,
         uint256 _fee,
@@ -35,7 +35,7 @@ contract IERC865 is Initializable, ERC20 {
         returns (bool);
 
     function increaseAllowancePreSigned(
-        bytes _signature,
+        bytes memory _signature,
         address _spender,
         uint256 _addedValue,
         uint256 _fee,
@@ -45,7 +45,7 @@ contract IERC865 is Initializable, ERC20 {
         returns (bool);
 
     function decreaseAllowancePreSigned(
-        bytes _signature,
+        bytes memory _signature,
         address _spender,
         uint256 _subtractedValue,
         uint256 _fee,
@@ -55,7 +55,7 @@ contract IERC865 is Initializable, ERC20 {
         returns (bool);
 
     function transferFromPreSigned(
-        bytes _signature,
+        bytes memory _signature,
         address _from,
         address _to,
         uint256 _value,

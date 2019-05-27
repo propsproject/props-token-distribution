@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
@@ -46,8 +46,9 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
         address to,
         uint256 value
     )
-    public canTransfer(msg.sender)
-    returns (bool)
+        public
+        canTransfer(msg.sender)
+        returns (bool)
     {
         return super.transfer(to, value);
     }
@@ -65,8 +66,9 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
         address to,
         uint256 value
     )
-    public canTransfer(from)
-    returns (bool)
+        public
+        canTransfer(from)
+        returns (bool)
     {
         return super.transferFrom(from, to, value);
     }

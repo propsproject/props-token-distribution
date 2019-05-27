@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/math/SafeMath.sol";
@@ -103,7 +103,7 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _rewardsDay uint256 the rewards day from which this change should take effect
     * @param _validators address[] array of validators
     */
-    function setValidators(uint256 _rewardsDay, address[] _validators)
+    function setValidators(uint256 _rewardsDay, address[] memory _validators)
         public
         onlyController
         returns (bool)
@@ -118,7 +118,7 @@ contract PropsRewards is Initializable, ERC20 {
     * @param _rewardsDay uint256 the rewards day from which this change should take effect
     * @param _applications address[] array of validators
     */
-    function setApplications(uint256 _rewardsDay, address[] _applications)
+    function setApplications(uint256 _rewardsDay, address[] memory _applications)
         public
         onlyController
         returns (bool)
@@ -136,7 +136,7 @@ contract PropsRewards is Initializable, ERC20 {
     function getEntities(PropsRewardsLib.RewardedEntityType _entityType, uint256 _rewardsDay)
         public
         view
-        returns (address[])
+        returns (address[] memory)
     {
         return PropsRewardsLib.getEntities(rewardsLibData, _entityType, _rewardsDay);
     }
@@ -151,8 +151,8 @@ contract PropsRewards is Initializable, ERC20 {
     function submitDailyRewards(
         uint256 _rewardsDay,
         bytes32 _rewardsHash,
-        address[] _applications,
-        uint256[] _amounts
+        address[] memory _applications,
+        uint256[] memory _amounts
     )
         public
         returns (bool)
@@ -344,8 +344,8 @@ contract PropsRewards is Initializable, ERC20 {
     function _mintDailyRewardsForApps(
         uint256 _rewardsDay,
         bytes32 _rewardsHash,
-        address[] _applications,
-        uint256[] _amounts,
+        address[] memory _applications,
+        uint256[] memory _amounts,
         uint256 _sum
     )
         internal

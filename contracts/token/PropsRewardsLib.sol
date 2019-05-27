@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 /**
  * @title Props Rewards Library
@@ -90,7 +90,7 @@ library PropsRewardsLib {
          _;
     }
 
-    modifier onlyExistingApplications(Data storage _self, address[] _entities) {
+    modifier onlyExistingApplications(Data storage _self, address[] memory _entities) {
         for (uint256 i = 0; i < _entities.length; i++) {
             require(
                 _self.applications[_entities[i]].initializedState == 1,
@@ -100,7 +100,7 @@ library PropsRewardsLib {
         _;
     }
 
-    modifier onlyExistingValidators(Data storage _self, address[] _entities) {
+    modifier onlyExistingValidators(Data storage _self, address[] memory _entities) {
         for (uint256 i = 0; i < _entities.length; i++) {
             require(
                 _self.validators[_entities[i]].initializedState == 1,
@@ -194,8 +194,8 @@ library PropsRewardsLib {
         Data storage _self,
         uint256 _rewardsDay,
         bytes32 _rewardsHash,
-        address[] _applications,
-        uint256[] _amounts,
+        address[] memory _applications,
+        uint256[] memory _amounts,
         uint256 _currentTotalSupply
     )
         public
@@ -386,7 +386,7 @@ library PropsRewardsLib {
     function setValidators(
         Data storage _self,
         uint256 _rewardsDay,
-        address[] _validators
+        address[] memory _validators
     )
         public
         onlyValidFutureRewardsDay(_self, _rewardsDay)
@@ -414,7 +414,7 @@ library PropsRewardsLib {
     function setApplications(
         Data storage _self,
         uint256 _rewardsDay,
-        address[] _applications
+        address[] memory _applications
     )
         public
         onlyValidFutureRewardsDay(_self, _rewardsDay)
@@ -446,7 +446,7 @@ library PropsRewardsLib {
     )
         public
         view
-        returns (address[])
+        returns (address[] memory)
     {
         if (_entityType == RewardedEntityType.Application) {
             if (_getSelectedRewardedEntityListType(_self.selectedApplications, _rewardsDay) == 0) {
@@ -468,7 +468,7 @@ library PropsRewardsLib {
     * @param _rewardedEntitylist RewardedEntityList pointer to storage
     * @param _rewardsDay uint256 the reward day to determine which list to get
     */
-    function _getSelectedRewardedEntityListType(RewardedEntityList _rewardedEntitylist, uint256 _rewardsDay)
+    function _getSelectedRewardedEntityListType(RewardedEntityList memory _rewardedEntitylist, uint256 _rewardsDay)
         internal
         pure
         returns (uint256)
@@ -528,8 +528,8 @@ library PropsRewardsLib {
     */
     function _validateSubmittedData(
         Data storage _self,
-        address[] _applications,
-        uint256[] _amounts
+        address[] memory _applications,
+        uint256[] memory _amounts
     )
         public
         view
@@ -558,8 +558,8 @@ library PropsRewardsLib {
     function _rewardHashIsvalid(
         uint256 _rewardsDay,
         bytes32 _rewardsHash,
-        address[] _applications,
-        uint256[] _amounts
+        address[] memory _applications,
+        uint256[] memory _amounts
     )
         public
         pure
@@ -630,7 +630,7 @@ library PropsRewardsLib {
     //_updateCurrentEntityList(_rewardedEntitylist, _entities,_rewardedEntityType),
     function _updateCurrentEntityList(
         RewardedEntityList storage _rewardedEntitylist,
-        address[] _entities
+        address[] memory _entities
     )
         internal
         returns (bool)

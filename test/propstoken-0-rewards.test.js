@@ -20,7 +20,6 @@ const ethUtil = require('ethereumjs-util');
 const main = require('../scripts/tests/index.js').main;
 const calcRewardsDay = require('../scripts/tests/index.js').calcRewardsDay;
 const utils = require('../scripts_utils/utils');
-const { soliditySha3 } = require('web3-utils');
 
 let newControllerAddress;
 let txRes;
@@ -56,84 +55,83 @@ const gasSummary = function() {
   }
 }
 
-const application1 = {
-  account: web3.eth.accounts[11],
-  name: "application1",
-  rewardsAddress: web3.eth.accounts[12],
-  sidechainAddress: web3.eth.accounts[13],
-  updatedName: "application1-update"
-}
-
-const application2 = {
-  account: web3.eth.accounts[14],
-  name: "application2",
-  rewardsAddress: web3.eth.accounts[15],
-  sidechainAddress: web3.eth.accounts[16],
-}        
-
-const application3 = {
-  account: web3.eth.accounts[17],
-  name: "application3",
-  rewardsAddress: web3.eth.accounts[18],
-  sidechainAddress: web3.eth.accounts[19],
-}
-
-const application4 = {
-  account: web3.eth.accounts[20],
-  name: "application4",
-  rewardsAddress: web3.eth.accounts[21],
-  sidechainAddress: web3.eth.accounts[22],
-}
-
-const application5 = {
-  account: web3.eth.accounts[23],
-  name: "application5",
-  rewardsAddress: web3.eth.accounts[24],
-  sidechainAddress: web3.eth.accounts[25],
-}
-
-const validator1 = {
-  account: web3.eth.accounts[30],
-  name: "validator1",
-  rewardsAddress: web3.eth.accounts[31],
-  sidechainAddress: web3.eth.accounts[32],
-  updatedName: "validator1-update"
-}
-
-const validator2 = {
-  account: web3.eth.accounts[33],
-  name: "validator2",
-  rewardsAddress: web3.eth.accounts[34],
-  sidechainAddress: web3.eth.accounts[35],
-}        
-
-const validator3 = {
-  account: web3.eth.accounts[36],
-  name: "validator3",
-  rewardsAddress: web3.eth.accounts[37],
-  sidechainAddress: web3.eth.accounts[38],
-}
-
-const validator4 = {
-  account: web3.eth.accounts[39],
-  name: "validator4",
-  rewardsAddress: web3.eth.accounts[40],
-  sidechainAddress: web3.eth.accounts[41],
-}
-
-const validator5 = {
-  account: web3.eth.accounts[42],
-  name: "validator5",
-  rewardsAddress: web3.eth.accounts[43],
-  sidechainAddress: web3.eth.accounts[44],
-}
-
 let maxTotalSupply;
 let currentTotalSupply;
 let rewardsDayInfo
 
 
 contract('main', (_accounts) => {
+  const application1 = {
+    account: _accounts[11],
+    name: "application1",
+    rewardsAddress: _accounts[12],
+    sidechainAddress: _accounts[13],
+    updatedName: "application1-update"
+  }
+  
+  const application2 = {
+    account: _accounts[14],
+    name: "application2",
+    rewardsAddress: _accounts[15],
+    sidechainAddress: _accounts[16],
+  }        
+  
+  const application3 = {
+    account: _accounts[17],
+    name: "application3",
+    rewardsAddress: _accounts[18],
+    sidechainAddress: _accounts[19],
+  }
+  
+  const application4 = {
+    account: _accounts[20],
+    name: "application4",
+    rewardsAddress: _accounts[21],
+    sidechainAddress: _accounts[22],
+  }
+  
+  const application5 = {
+    account: _accounts[23],
+    name: "application5",
+    rewardsAddress: _accounts[24],
+    sidechainAddress: _accounts[25],
+  }
+  
+  const validator1 = {
+    account: _accounts[30],
+    name: "validator1",
+    rewardsAddress: _accounts[31],
+    sidechainAddress: _accounts[32],
+    updatedName: "validator1-update"
+  }
+  
+  const validator2 = {
+    account: _accounts[33],
+    name: "validator2",
+    rewardsAddress: _accounts[34],
+    sidechainAddress: _accounts[35],
+  }        
+  
+  const validator3 = {
+    account: _accounts[36],
+    name: "validator3",
+    rewardsAddress: _accounts[37],
+    sidechainAddress: _accounts[38],
+  }
+  
+  const validator4 = {
+    account: _accounts[39],
+    name: "validator4",
+    rewardsAddress: _accounts[40],
+    sidechainAddress: _accounts[41],
+  }
+  
+  const validator5 = {
+    account: _accounts[42],
+    name: "validator5",
+    rewardsAddress: _accounts[43],
+    sidechainAddress: _accounts[44],
+  }
   before(async () => {
     instance = await main(true);
     rewardsDayInfo = calcRewardsDay();
@@ -144,11 +142,10 @@ contract('main', (_accounts) => {
     }, 90000, 1000);
     // process.stdout.clearLine();
     // process.stdout.cursorTo(0);
-  });
-
+  });  
   describe('Initialization values are correct and generic controller function', async () => {    
-    const controllerAddress = web3.eth.accounts[2];
-    newControllerAddress = web3.eth.accounts[4];    
+    const controllerAddress = _accounts[2];
+    newControllerAddress = _accounts[4];    
     it('Controller is properly set', async () => {      
       const currentController = await instance.methods.controller().call();
       assert.equal(currentController.toLowerCase(), controllerAddress.toLowerCase());
@@ -175,7 +172,7 @@ contract('main', (_accounts) => {
 
     it('Max Supply is properly set', async () => {      
       maxTotalSupply = (await instance.methods.maxTotalSupply().call());
-      assert.equal(String(web3.fromWei(maxTotalSupply)), "1000000000");
+      assert.equal(String(web3.utils.fromWei(maxTotalSupply)), "1000000000");
     });
 
     it('Rewards Start Timestamp is properly set', async () => {      
@@ -431,31 +428,33 @@ contract('main', (_accounts) => {
     
     const validApplicationRewards = {
       applications: [application1.account, application2.account, application3.account],
-      amounts: [web3.toWei(100000), web3.toWei(72000), web3.toWei(36000)]
+      amounts: [web3.utils.toWei("100000"), web3.utils.toWei("72000"), web3.utils.toWei("36000")]
     }
     const exceedMaxApplicationRewards = {
       applications: [application1.account, application2.account, application3.account],
-      amounts: [web3.toWei(120000), web3.toWei(72000), web3.toWei(36000)]
+      amounts: [web3.utils.toWei("120000"), web3.utils.toWei("72000"), web3.utils.toWei("36000")]
     }
     const nonExistentAppApplicationRewards = {
       applications: [application1.account, application2.account, application5.account],
-      amounts: [web3.toWei(120000), web3.toWei(72000), web3.toWei(36000)]
+      amounts: exceedMaxApplicationRewards.amounts
     }
     const appExistsButNotInListApplicationRewards = {
       applications: [application1.account, application2.account, application4.account],
-      amounts: [web3.toWei(120000), web3.toWei(72000), web3.toWei(36000)]
+      amounts: exceedMaxApplicationRewards.amounts
     }
 
-    const day0SelectedValidators = [validator1, validator2, validator3];    
-    const day0ValidApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const day1ValidApplicationRewardsHash = soliditySha3(1, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const day2ValidApplicationRewardsHash = soliditySha3(2, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const day3ValidApplicationRewardsHash = soliditySha3(3, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const day4ValidApplicationRewardsHash = soliditySha3(4, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const day5ValidApplicationRewardsHash = soliditySha3(5, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
-    const exceedMaxApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(exceedMaxApplicationRewards.applications, 'address'), formatArrayForSha3(exceedMaxApplicationRewards.amounts, 'uint256'));
-    const nonExistentAppApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(nonExistentAppApplicationRewards.applications, 'address'), formatArrayForSha3(nonExistentAppApplicationRewards.amounts, 'uint256'));
-    const appExistsButNotInListApplicationRewardsHash = soliditySha3(0, formatArrayForSha3(appExistsButNotInListApplicationRewards.applications, 'address'), formatArrayForSha3(appExistsButNotInListApplicationRewards.amounts, 'uint256'));
+    const day0SelectedValidators = [validator1, validator2, validator3];  
+    // console.log(JSON.stringify(validApplicationRewards));
+    // process.exit(0);  
+    const day0ValidApplicationRewardsHash = web3.utils.soliditySha3(0, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day1ValidApplicationRewardsHash = web3.utils.soliditySha3(1, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day2ValidApplicationRewardsHash = web3.utils.soliditySha3(2, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day3ValidApplicationRewardsHash = web3.utils.soliditySha3(3, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day4ValidApplicationRewardsHash = web3.utils.soliditySha3(4, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const day5ValidApplicationRewardsHash = web3.utils.soliditySha3(5, formatArrayForSha3(validApplicationRewards.applications, 'address'), formatArrayForSha3(validApplicationRewards.amounts, 'uint256'));
+    const exceedMaxApplicationRewardsHash = web3.utils.soliditySha3(0, formatArrayForSha3(exceedMaxApplicationRewards.applications, 'address'), formatArrayForSha3(exceedMaxApplicationRewards.amounts, 'uint256'));
+    const nonExistentAppApplicationRewardsHash = web3.utils.soliditySha3(0, formatArrayForSha3(nonExistentAppApplicationRewards.applications, 'address'), formatArrayForSha3(nonExistentAppApplicationRewards.amounts, 'uint256'));
+    const appExistsButNotInListApplicationRewardsHash = web3.utils.soliditySha3(0, formatArrayForSha3(appExistsButNotInListApplicationRewards.applications, 'address'), formatArrayForSha3(appExistsButNotInListApplicationRewards.amounts, 'uint256'));
 
     it('Reward hash must match submitted data', async () => {  
       try {

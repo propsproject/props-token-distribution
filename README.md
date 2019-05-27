@@ -25,7 +25,7 @@ $ npm install --global zos
 $ npm install --global ganache-cli
 
 # Install Truffle globally:
-$ npm install --global truffle@v4.1.12
+$ npm install --global truffle@v5.0.19
 
 # Install local node dependencies:
 $ npm install
