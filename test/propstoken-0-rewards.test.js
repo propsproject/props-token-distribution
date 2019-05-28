@@ -56,84 +56,83 @@ const gasSummary = function() {
   }
 }
 
-const application1 = {
-  account: web3.eth.accounts[11],
-  name: "application1",
-  rewardsAddress: web3.eth.accounts[12],
-  sidechainAddress: web3.eth.accounts[13],
-  updatedName: "application1-update"
-}
-
-const application2 = {
-  account: web3.eth.accounts[14],
-  name: "application2",
-  rewardsAddress: web3.eth.accounts[15],
-  sidechainAddress: web3.eth.accounts[16],
-}        
-
-const application3 = {
-  account: web3.eth.accounts[17],
-  name: "application3",
-  rewardsAddress: web3.eth.accounts[18],
-  sidechainAddress: web3.eth.accounts[19],
-}
-
-const application4 = {
-  account: web3.eth.accounts[20],
-  name: "application4",
-  rewardsAddress: web3.eth.accounts[21],
-  sidechainAddress: web3.eth.accounts[22],
-}
-
-const application5 = {
-  account: web3.eth.accounts[23],
-  name: "application5",
-  rewardsAddress: web3.eth.accounts[24],
-  sidechainAddress: web3.eth.accounts[25],
-}
-
-const validator1 = {
-  account: web3.eth.accounts[30],
-  name: "validator1",
-  rewardsAddress: web3.eth.accounts[31],
-  sidechainAddress: web3.eth.accounts[32],
-  updatedName: "validator1-update"
-}
-
-const validator2 = {
-  account: web3.eth.accounts[33],
-  name: "validator2",
-  rewardsAddress: web3.eth.accounts[34],
-  sidechainAddress: web3.eth.accounts[35],
-}        
-
-const validator3 = {
-  account: web3.eth.accounts[36],
-  name: "validator3",
-  rewardsAddress: web3.eth.accounts[37],
-  sidechainAddress: web3.eth.accounts[38],
-}
-
-const validator4 = {
-  account: web3.eth.accounts[39],
-  name: "validator4",
-  rewardsAddress: web3.eth.accounts[40],
-  sidechainAddress: web3.eth.accounts[41],
-}
-
-const validator5 = {
-  account: web3.eth.accounts[42],
-  name: "validator5",
-  rewardsAddress: web3.eth.accounts[43],
-  sidechainAddress: web3.eth.accounts[44],
-}
-
 let maxTotalSupply;
 let currentTotalSupply;
 let rewardsDayInfo
 
 
 contract('main', (_accounts) => {
+  const application1 = {
+    account: _accounts[11],
+    name: "application1",
+    rewardsAddress: _accounts[12],
+    sidechainAddress: _accounts[13],
+    updatedName: "application1-update"
+  }
+  
+  const application2 = {
+    account: _accounts[14],
+    name: "application2",
+    rewardsAddress: _accounts[15],
+    sidechainAddress: _accounts[16],
+  }        
+  
+  const application3 = {
+    account: _accounts[17],
+    name: "application3",
+    rewardsAddress: _accounts[18],
+    sidechainAddress: _accounts[19],
+  }
+  
+  const application4 = {
+    account: _accounts[20],
+    name: "application4",
+    rewardsAddress: _accounts[21],
+    sidechainAddress: _accounts[22],
+  }
+  
+  const application5 = {
+    account: _accounts[23],
+    name: "application5",
+    rewardsAddress: _accounts[24],
+    sidechainAddress: _accounts[25],
+  }
+  
+  const validator1 = {
+    account: _accounts[30],
+    name: "validator1",
+    rewardsAddress: _accounts[31],
+    sidechainAddress: _accounts[32],
+    updatedName: "validator1-update"
+  }
+  
+  const validator2 = {
+    account: _accounts[33],
+    name: "validator2",
+    rewardsAddress: _accounts[34],
+    sidechainAddress: _accounts[35],
+  }        
+  
+  const validator3 = {
+    account: _accounts[36],
+    name: "validator3",
+    rewardsAddress: _accounts[37],
+    sidechainAddress: _accounts[38],
+  }
+  
+  const validator4 = {
+    account: _accounts[39],
+    name: "validator4",
+    rewardsAddress: _accounts[40],
+    sidechainAddress: _accounts[41],
+  }
+  
+  const validator5 = {
+    account: _accounts[42],
+    name: "validator5",
+    rewardsAddress: _accounts[43],
+    sidechainAddress: _accounts[44],
+  }
   before(async () => {
     instance = await main(true);
     rewardsDayInfo = calcRewardsDay();
@@ -147,8 +146,8 @@ contract('main', (_accounts) => {
   });
 
   describe('Initialization values are correct and generic controller function', async () => {    
-    const controllerAddress = web3.eth.accounts[2];
-    newControllerAddress = web3.eth.accounts[4];    
+    const controllerAddress = _accounts[2];
+    newControllerAddress = _accounts[4];    
     it('Controller is properly set', async () => {      
       const currentController = await instance.methods.controller().call();
       assert.equal(currentController.toLowerCase(), controllerAddress.toLowerCase());
