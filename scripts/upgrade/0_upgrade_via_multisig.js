@@ -32,7 +32,7 @@ if (OldPropsTokenLogicContractAddress === NewPropsTokenLogicContractAddress) {
   process.exit(0);
 }
 
-const multisigWalletABI = require('../../build/contracts/MultiSigWallet.json');
+const multisigWalletABI = require('.MultiSigWallet.json');
 
 const upgradeMetadataFilename = `output/upgrades-${networkProvider}.json`;
 let upgradeData;

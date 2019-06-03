@@ -102,8 +102,25 @@ async function main() {
 
   // transfer ownership of props token proxy contract to multisig wallet
   // deploy proxy contract
-  networkInUse = `${networkProvider}1`;
-  addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+  
+  let addressPropsHolder;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
+  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+    providerOwner = connectionConfig.networks[networkInUse].provider();
+    web3 = new Web3(providerOwner);
+  }
+  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+    const accounts = await web3.eth.getAccounts();
+    addressInUse = accounts[1];
+    addressPropsHolder = accounts[2];
+  } else {
+    addressInUse = connectionConfig.networks[networkInUse].wallet_address;
+    addressPropsHolder = connectionConfig.networks[`${networkProvider}2`].wallet_address;
+  }
+  
+  // networkInUse = `${networkProvider}1`;
+  // addressInUse = connectionConfig.networks[networkInUse].wallet_address;
   cmd = `zos set-admin ${PropsTokenContractAddress} ${multisigWalletForPropsTokenProxy} -y --network ${networkInUse} --from ${addressInUse}`;
   try {
     console.log(`Executing ${cmd}`);
