@@ -45,7 +45,7 @@ $ zos add PropsToken
 $ npm run compile
 
 # Run ganache-cli
-$ npm run testrpc
+$ npm run ganache-cli
 
 # Run contracts test suite
 $ npm run test
