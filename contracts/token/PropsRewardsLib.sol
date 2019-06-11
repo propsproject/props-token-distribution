@@ -131,12 +131,12 @@ library PropsRewardsLib {
 
     modifier onlyValidRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
-            _currentRewardsDay(_self) == _rewardsDay && _rewardsDay > _self.dailyRewards.lastRewardsDay,
+            _currentRewardsDay(_self) == _rewardsDay && _rewardsDay > _self.lastRewardsDay,
             "Must be for current day"
         );
          _;
     }
-
+    
     modifier onlyValidFutureRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
             _rewardsDay >= _currentRewardsDay(_self),
@@ -614,7 +614,7 @@ library PropsRewardsLib {
     {
         //the the start time - floor timestamp to previous midnight divided by seconds in a day will give the rewards day number
        if (_self.minSecondsBetweenDays > 0) {
-            return (block.timestamp.sub(_self.rewardsStartTimestamp)).div(_self.minSecondsBetweenDays);
+            return (block.timestamp.sub(_self.rewardsStartTimestamp)).div(_self.minSecondsBetweenDays).add(1);
         } else {
             return 0;
         }

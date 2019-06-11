@@ -22,22 +22,22 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>5/5</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/2</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>4/4</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>6/6</span>
+        <span class='fraction'>0/0</span>
       </div>
     </div>
   </div>
@@ -116,7 +116,11 @@
 71
 72
 73
-74</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+74
+75
+76
+77
+78</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -131,12 +135,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -152,8 +154,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4×</span>
-<span class="cline-any cline-yes">4×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -167,7 +167,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -186,7 +185,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.24;
@@ -201,66 +209,70 @@ import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 contract PropsTimeBasedTransfers is Initializable, ERC20 {
     uint256 public transfersStartTime;
     address public canTransferBeforeStartTime;
-&nbsp;
-    modifier canTransfer(address _account)
-    {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
-            now &gt; transfersStartTime ||
-            _account==canTransferBeforeStartTime,
-            "Cannot transfer before transfers start time from this account"
-        );
-        _;
-    }
-&nbsp;
     /**
-    * @dev The initializer function, with transfers start time `transfersStartTime` (unix timestamp)
-    * and `canTransferBeforeStartTime` address which is exempt from start time restrictions
-    * @param start uint Unix timestamp of when transfers can start
-    * @param account uint256 address exempt from the start date check
+    Contract logic is no longer relevant.
+    Leaving in the variables used for upgrade compatibility but the checks are no longer required
     */
-    function initialize(
-        uint256 start,
-        address account
-    )
-        public
-        initializer
-    {
-        transfersStartTime = start;
-        canTransferBeforeStartTime = account;
-    }
-    /**
-    * @dev Transfer token for a specified address if allowed
-    * @param to The address to transfer to.
-    * @param value The amount to be transferred.
-    */
-    function transfer(
-        address to,
-        uint256 value
-    )
-    public canTransfer(msg.sender)
-    returns (bool)
-    {
-        return super.transfer(to, value);
-    }
 &nbsp;
-    /**
-     * @dev Transfer tokens from one address to another if allowed
-     * Note that while this function emits an Approval event, this is not required as per the specification,
-     * and other compliant implementations may not emit the event.
-     * @param from address The address which you want to send tokens from
-     * @param to address The address which you want to transfer to
-     * @param value uint256 the amount of tokens to be transferred
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    )
-    public canTransfer(from)
-    returns (bool)
-    {
-        return super.transferFrom(from, to, value);
-    }
+    // modifier canTransfer(address _account)
+    // {
+    //     require(
+    //         now &gt; transfersStartTime ||
+    //         _account==canTransferBeforeStartTime,
+    //         "Cannot transfer before transfers start time from this account"
+    //     );
+    //     _;
+    // }
+&nbsp;
+    // /**
+    // * @dev The initializer function, with transfers start time `transfersStartTime` (unix timestamp)
+    // * and `canTransferBeforeStartTime` address which is exempt from start time restrictions
+    // * @param start uint Unix timestamp of when transfers can start
+    // * @param account uint256 address exempt from the start date check
+    // */
+    // function initialize(
+    //     uint256 start,
+    //     address account
+    // )
+    //     public
+    //     initializer
+    // {
+    //     transfersStartTime = start;
+    //     canTransferBeforeStartTime = account;
+    // }
+    // /**
+    // * @dev Transfer token for a specified address if allowed
+    // * @param to The address to transfer to.
+    // * @param value The amount to be transferred.
+    // */
+    // function transfer(
+    //     address to,
+    //     uint256 value
+    // )
+    // public canTransfer(msg.sender)
+    // returns (bool)
+    // {
+    //     return super.transfer(to, value);
+    // }
+&nbsp;
+    // /**
+    //  * @dev Transfer tokens from one address to another if allowed
+    //  * Note that while this function emits an Approval event, this is not required as per the specification,
+    //  * and other compliant implementations may not emit the event.
+    //  * @param from address The address which you want to send tokens from
+    //  * @param to address The address which you want to transfer to
+    //  * @param value uint256 the amount of tokens to be transferred
+    //  */
+    // function transferFrom(
+    //     address from,
+    //     address to,
+    //     uint256 value
+    // )
+    // public canTransfer(from)
+    // returns (bool)
+    // {
+    //     return super.transferFrom(from, to, value);
+    // }
 }
 &nbsp;</pre></td></tr>
 </table></pre>
@@ -268,7 +280,7 @@ contract PropsTimeBasedTransfers is Initializable, ERC20 {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun May 26 2019 18:42:25 GMT-0400 (EDT)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Jun 11 2019 05:32:21 GMT-0400 (EDT)
 </div>
 </div>
 <script src="../prettify.js"></script>

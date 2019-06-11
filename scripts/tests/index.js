@@ -18,7 +18,7 @@ const calcRewardsDay = function() {
   secondsDiffBetweenDays - ((currentTimestamp - rewardsStartTimestamp) % secondsDiffBetweenDays) :
   -currentTimestamp + rewardsStartTimestamp;
   $ret =  {
-    rewardsDay: ((currentTimestamp - (currentTimestamp % secondsDiffBetweenDays)) - rewardsStartTimestamp) / secondsDiffBetweenDays,
+    rewardsDay: (((currentTimestamp - (currentTimestamp % secondsDiffBetweenDays)) - rewardsStartTimestamp) / secondsDiffBetweenDays)+1,
     secondsLeft
   }
   
@@ -46,15 +46,15 @@ async function main(isRewardsTest) {
     // console.log(`initializing contract ${global.timestamp}, ${controllerAddress}, ${secondsDiffBetweenDays}, ${rewardsStartTimestamp}`)
     if (isRewardsTest) {
       let rewardsDayInfo = calcRewardsDay();
-      console.log(`will wait for day 0 to begin`);
+      console.log(`will wait for day 1 to begin`);
       let result = await waitUntil(() => {
         rewardsDayInfo = calcRewardsDay();
-        return rewardsDayInfo.rewardsDay == 0;
+        return rewardsDayInfo.rewardsDay == 1;
       }, 90000, 1000);
     }
     // process.stdout.clearLine();
     // process.stdout.cursorTo(0);
-    const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, global.timestamp, controllerAddress, secondsDiffBetweenDays, rewardsStartTimestamp] });          
+    const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, controllerAddress, secondsDiffBetweenDays, rewardsStartTimestamp] });          
     return instance;
   } catch (error) {
     console.warn(`error=${error}`);

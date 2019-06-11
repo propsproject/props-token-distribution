@@ -61,15 +61,15 @@ contract('main', (_accounts) => {
       assert.equal(isEqual, true);
     });
 
-    it('Transfer start time is correct', async () => {
-      const transferStartTime = await instance.methods.transfersStartTime().call();
-      assert.equal(transferStartTime, global.timestamp);
-    });
+  //   it('Transfer start time is correct', async () => {
+  //     const transferStartTime = await instance.methods.transfersStartTime().call();
+  //     assert.equal(transferStartTime, global.timestamp);
+  //   });
 
-    it('Transfer start time exception address is correct', async () => {
-      const canTransferExceptionAddress = await instance.methods.canTransferBeforeStartTime().call();
-      assert.equal(String(canTransferExceptionAddress).toLowerCase(), String(web3.eth.accounts[3]).toLowerCase());
-    });
+  //   it('Transfer start time exception address is correct', async () => {
+  //     const canTransferExceptionAddress = await instance.methods.canTransferBeforeStartTime().call();
+  //     assert.equal(String(canTransferExceptionAddress).toLowerCase(), String(web3.eth.accounts[3]).toLowerCase());
+  //   });
   });
 
   describe('ERC20 Tests', async () => {
@@ -94,53 +94,53 @@ contract('main', (_accounts) => {
     });
   });
 
-  describe('Timebase transfer logic', async () => {
-    let newAccount3Balance;
-    let newAccount4Balance;
-    it('transfer fails if non holder account before transfer start time', async () => {
-      const amount = 10;
-      try {
-        expect(await instance.methods.transfer(web3.eth.accounts[3], web3.toWei(amount)).send({ from: web3.eth.accounts[4] })).to.be.rejectedWith(Error);
-      } catch (error) {
-        //
-      }
-    });
+  // describe('Timebase transfer logic', async () => {
+  //   let newAccount3Balance;
+  //   let newAccount4Balance;
+  //   it('transfer fails if non holder account before transfer start time', async () => {
+  //     const amount = 10;
+  //     try {
+  //       expect(await instance.methods.transfer(web3.eth.accounts[3], web3.toWei(amount)).send({ from: web3.eth.accounts[4] })).to.be.rejectedWith(Error);
+  //     } catch (error) {
+  //       //
+  //     }
+  //   });
 
-    it('transfer succeeds with holder account before transfer start time', async () => {
-      const amount = 10;
-      const account3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
-      const account4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
-      const result = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });
-      newAccount3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
-      newAccount4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
-      assert.equal(Number(newAccount3Balance), Number(account3Balance) - Number(amount));
-      assert.equal(Number(newAccount4Balance), Number(account4Balance) + Number(amount));
-    });
+  //   it('transfer succeeds with holder account before transfer start time', async () => {
+  //     const amount = 10;
+  //     const account3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+  //     const account4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+  //     const result = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });
+  //     newAccount3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+  //     newAccount4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+  //     assert.equal(Number(newAccount3Balance), Number(account3Balance) - Number(amount));
+  //     assert.equal(Number(newAccount4Balance), Number(account4Balance) + Number(amount));
+  //   });
 
-    it('transfer succeeds with non holder accoutn after after tranfer start time', async () => {
-      // Wait for some async operation to end
-      try {
-        console.log(`will wait for ${global.timestamp - Math.floor(Date.now() / 1000)} seconds...`);
-        const result = await waitUntil(() => {
-          const timePassed = global.timestamp - Math.floor(Date.now() / 1000);
-          return timePassed < 0;
-        }, 90000, 1000);
+  //   it('transfer succeeds with non holder accoutn after after tranfer start time', async () => {
+  //     // Wait for some async operation to end
+  //     try {
+  //       console.log(`will wait for ${global.timestamp - Math.floor(Date.now() / 1000)} seconds...`);
+  //       const result = await waitUntil(() => {
+  //         const timePassed = global.timestamp - Math.floor(Date.now() / 1000);
+  //         return timePassed < 0;
+  //       }, 90000, 1000);
 
-        // Here are the operations to be done after predicate
-        const amount = 10;
-        const account3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
-        const account4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
-        const res = await instance.methods.transfer(web3.eth.accounts[3], web3.toWei(amount)).send({ from: web3.eth.accounts[4] });
-        newAccount3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
-        newAccount4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
-        assert.equal(Number(newAccount3Balance), Number(account3Balance) + Number(amount));
-        assert.equal(Number(newAccount4Balance), Number(account4Balance) - Number(amount));
-      } catch (error) {
-      // Here are the operations to be done if predicate didn't succeed in the timeout
-        console.log('Async operation failed: ', error);
-      }
-    });
-  });
+  //       // Here are the operations to be done after predicate
+  //       const amount = 10;
+  //       const account3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+  //       const account4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+  //       const res = await instance.methods.transfer(web3.eth.accounts[3], web3.toWei(amount)).send({ from: web3.eth.accounts[4] });
+  //       newAccount3Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+  //       newAccount4Balance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
+  //       assert.equal(Number(newAccount3Balance), Number(account3Balance) + Number(amount));
+  //       assert.equal(Number(newAccount4Balance), Number(account4Balance) - Number(amount));
+  //     } catch (error) {
+  //     // Here are the operations to be done if predicate didn't succeed in the timeout
+  //       console.log('Async operation failed: ', error);
+  //     }
+  //   });
+  // });
 
   const alice = { address: '0x1c77BCe3fAc2d7023aB3f9A6369c100FB8B6c7B5', pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
   const bob = { address: web3.eth.accounts[8], pk: 'f34381274ac5cca8a465209bdeafeed0274ddcf7ba1df080df772b73ccad032a' };
