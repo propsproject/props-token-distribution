@@ -63,7 +63,7 @@ async function main() {
   networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
     if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
       providerDevOps1 = connectionConfig.networks[networkInUse].provider();
-      web3 = new Web3(providerTransferrer);
+      web3 = new Web3(providerDevOps1);
     }
     if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
       web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
