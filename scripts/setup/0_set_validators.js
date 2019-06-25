@@ -70,7 +70,11 @@ async function main() {
   } else {
     DevOps1MultiSigOwnerAddress = connectionConfig.networks[networkInUse].wallet_address;
   }
-  const multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
+  let multiSigContractInstance;
+  if (multisigWalletForPropsTokenProxy != 'none') {
+    multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
+  }
+    
   const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
   // const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
   //get current rewards day
@@ -81,7 +85,7 @@ async function main() {
   // return (block.timestamp.sub(_self.rewardsStartTimestamp)).div(_self.minSecondsBetweenDays).add(1);
   const rewardsDay = Math.floor((currentTimestamp - rewardsTimestamp) / secondsInDay) + 1;
   console.log(`Got rewardsTimestamp=${rewardsTimestamp}, secondsInDay=${secondsInDay}, currentTimestamp=${currentTimestamp}, rewardsDay=${rewardsDay}`);  
-  const func = propsContractInstance.GetFunction
+  
   const encodedData = await propsContractInstance.methods.setValidators(
     rewardsDay,
     validators
@@ -90,7 +94,25 @@ async function main() {
   const upgradeToEncoded = zos.encodeCall('setValidators', ['uint256','address[]'], [rewardsDay,validators]);
 
   console.log(`encodedData=${encodedData}`);
-  // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();  
+  if (multisigWalletForPropsTokenProxy === 'none') {
+    await propsContractInstance.methods.setValidators(
+      rewardsDay,
+      validators,      
+    ).send({
+      from: DevOps1MultiSigOwnerAddress,
+      gas: utils.gasLimit('deployJurisdiction'),
+      gasPrice: utils.gasPrice(),
+      // eslint-disable-next-line no-loop-func
+    }).then((receipt) => {
+      setupDataEntry.newValidators = validators;
+      setupDataEntry.rewardsDay = rewardsDay;
+      setupDataEntry.txHash = receipt.transactionHash;
+      console.log('Transaction for set validators');
+    }).catch((error) => {
+      console.warn(`Error sending transaction:${error}`);
+    });
+  } else {
+// const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();  
   // eslint-disable-next-line no-await-in-loop
   await multiSigContractInstance.methods.submitTransaction(
     PropsTokenContractAddress,
@@ -109,6 +131,8 @@ async function main() {
   }).catch((error) => {
     console.warn(`Error sending multisig transaction:${error}`);
   });
+  }
+  
 
   setupData.steps.push(setupDataEntry);
   fs.writeFile(

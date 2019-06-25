@@ -49,7 +49,7 @@ async function main() {
     addressInUse = connectionConfig.networks[networkInUse].wallet_address;
   }
 
-  cmd = `zos push -v --network ${networkInUse} --from ${addressInUse}`;
+  cmd = `zos push -v --deploy-dependencies --network ${networkInUse} --from ${addressInUse}`;
   try {
     console.log(`Executing ${cmd}`);
     const cmdOutput = execSync(cmd).toString();
@@ -75,7 +75,7 @@ async function main() {
     addressPropsHolder = connectionConfig.networks[`${networkProvider}2`].wallet_address;
   }
 
-  cmd = `zos create PropsToken -v --init initialize --args ${addressPropsHolder},${transferStartTime},${addressPropsHolder},${minSecondsBetweenDailySubmissions},${rewardsStartTimestamp} --network ${networkInUse} --from ${addressInUse}`;
+  cmd = `zos create PropsToken -v --init initialize --args ${addressPropsHolder},${addressPropsHolder},${minSecondsBetweenDailySubmissions},${rewardsStartTimestamp} --network ${networkInUse} --from ${addressInUse}`;
   try {
     console.log(`Executing ${cmd}`);
     const cmdOutput = execSync(cmd).toString();

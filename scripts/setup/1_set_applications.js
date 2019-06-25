@@ -70,7 +70,12 @@ async function main() {
   } else {
     DevOps1MultiSigOwnerAddress = connectionConfig.networks[networkInUse].wallet_address;
   }
-  const multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
+
+  let multiSigContractInstance;
+  if (multisigWalletForPropsTokenProxy != 'none') {
+    multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
+  }
+  
   const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
   // const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
   //get current rewards day
@@ -89,25 +94,44 @@ async function main() {
     applications
   ).encodeABI();
   
-  // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();  
-  // eslint-disable-next-line no-await-in-loop
-  await multiSigContractInstance.methods.submitTransaction(
-    PropsTokenContractAddress,
-    0,
-    upgradeToEncoded,
-  ).send({
-    from: DevOps1MultiSigOwnerAddress,
-    gas: utils.gasLimit('multisig'),
-    gasPrice: utils.gasPrice(),
-    // eslint-disable-next-line no-loop-func
-  }).then((receipt) => {
-    setupDataEntry.newApplications = applications;
-    setupDataEntry.rewardsDay = rewardsDay;
-    setupDataEntry.multisigTx = receipt.transactionHash;
-    console.log('Multisig transaction for set application');
-  }).catch((error) => {
-    console.warn(`Error sending multisig transaction:${error}`);
-  });
+  if (multisigWalletForPropsTokenProxy === 'none') {
+    await propsContractInstance.methods.setApplications(
+      rewardsDay,
+      applications,      
+    ).send({
+      from: DevOps1MultiSigOwnerAddress,
+      gas: utils.gasLimit('deployJurisdiction'),
+      gasPrice: utils.gasPrice(),
+      // eslint-disable-next-line no-loop-func
+    }).then((receipt) => {
+      setupDataEntry.newApplications = applications;
+      setupDataEntry.rewardsDay = rewardsDay;
+      setupDataEntry.txHash = receipt.transactionHash;
+      console.log('Transaction for set applications');
+    }).catch((error) => {
+      console.warn(`Error sending transaction:${error}`);
+    });
+  } else {
+    // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();  
+    // eslint-disable-next-line no-await-in-loop
+    await multiSigContractInstance.methods.submitTransaction(
+      PropsTokenContractAddress,
+      0,
+      upgradeToEncoded,
+    ).send({
+      from: DevOps1MultiSigOwnerAddress,
+      gas: utils.gasLimit('multisig'),
+      gasPrice: utils.gasPrice(),
+      // eslint-disable-next-line no-loop-func
+    }).then((receipt) => {
+      setupDataEntry.newApplications = applications;
+      setupDataEntry.rewardsDay = rewardsDay;
+      setupDataEntry.multisigTx = receipt.transactionHash;
+      console.log('Multisig transaction for set application');
+    }).catch((error) => {
+      console.warn(`Error sending multisig transaction:${error}`);
+    });
+  }
 
   setupData.steps.push(setupDataEntry);
   fs.writeFile(
