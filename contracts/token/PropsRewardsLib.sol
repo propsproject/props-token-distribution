@@ -132,7 +132,7 @@ library PropsRewardsLib {
     modifier onlyValidRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
             _currentRewardsDay(_self) > _rewardsDay && _rewardsDay > _self.lastRewardsDay,
-            "Must be for the previous day but after a previous rewards day"
+            "Must be for a previous day but after the last rewards day"
         );
          _;
     }
