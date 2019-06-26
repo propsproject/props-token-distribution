@@ -11,6 +11,7 @@ const utils = require('../../scripts_utils/utils');
 const networkProvider = process.argv[2];
 const multisigWalletForPropsTokenProxy = process.argv[3];
 const validators = String(process.argv[4]).split(",");
+const tokenContract = process.argv[5];
 
 let networkInUse;
 let web3;
@@ -29,10 +30,15 @@ if (validators.length == 0) {
   console.log('Must supply validators comma delimited list');
   process.exit(0);  
 }
+let PropsTokenContractAddress;
+if (tokenContract.length > 0) {
+  PropsTokenContractAddress = tokenContract;
+} else {
+  const zosDataFileName = networkProvider === 'test' ? 'zos.dev-5777.json' : `zos.${networkProvider}.json`;
+  const zosData = JSON.parse(fs.readFileSync(zosDataFileName, 'utf8'));
+  PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
+}
 
-const zosDataFileName = networkProvider === 'test' ? 'zos.dev-5777.json' : `zos.${networkProvider}.json`;
-const zosData = JSON.parse(fs.readFileSync(zosDataFileName, 'utf8'));
-const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 
 const multisigWalletABI = require('./MultiSigWallet.json');
 
@@ -107,9 +113,9 @@ async function main() {
       setupDataEntry.newValidators = validators;
       setupDataEntry.rewardsDay = rewardsDay;
       setupDataEntry.txHash = receipt.transactionHash;
-      console.log('Transaction for set validators');
+      console.log(`Transaction for set validators ${JSON.stringify(receipt)}`);
     }).catch((error) => {
-      console.warn(`Error sending transaction:${error}`);
+      console.warn(`Error sending transaction:${JSON.stringify(error)}`);
     });
   } else {
 // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();  

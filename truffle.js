@@ -17,6 +17,7 @@ module.exports = {
       port: 8545,
       network_id: '5777',      
     },
+    
     rinkeby0: {
       provider() {
         if (!process.env.DEVOPS_PK0 || !process.env.DEVOPS_WALLET0) {
