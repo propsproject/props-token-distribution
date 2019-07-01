@@ -136,7 +136,7 @@ library PropsRewardsLib {
         );
          _;
     }
-    
+
     modifier onlyValidFutureRewardsDay(Data storage _self, uint256 _rewardsDay) {
         require(
             _rewardsDay >= _currentRewardsDay(_self),

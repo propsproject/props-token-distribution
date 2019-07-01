@@ -458,14 +458,26 @@ contract('main', (_accounts) => {
 
     it('Reward hash must match submitted data', async () => {  
       try {
-        
         expect(await instance.methods.submitDailyRewards(1, exceedMaxApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: utils.gasLimit('rewardtest') })).to.be.rejectedWith(Error);
       } catch (error) {
         //
       }      
     });
 
-    it('Validator on the list can submit valid data', async() => {
+    it('Validator on the list cannot submit valid data if day has not ended', async() => {
+      try {
+        expect(await instance.methods.submitDailyRewards(1, day1ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: utils.gasLimit('rewardtest') })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }            
+    });
+
+    it('Validator on the list can submit valid data for yesterday', async() => {
+      console.log(`will wait for ${rewardsDayInfo.secondsLeft} seconds before submitting day 1`);
+      let result = await waitUntil(() => {
+        rewardsDayInfo = calcRewardsDay();
+        return rewardsDayInfo.rewardsDay == 2;
+      }, 90000, 1000);
       txRes = await instance.methods.submitDailyRewards(1, day1ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: utils.gasLimit('rewardtest') });
       logGasUsed('submitDailyRewards', txRes.gasUsed);
       assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),'1');
@@ -619,7 +631,7 @@ contract('main', (_accounts) => {
       console.log(`will wait for ${rewardsDayInfo.secondsLeft} seconds before submitting day 2`);
       let result = await waitUntil(() => {
         rewardsDayInfo = calcRewardsDay();
-        return rewardsDayInfo.rewardsDay == 2;
+        return rewardsDayInfo.rewardsDay == 3;
       }, 90000, 1000);
       // process.stdout.clearLine();
       // process.stdout.cursorTo(0);
@@ -641,7 +653,7 @@ contract('main', (_accounts) => {
       console.log(`Submitted for day 2 will wait for ${rewardsDayInfo.secondsLeft} seconds beofre day 3`);
       result = await waitUntil(() => {
         rewardsDayInfo = calcRewardsDay();
-        return rewardsDayInfo.rewardsDay == 3;
+        return rewardsDayInfo.rewardsDay == 4;
       }, 90000, 1000);
       // process.stdout.clearLine();
       // process.stdout.cursorTo(0);
@@ -679,7 +691,7 @@ contract('main', (_accounts) => {
       console.log(`will wait for ${rewardsDayInfo.secondsLeft} seconds before submitting day 4`);      
       let result = await waitUntil(() => {
         rewardsDayInfo = calcRewardsDay();
-        return rewardsDayInfo.rewardsDay == 4;
+        return rewardsDayInfo.rewardsDay == 5;
       }, 90000, 1000);
       // process.stdout.clearLine();
       // process.stdout.cursorTo(0);
