@@ -8,7 +8,7 @@ const connectionConfig = require('../../truffle');
 const utils = require('../../scripts_utils/utils');
 
 const networkProvider = process.argv[2];
-const multisigWalletForPropsTokenProxy = process.argv[3];
+const multisigWalletForRewardsController = process.argv[3];
 const minSecondsBetweenDailySubmissions = process.argv[4];
 const rewardsStartTimestamp = process.argv[5];
 let networkInUse;
@@ -19,8 +19,8 @@ if (typeof (networkProvider) === 'undefined') {
   process.exit(0);
 }
 
-if (typeof (multisigWalletForPropsTokenProxy) === 'undefined') {
-  console.log('Must supply multisigWalletForPropsTokenProxy');
+if (typeof (multisigWalletForRewardsController) === 'undefined') {
+  console.log('Must supply multisigWalletForRewardsController');
   process.exit(0);
 }
 
@@ -77,7 +77,7 @@ async function main() {
   const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
   
   await propsContractInstance.methods.initializePostRewardsUpgrade1(
-    multisigWalletForPropsTokenProxy,
+    multisigWalletForRewardsController,
     minSecondsBetweenDailySubmissions,
     rewardsStartTimestamp,
   ).send({
@@ -86,7 +86,7 @@ async function main() {
     gasPrice: utils.gasPrice(),
     // eslint-disable-next-line no-loop-func
   }).then((receipt) => {
-    upgradeDataEntry.initializeData = [multisigWalletForPropsTokenProxy,minSecondsBetweenDailySubmissions,rewardsStartTimestamp];
+    upgradeDataEntry.initializeData = [multisigWalletForRewardsController,minSecondsBetweenDailySubmissions,rewardsStartTimestamp];
     upgradeDataEntry.initializeTx = receipt.transactionHash;
     console.log('Initialized rewards upgrade contract');
   }).catch((error) => {
