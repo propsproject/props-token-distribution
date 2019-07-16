@@ -126,7 +126,7 @@ async function main() {
     upgradeToEncoded,
   ).send({
     from: DevOps1MultiSigOwnerAddress,
-    gas: utils.gasLimit('deployJurisdiction'),
+    gas: utils.gasLimit('setEntitiesViaMultisig'),
     gasPrice: utils.gasPrice(),
     // eslint-disable-next-line no-loop-func
   }).then((receipt) => {

@@ -12,6 +12,8 @@ const gasLimit = (type) => {
       return 70000;
     case 'multisig':
       return 250000;
+    case 'setEntitiesViaMultisig':
+      return 600000;
     case 'deployJurisdiction':
       return 7473430;
     case 'addAttribute': // add attribute to jurisdiction contract

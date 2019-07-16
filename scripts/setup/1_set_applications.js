@@ -91,8 +91,7 @@ async function main() {
   const currentTimestamp = Math.floor(Date.now()/1000);
   // return (block.timestamp.sub(_self.rewardsStartTimestamp)).div(_self.minSecondsBetweenDays).add(1);
   const rewardsDay = Math.floor((currentTimestamp - rewardsTimestamp) / secondsInDay) + 1;
-  console.log(`Got rewardsTimestamp=${rewardsTimestamp}, secondsInDay=${secondsInDay}, currentTimestamp=${currentTimestamp}, rewardsDay=${rewardsDay}`);  
-
+  console.log(`Got rewardsTimestamp=${rewardsTimestamp}, secondsInDay=${secondsInDay}, currentTimestamp=${currentTimestamp}, rewardsDay=${rewardsDay}`);    
   const upgradeToEncoded = zos.encodeCall('setApplications', ['uint256','address[]'], [rewardsDay,applications]);
 
   const encodedData = await propsContractInstance.methods.setApplications(
@@ -126,7 +125,7 @@ async function main() {
       upgradeToEncoded,
     ).send({
       from: DevOps1MultiSigOwnerAddress,
-      gas: utils.gasLimit('multisig'),
+      gas: utils.gasLimit('setEntitiesViaMultisig'),
       gasPrice: utils.gasPrice(),
       // eslint-disable-next-line no-loop-func
     }).then((receipt) => {

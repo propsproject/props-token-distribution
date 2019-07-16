@@ -22,7 +22,7 @@ Use node version v8.11.1
 $ npm install --global zos
 
 # Install Ganache-cli globally:
-$ npm install --global ganache-cli
+$ npm install --global ganache-cli@v6.4.1
 
 # Install Truffle globally:
 $ npm install --global truffle@v4.1.12
@@ -50,7 +50,8 @@ $ npm run ganache-cli
 # Run contracts test suite
 $ npm run test
 # If fails to bind due to mismatch versions run directly:
-$ NODE_ENV=test truffle test ./test/propstoken.test.js --network test
+$ NODE_ENV=test truffle test ./test/propstoken-0-rewards.test.js --network test
+$ NODE_ENV=test truffle test ./test/propstoken-1-main.test.js --network test
 ```
 
 ### [Test Coverage](https://htmlpreview.github.io/?https://raw.githubusercontent.com/propsproject/props-token-distribution/feature/rewards-contracts/coverage/token/index.html)

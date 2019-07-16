@@ -116,7 +116,7 @@ contract PropsRewards is Initializable, ERC20 {
     /**
     * @dev Set new applications list
     * @param _rewardsDay uint256 the rewards day from which this change should take effect
-    * @param _applications address[] array of validators
+    * @param _applications address[] array of applications
     */
     function setApplications(uint256 _rewardsDay, address[] _applications)
         public
@@ -158,19 +158,19 @@ contract PropsRewards is Initializable, ERC20 {
         returns (bool)
     {
         // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
-        if (_rewardsDay > 0 && (_rewardsDay > rewardsLibData.dailyRewards.lastRewardsDay)) {
+        if (_rewardsDay > rewardsLibData.dailyRewards.lastApplicationsRewardsDay) {
             uint256 previousDayValidatorRewardsAmount = PropsRewardsLib.calculateValidatorRewards(
                 rewardsLibData,
-                rewardsLibData.dailyRewards.lastRewardsDay,
+                rewardsLibData.dailyRewards.lastApplicationsRewardsDay,
                 rewardsLibData.dailyRewards.lastConfirmedRewardsHash,
                 false
             );
             if (previousDayValidatorRewardsAmount > 0) {
-                _mintDailyRewardsForValidators(rewardsLibData.dailyRewards.lastRewardsDay, rewardsLibData.dailyRewards.lastConfirmedRewardsHash, previousDayValidatorRewardsAmount);
+                _mintDailyRewardsForValidators(rewardsLibData.dailyRewards.lastApplicationsRewardsDay, rewardsLibData.dailyRewards.lastConfirmedRewardsHash, previousDayValidatorRewardsAmount);
             }
         }
         // check and give application rewards if majority of validators agree
-        uint256 appRewardsSum = PropsRewardsLib.calculateApplicationRewards(
+        uint256 appRewardsSum = PropsRewardsLib.calculateAndFinalizeApplicationRewards(
             rewardsLibData,
             _rewardsDay,
             _rewardsHash,
@@ -208,6 +208,7 @@ contract PropsRewards is Initializable, ERC20 {
         onlyController
         returns (bool)
     {
+        require(_controller != address(0), "Controller cannot be the zero address");
         controller = _controller;
         emit ControllerUpdated
         (
@@ -305,7 +306,7 @@ contract PropsRewards is Initializable, ERC20 {
         PropsRewardsLib.updateParameter(rewardsLibData, PropsRewardsLib.ParameterName.ValidatorRewardsPercent, 1829, 0);
 
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
-        rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** uint256(_decimals));
+        rewardsLibData.maxTotalSupply = maxTotalSupply = 1 * 1e9 * (10 ** _decimals);
         rewardsLibData.rewardsStartTimestamp = rewardsStartTimestamp = _rewardsStartTimestamp;
         rewardsLibData.minSecondsBetweenDays = _minSecondsBetweenDays;
 
@@ -324,7 +325,7 @@ contract PropsRewards is Initializable, ERC20 {
         for (uint256 i = 0; i < validatorsCount; i++) {
             _mint(rewardsLibData.validators[rewardsLibData.dailyRewards.submissions[_rewardsHash].validatorsList[i]].rewardsAddress,_amount);
         }
-        PropsRewardsLib._resetDailyRewards(rewardsLibData);
+        PropsRewardsLib._resetDailyRewards(rewardsLibData, _rewardsHash);
         emit DailyRewardsValidatorsMinted(
             _rewardsDay,
             _rewardsHash,
