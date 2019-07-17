@@ -80,7 +80,7 @@ contract('main', (_accounts) => {
     it('Transfer works and event is emitted', async () => {
       const transferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
       const receiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
-      transferResult = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });      
+      transferResult = await instance.methods.transfer(web3.eth.accounts[4], web3.toWei(amount)).send({ from: web3.eth.accounts[3] });
       newTransferrerBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
       newReceiverBalance = web3.fromWei(await instance.methods.balanceOf(web3.eth.accounts[4]).call());
       assert.equal(Number(newTransferrerBalance), Number(transferrerBalance) - Number(amount));

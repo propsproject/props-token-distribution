@@ -570,8 +570,8 @@ library PropsRewardsLib {
                 }
             }
         } else {
-            for (uint256 j = 0; j < _applications.length; i++) {
-                if (!_self.selectedApplications.previous[_applications[i]]) {
+            for (uint256 j = 0; j < _applications.length; j++) {
+                if (!_self.selectedApplications.previous[_applications[j]]) {
                     nonActiveApplication = true;
                 }
             }

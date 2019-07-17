@@ -61,6 +61,13 @@ contract PropsRewards is Initializable, ERC20 {
 
     event ControllerUpdated(address indexed newController);
 
+    event Settlement(
+        address indexed applicationId,
+        bytes32 indexed userId,
+        address indexed to,
+        uint256 amount,
+        address rewardsAddress
+    );
     /*
     *  Storage
     */
@@ -279,6 +286,30 @@ contract PropsRewards is Initializable, ERC20 {
         return true;
     }
 
+    /**
+    * @dev Allows an application to settle sidechain props. Should be called from an application rewards address
+    * @param _applicationAddress address the application main address (used to setup the application)
+    * @param _userId bytes32 identification of the user on the sidechain that was settled
+    * @param _to address where to send the props to
+    * @param _amount uint256 the address used for using the sidechain
+    */
+    function settle(
+        address _applicationAddress,
+        bytes32 _userId,
+        address _to,
+        uint256 _amount
+    )
+        public
+        returns (bool)
+    {
+        require(
+            rewardsLibData.applications[_applicationAddress].rewardsAddress == msg.sender,
+            "settle may only be called by an application"
+        );
+        _transfer(msg.sender, _to, _amount);
+        emit Settlement(_applicationAddress, _userId, _to, _amount, msg.sender);
+        return true;
+    }
     /**
     * @dev internal intialize rewards upgrade1
     * @param _controller address that will have controller functionality on rewards protocol

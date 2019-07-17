@@ -170,7 +170,7 @@ contract('main', (_accounts) => {
       } catch (error) {
         //
       }
-    });    
+    });
 
     it('Max Supply is properly set', async () => {      
       maxTotalSupply = (await instance.methods.maxTotalSupply().call());
@@ -222,6 +222,7 @@ contract('main', (_accounts) => {
       assert.equal(String(txRes.events['ParameterUpdated'].returnValues['3']),'2');
 
     });
+    
 
     it('Updating a parameter before the previous update took place', async () => {  
       txRes = await instance.methods.updateParameter(0, 34752, 2).send({ from: newControllerAddress });
@@ -422,6 +423,56 @@ contract('main', (_accounts) => {
       assert.deepEqual(value.map(function(item) { return item.toLowerCase()}), [validator1.account, validator2.account, validator3.account, validator4.account]);
     });
   });
+
+  describe('Settlement', async () => {        
+    // transfer props to application1 so it can settle with    
+    const applicationPropsAmount = 100;    
+    const applicationUserId = "someuserid123";
+    const applicationUserWallet =  _accounts[49];
+    const settlementAmount = 50;
+    it('Can settle from an application rewards address when values are correct', async () => {  
+      txRes = await instance.methods.transfer(application1.rewardsAddress, web3.toWei(applicationPropsAmount)).send({ from: web3.eth.accounts[3] });
+      txRes = await instance.methods.settle(application1.account, web3.fromAscii(applicationUserId), applicationUserWallet, web3.toWei(settlementAmount)).send({ from: application1.rewardsAddress });
+      logGasUsed('settle', txRes.gasUsed);      
+      newApplicationBalance = web3.fromWei(await instance.methods.balanceOf(application1.rewardsAddress).call());
+      newApplicationUserWalletBalance = web3.fromWei(await instance.methods.balanceOf(applicationUserWallet).call());
+      assert.equal(Number(newApplicationBalance), Number(applicationPropsAmount) - Number(settlementAmount));
+      assert.equal(Number(newApplicationUserWalletBalance), Number(settlementAmount));      
+    });
+
+    it('Settlement event was emitted', async () => {  
+      // console.log(JSON.stringify(txRes.events));      
+      assert.equal(String(txRes.events['Settlement'].returnValues['0']).toLowerCase(),String(application1.account).toLowerCase());
+      assert.equal(web3.toUtf8(txRes.events['Settlement'].returnValues['1']),applicationUserId);
+      assert.equal(String(txRes.events['Settlement'].returnValues['2']).toLowerCase(),String(applicationUserWallet).toLowerCase());
+      assert.equal(Number(web3.fromWei(txRes.events['Settlement'].returnValues['3'])),settlementAmount);
+      assert.equal(String(txRes.events['Settlement'].returnValues['4']).toLowerCase(),String(application1.rewardsAddress).toLowerCase());
+    });
+    
+    it('Settlment will fail if application does not exist', async () => {
+      try {
+        expect(await instance.methods.settle(validator1.account, web3.fromAscii(applicationUserId), applicationUserWallet, web3.toWei(settlementAmount)).send({ from: validator1.rewardsAddress })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });
+
+    it('Settlment will fail if application reward address does not match the account', async () => {
+      try {
+        expect(await instance.methods.settle(application2.account, web3.fromAscii(applicationUserId), applicationUserWallet, web3.toWei(settlementAmount)).send({ from: application1.rewardsAddress })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+
+      try {
+        expect(await instance.methods.settle(application1.account, web3.fromAscii(applicationUserId), applicationUserWallet, web3.toWei(settlementAmount)).send({ from: application2.rewardsAddress })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });
+
+  });
+
   describe('Submissions and Rewards Tests', async () => {    
     const formatArrayForSha3 = function(arr, type) {      
       return { type, value: arr};
@@ -503,14 +554,7 @@ contract('main', (_accounts) => {
       }      
     });
 
-    it('Reaching Validator majority with non existent application is rejected', async() => {
-      // get current props balances for rewarded applications      
-      txRes = await instance.methods.submitDailyRewards(1, nonExistentAppApplicationRewardsHash, nonExistentAppApplicationRewards.applications, nonExistentAppApplicationRewards.amounts).send({ from: validator1.account, gas: utils.gasLimit('rewardtest') });
-      logGasUsed('submitDailyRewards', txRes.gasUsed);
-      // exepct DailyRewardsSubmitted
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),'1');
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),nonExistentAppApplicationRewardsHash.toLowerCase());      
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator1.account).toLowerCase());
+    it('Cannot submit with non existent application', async() => {            
       try {
         expect(txRes = await instance.methods.submitDailyRewards(1, nonExistentAppApplicationRewardsHash, nonExistentAppApplicationRewards.applications, nonExistentAppApplicationRewards.amounts).send({ from: validator2.account, gas: utils.gasLimit('rewardtest') })).to.be.rejectedWith(Error)
       }
@@ -520,14 +564,7 @@ contract('main', (_accounts) => {
        
     });
 
-    it('Reaching Validator majority with existing application but not on list is rejected', async() => {
-      // get current props balances for rewarded applications      
-      txRes = await instance.methods.submitDailyRewards(1, appExistsButNotInListApplicationRewardsHash, appExistsButNotInListApplicationRewards.applications, appExistsButNotInListApplicationRewards.amounts).send({ from: validator1.account, gas: utils.gasLimit('rewardtest') });
-      logGasUsed('submitDailyRewards', txRes.gasUsed);
-      // exepct DailyRewardsSubmitted
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['0']).toLowerCase(),'1');
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['1']).toLowerCase(),appExistsButNotInListApplicationRewardsHash.toLowerCase());      
-      assert.equal(String(txRes.events['DailyRewardsSubmitted'].returnValues['2']).toLowerCase(),String(validator1.account).toLowerCase());
+    it('Cannot submit with existing application but not active', async() => {            
       try {
         expect(txRes = await instance.methods.submitDailyRewards(1, appExistsButNotInListApplicationRewardsHash, appExistsButNotInListApplicationRewards.applications, appExistsButNotInListApplicationRewards.amounts).send({ from: validator2.account, gas: utils.gasLimit('rewardtest') })).to.be.rejectedWith(Error)
       }
@@ -708,26 +745,26 @@ contract('main', (_accounts) => {
       assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),expectedValidatorRewardsAmountSum.toString());        
     });
 
-    // it('App rewards and validator rewards work after a gap in the days', async() => {      
-    //   console.log(`will wait for ${rewardsDayInfo.secondsLeft*2} seconds before submitting day 6`);      
-    //   let result = await waitUntil(() => {
-    //     rewardsDayInfo = calcRewardsDay();
-    //     return rewardsDayInfo.rewardsDay == 6;
-    //   }, 90000, 1000);
-    //   // process.stdout.clearLine();
-    //   // process.stdout.cursorTo(0);
-    //   currentTotalSupply = await instance.methods.totalSupply().call();
-    //   txRes = await instance.methods.submitDailyRewards(6, day6ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: utils.gasLimit('rewardtest') });      
-    //   logGasUsed('submitDailyRewards', txRes.gasUsed);
-    //   // expect both applications and validators to be minted
-    //   assert.equal('DailyRewardsApplicationsMinted' in txRes.events, true);
-    //   assert.equal('DailyRewardsValidatorsMinted' in txRes.events, true);            
-    //   const expectedValidatorRewardsAmountSum = (new BigNumber(maxTotalSupply)).minus(currentTotalSupply).times(1830).div(1e8).integerValue(BigNumber.ROUND_DOWN);            
-    //   assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),'6');
-    //   assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),day5ValidApplicationRewardsHash.toLowerCase());      
-    //   assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),'1');
-    //   assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),expectedValidatorRewardsAmountSum.toString());        
-    // });
+    it('App rewards and validator rewards work after a gap in the days', async() => {      
+      console.log(`will wait for ${rewardsDayInfo.secondsLeft*2} seconds before submitting day 6`);      
+      let result = await waitUntil(() => {
+        rewardsDayInfo = calcRewardsDay();
+        return rewardsDayInfo.rewardsDay == 7;
+      }, 90000, 1000);
+      // process.stdout.clearLine();
+      // process.stdout.cursorTo(0);
+      currentTotalSupply = await instance.methods.totalSupply().call();
+      txRes = await instance.methods.submitDailyRewards(6, day6ValidApplicationRewardsHash, validApplicationRewards.applications, validApplicationRewards.amounts).send({ from: validator1.account, gas: utils.gasLimit('rewardtest') });      
+      logGasUsed('submitDailyRewards', txRes.gasUsed);
+      // expect both applications and validators to be minted
+      assert.equal('DailyRewardsApplicationsMinted' in txRes.events, true);
+      assert.equal('DailyRewardsValidatorsMinted' in txRes.events, true);            
+      const expectedValidatorRewardsAmountSum = (new BigNumber(maxTotalSupply)).minus(currentTotalSupply).times(1830).div(1e8).integerValue(BigNumber.ROUND_DOWN);            
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['0']).toLowerCase(),'6');
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['1']).toLowerCase(),day6ValidApplicationRewardsHash.toLowerCase());      
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['2']).toLowerCase(),'1');
+      assert.equal(String(txRes.events['DailyRewardsValidatorsMinted'].returnValues['3']).toLowerCase(),expectedValidatorRewardsAmountSum.toString());        
+    });
   });
   after(async () => {
     gasSummary();
