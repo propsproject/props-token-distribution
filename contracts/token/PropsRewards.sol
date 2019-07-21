@@ -113,11 +113,9 @@ contract PropsRewards is Initializable, ERC20 {
     function setValidators(uint256 _rewardsDay, address[] _validators)
         public
         onlyController
-        returns (bool)
     {
         PropsRewardsLib.setValidators(rewardsLibData, _rewardsDay, _validators);
         emit ValidatorsListUpdated(_validators, _rewardsDay);
-        return true;
     }
 
     /**
@@ -128,11 +126,9 @@ contract PropsRewards is Initializable, ERC20 {
     function setApplications(uint256 _rewardsDay, address[] _applications)
         public
         onlyController
-        returns (bool)
     {
         PropsRewardsLib.setApplications(rewardsLibData, _rewardsDay, _applications);
         emit ApplicationsListUpdated(_applications, _rewardsDay);
-        return true;
     }
 
     /**
@@ -162,7 +158,6 @@ contract PropsRewards is Initializable, ERC20 {
         uint256[] _amounts
     )
         public
-        returns (bool)
     {
         // if submission is for a new day check if previous day validator rewards were given if not give to participating ones
         if (_rewardsDay > rewardsLibData.dailyRewards.lastApplicationsRewardsDay) {
@@ -201,7 +196,6 @@ contract PropsRewards is Initializable, ERC20 {
         }
 
         emit DailyRewardsSubmitted(_rewardsDay, _rewardsHash, msg.sender);
-        return true;
     }
 
     /**
@@ -213,7 +207,6 @@ contract PropsRewards is Initializable, ERC20 {
     )
         public
         onlyController
-        returns (bool)
     {
         require(_controller != address(0), "Controller cannot be the zero address");
         controller = _controller;
@@ -221,7 +214,6 @@ contract PropsRewards is Initializable, ERC20 {
         (
             _controller
         );
-        return true;
     }
 
     /**
@@ -253,7 +245,6 @@ contract PropsRewards is Initializable, ERC20 {
     )
         public
         onlyController
-        returns (bool)
     {
         PropsRewardsLib.updateParameter(rewardsLibData, _name, _value, _rewardsDay);
         emit ParameterUpdated(
@@ -262,7 +253,6 @@ contract PropsRewards is Initializable, ERC20 {
             rewardsLibData.parameters[uint256(_name)].previousValue,
             rewardsLibData.parameters[uint256(_name)].rewardsDay
         );
-        return true;
     }
 
     /**
@@ -279,11 +269,9 @@ contract PropsRewards is Initializable, ERC20 {
         address _sidechainAddress
     )
         public
-        returns (bool)
     {
         PropsRewardsLib.updateEntity(rewardsLibData, _entityType, _name, _rewardsAddress, _sidechainAddress);
         emit EntityUpdated(msg.sender, _entityType, _name, _rewardsAddress, _sidechainAddress);
-        return true;
     }
 
     /**
@@ -300,7 +288,6 @@ contract PropsRewards is Initializable, ERC20 {
         uint256 _amount
     )
         public
-        returns (bool)
     {
         require(
             rewardsLibData.applications[_applicationAddress].rewardsAddress == msg.sender,
@@ -308,7 +295,6 @@ contract PropsRewards is Initializable, ERC20 {
         );
         _transfer(msg.sender, _to, _amount);
         emit Settlement(_applicationAddress, _userId, _to, _amount, msg.sender);
-        return true;
     }
     /**
     * @dev internal intialize rewards upgrade1

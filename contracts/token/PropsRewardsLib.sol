@@ -286,7 +286,6 @@ library PropsRewardsLib {
     )
         public
         onlyValidFutureRewardsDay(_self, _rewardsDay)
-        returns (bool)
     {
         if (_rewardsDay <= _self.parameters[uint256(_name)].rewardsDay) {
            _self.parameters[uint256(_name)].currentValue = _value;
@@ -296,7 +295,6 @@ library PropsRewardsLib {
             _self.parameters[uint256(_name)].currentValue = _value;
            _self.parameters[uint256(_name)].rewardsDay = _rewardsDay;
         }
-        return true;
     }
 
     /**
@@ -316,14 +314,12 @@ library PropsRewardsLib {
     )
         public
         onlyValidAddresses(_rewardsAddress, _sidechainAddress)
-        returns (bool)
     {
         if (_entityType == RewardedEntityType.Application) {
             updateApplication(_self, _name, _rewardsAddress, _sidechainAddress);
         } else {
             updateValidator(_self, _name, _rewardsAddress, _sidechainAddress);
         }
-        return true;
     }
 
     /**
@@ -394,7 +390,6 @@ library PropsRewardsLib {
         public
         onlyValidFutureRewardsDay(_self, _rewardsDay)
         onlyExistingValidators(_self, _validators)
-        returns (bool)
     {
         // no need to update the previous if its' the first time or second update in the same day
         if (_rewardsDay > _self.selectedValidators.rewardsDay && _self.selectedValidators.currentList.length > 0)
@@ -402,7 +397,6 @@ library PropsRewardsLib {
 
         _updateCurrentEntityList(_self.selectedValidators, _validators);
         _self.selectedValidators.rewardsDay = _rewardsDay;
-        return true;
     }
 
    /**
@@ -419,14 +413,12 @@ library PropsRewardsLib {
         public
         onlyValidFutureRewardsDay(_self, _rewardsDay)
         onlyExistingApplications(_self, _applications)
-        returns (bool)
     {
 
         if (_rewardsDay > _self.selectedApplications.rewardsDay && _self.selectedApplications.currentList.length > 0)
                 _updatePreviousEntityList(_self.selectedApplications);
         _updateCurrentEntityList(_self.selectedApplications, _applications);
         _self.selectedApplications.rewardsDay = _rewardsDay;
-        return true;
     }
 
     /**
@@ -648,7 +640,6 @@ library PropsRewardsLib {
         address[] _entities
     )
         internal
-        returns (bool)
     {
         bool emptyCurrentList = _rewardedEntitylist.currentList.length == 0;
         if (!emptyCurrentList && _rewardedEntitylist.currentList.length != _entities.length) {
@@ -664,7 +655,6 @@ library PropsRewardsLib {
             }
             _rewardedEntitylist.current[_entities[i]] = true;
         }
-        return true;
     }
 
     /**
@@ -673,7 +663,6 @@ library PropsRewardsLib {
     */
     function _updatePreviousEntityList(RewardedEntityList storage _rewardedEntitylist)
         internal
-        returns (bool)
     {
         bool emptyPreviousList = _rewardedEntitylist.previousList.length == 0;
         if (
@@ -691,7 +680,6 @@ library PropsRewardsLib {
             }
             _rewardedEntitylist.previous[_rewardedEntitylist.currentList[i]] = true;
         }
-        return true;
     }
 
     /**
@@ -700,13 +688,11 @@ library PropsRewardsLib {
     */
     function _deleteCurrentEntityList(RewardedEntityList storage _rewardedEntitylist)
         internal
-        returns (bool)
     {
         for (uint256 i = 0; i < _rewardedEntitylist.currentList.length ; i++) {
              delete _rewardedEntitylist.current[_rewardedEntitylist.currentList[i]];
         }
         delete  _rewardedEntitylist.currentList;
-        return true;
     }
 
     /**
@@ -715,13 +701,11 @@ library PropsRewardsLib {
     */
     function _deletePreviousEntityList(RewardedEntityList storage _rewardedEntitylist)
         internal
-        returns (bool)
     {
         for (uint256 i = 0; i < _rewardedEntitylist.previousList.length ; i++) {
             delete _rewardedEntitylist.previous[_rewardedEntitylist.previousList[i]];
         }
         delete _rewardedEntitylist.previousList;
-        return true;
     }
 
     /**
@@ -734,7 +718,6 @@ library PropsRewardsLib {
         bytes32 _rewardsHash
     )
         public
-        returns (bool)
     {
          _self.lastValidatorsRewardsDay = _self.dailyRewards.lastApplicationsRewardsDay;
         for (uint256 j = 0; j < _self.dailyRewards.submissions[_rewardsHash].validatorsList.length; j++) {
