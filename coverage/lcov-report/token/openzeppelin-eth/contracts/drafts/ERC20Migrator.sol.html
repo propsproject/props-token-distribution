@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for token/openzeppelin-eth/contracts/drafts/ERC20Migrator.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../../index.html">all files</a> / <a href="index.html">token/openzeppelin-eth/contracts/drafts/</a> ERC20Migrator.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/12</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/6</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/14</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.24;
+&nbsp;
+import "zos-lib/contracts/Initializable.sol";
+import "../token/ERC20/IERC20.sol";
+import "../token/ERC20/ERC20Mintable.sol";
+import "../token/ERC20/SafeERC20.sol";
+import "../math/Math.sol";
+&nbsp;
+&nbsp;
+/**
+ * @title ERC20Migrator
+ * @dev This contract can be used to migrate an ERC20 token from one
+ * contract to another, where each token holder has to opt-in to the migration.
+ * To opt-in, users must approve for this contract the number of tokens they
+ * want to migrate. Once the allowance is set up, anyone can trigger the
+ * migration to the new token contract. In this way, token holders "turn in"
+ * their old balance and will be minted an equal amount in the new token.
+ * The new token contract must be mintable. For the precise interface refer to
+ * OpenZeppelin's ERC20Mintable, but the only functions that are needed are
+ * `isMinter(address)` and `mint(address, amount)`. The migrator will check
+ * that it is a minter for the token.
+ * The balance from the legacy token will be transfered to the migrator, as it
+ * is migrated, and remain there forever.
+ * Although this contract can be used in many different scenarios, the main
+ * motivation was to provide a way to migrate ERC20 tokens into an upgradeable
+ * version of it using ZeppelinOS. To read more about how this can be done
+ * using this implementation, please follow the official documentation site of
+ * ZeppelinOS: https://docs.zeppelinos.org/docs/erc20_onboarding.html
+ * Example of usage:
+ * ```
+ * const migrator = await ERC20Migrator.new(legacyToken.address);
+ * await newToken.addMinter(migrator.address);
+ * await migrator.beginMigration(newToken.address);
+ * ```
+ */
+contract ERC20Migrator is Initializable {
+  using SafeERC20 for IERC20;
+&nbsp;
+  /// Address of the old token contract
+  IERC20 private _legacyToken;
+&nbsp;
+  /// Address of the new token contract
+  ERC20Mintable private _newToken;
+&nbsp;
+  /**
+   * @param legacyToken address of the old token contract
+   */
+<span class="fstat-no" title="function not covered" >  function initialize(IERC20 legacyToken) public initializer </span>{
+<span class="cstat-no" title="statement not covered" >    require(legacyToken != address(0))</span>;
+<span class="cstat-no" title="statement not covered" >    _legacyToken = legacyToken</span>;
+  }
+&nbsp;
+  /**
+   * @dev Returns the legacy token that is being migrated.
+   */
+<span class="fstat-no" title="function not covered" >  function legacyToken() public view returns (IERC20) </span>{
+<span class="cstat-no" title="statement not covered" >    return _legacyToken;</span>
+  }
+&nbsp;
+  /**
+   * @dev Returns the new token to which we are migrating.
+   */
+<span class="fstat-no" title="function not covered" >  function newToken() public view returns (IERC20) </span>{
+<span class="cstat-no" title="statement not covered" >    return _newToken;</span>
+  }
+&nbsp;
+  /**
+   * @dev Begins the migration by setting which is the new token that will be
+   * minted. This contract must be a minter for the new token.
+   * @param newToken the token that will be minted
+   */
+<span class="fstat-no" title="function not covered" >  function beginMigration(ERC20Mintable newToken) public </span>{
+<span class="cstat-no" title="statement not covered" >    require(_newToken == address(0))</span>;
+<span class="cstat-no" title="statement not covered" >    require(newToken != address(0))</span>;
+<span class="cstat-no" title="statement not covered" >    require(newToken.isMinter(this))</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    _newToken = newToken</span>;
+  }
+&nbsp;
+  /**
+   * @dev Transfers part of an account's balance in the old token to this
+   * contract, and mints the same amount of new tokens for that account.
+   * @param account whose tokens will be migrated
+   * @param amount amount of tokens to be migrated
+   */
+<span class="fstat-no" title="function not covered" >  function migrate(address account, uint256 amount) public </span>{
+    _legacyToken.safeTransferFrom(account, this, amount);
+    _newToken.mint(account, amount);
+  }
+&nbsp;
+  /**
+   * @dev Transfers all of an account's allowed balance in the old token to
+   * this contract, and mints the same amount of new tokens for that account.
+   * @param account whose tokens will be migrated
+   */
+<span class="fstat-no" title="function not covered" >  function migrateAll(address account) public </span>{
+<span class="cstat-no" title="statement not covered" >    uint256 balance = _legacyToken.balanceOf(account)</span>;
+<span class="cstat-no" title="statement not covered" >    uint256 allowance = _legacyToken.allowance(account, this)</span>;
+<span class="cstat-no" title="statement not covered" >    uint256 amount = Math.min(balance, allowance)</span>;
+<span class="cstat-no" title="statement not covered" >    migrate(account, amount)</span>;
+  }
+&nbsp;
+  uint256[50] private ______gap;
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun May 26 2019 12:59:19 GMT-0400 (EDT)
+</div>
+</div>
+<script src="../../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../../sorter.js"></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "zos-lib/contracts/Initializable.sol";
+import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 import { ECDSA } from "openzeppelin-eth/contracts/cryptography/ECDSA.sol";
 import "./IERC865.sol";
 
@@ -12,10 +13,10 @@ import "./IERC865.sol";
  *
  */
 
-contract ERC865Token is Initializable, IERC865 {
+contract ERC865Token is Initializable, ERC20, IERC865 {
 
     /* hashed tx of transfers performed */
-    mapping(bytes32 => bool) hashedTxs;    
+    mapping(bytes32 => bool) hashedTxs;
     /**
      * @dev Submit a presigned transfer
      * @notice fee will be given to sender if it's a smart contract make sure it can accept funds
@@ -34,11 +35,11 @@ contract ERC865Token is Initializable, IERC865 {
     )
         public
         returns (bool)
-    {        
-        require(_to != address(0), "Invalid _to address");        
+    {
+        require(_to != address(0), "Invalid _to address");
 
         bytes32 hashedParams = getTransferPreSignedHash(address(this), _to, _value, _fee, _nonce);
-        address from = ECDSA.recover(hashedParams, _signature);     
+        address from = ECDSA.recover(hashedParams, _signature);
         require(from != address(0), "Invalid from address recovered");
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
         require(hashedTxs[hashedTx] == false,"Transaction hash was already used");
@@ -69,7 +70,7 @@ contract ERC865Token is Initializable, IERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0),"Invalid _spender address");        
+        require(_spender != address(0),"Invalid _spender address");
 
         bytes32 hashedParams = getApprovePreSignedHash(address(this), _spender, _value, _fee, _nonce);
         address from = ECDSA.recover(hashedParams, _signature);
@@ -77,9 +78,9 @@ contract ERC865Token is Initializable, IERC865 {
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
         require(hashedTxs[hashedTx] == false,"Transaction hash was already used");
         hashedTxs[hashedTx] = true;
-        _approve(from, _spender, _value);        
-        _transfer(from, msg.sender, _fee);        
-        
+        _approve(from, _spender, _value);
+        _transfer(from, msg.sender, _fee);
+
         emit ApprovalPreSigned(from, _spender, msg.sender, _value, _fee);
         return true;
     }
@@ -103,7 +104,7 @@ contract ERC865Token is Initializable, IERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0),"Invalid _spender address");        
+        require(_spender != address(0),"Invalid _spender address");
 
         bytes32 hashedParams = getIncreaseAllowancePreSignedHash(address(this), _spender, _addedValue, _fee, _nonce);
         address from = ECDSA.recover(hashedParams, _signature);
@@ -111,9 +112,9 @@ contract ERC865Token is Initializable, IERC865 {
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
         require(hashedTxs[hashedTx] == false,"Transaction hash was already used");
         hashedTxs[hashedTx] = true;
-        _approve(from, _spender, allowance(from, _spender).add(_addedValue));        
-        _transfer(from, msg.sender, _fee);        
-        
+        _approve(from, _spender, allowance(from, _spender).add(_addedValue));
+        _transfer(from, msg.sender, _fee);
+
         emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
         return true;
     }
@@ -137,17 +138,17 @@ contract ERC865Token is Initializable, IERC865 {
         public
         returns (bool)
     {
-        require(_spender != address(0),"Invalid _spender address");              
+        require(_spender != address(0),"Invalid _spender address");
 
         bytes32 hashedParams = getDecreaseAllowancePreSignedHash(address(this), _spender, _subtractedValue, _fee, _nonce);
         address from = ECDSA.recover(hashedParams, _signature);
         require(from != address(0),"Invalid from address recovered");
         bytes32 hashedTx = keccak256(abi.encodePacked(from, hashedParams));
-        require(hashedTxs[hashedTx] == false,"Transaction hash was already used");        
+        require(hashedTxs[hashedTx] == false,"Transaction hash was already used");
         // if substractedValue is greater than allowance will fail as allowance is uint256
         hashedTxs[hashedTx] = true;
-        _approve(from, _spender, allowance(from,_spender).sub(_subtractedValue));            
-        _transfer(from, msg.sender, _fee);                
+        _approve(from, _spender, allowance(from,_spender).sub(_subtractedValue));
+        _transfer(from, msg.sender, _fee);
 
         emit ApprovalPreSigned(from, _spender, msg.sender, allowance(from, _spender), _fee);
         return true;
@@ -174,7 +175,7 @@ contract ERC865Token is Initializable, IERC865 {
         public
         returns (bool)
     {
-        require(_to != address(0),"Invalid _to address");        
+        require(_to != address(0),"Invalid _to address");
 
         bytes32 hashedParams = getTransferFromPreSignedHash(address(this), _from, _to, _value, _fee, _nonce);
 
@@ -183,10 +184,10 @@ contract ERC865Token is Initializable, IERC865 {
         bytes32 hashedTx = keccak256(abi.encodePacked(spender, hashedParams));
         require(hashedTxs[hashedTx] == false,"Transaction hash was already used");
         hashedTxs[hashedTx] = true;
-        _transfer(_from, _to, _value);        
-        _approve(_from, spender, allowance(_from, spender).sub(_value));        
-        _transfer(spender, msg.sender, _fee);        
-        
+        _transfer(_from, _to, _value);
+        _approve(_from, spender, allowance(_from, spender).sub(_value));
+        _transfer(spender, msg.sender, _fee);
+
         emit TransferPreSigned(_from, _to, msg.sender, _value, _fee);
         return true;
     }

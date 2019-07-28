@@ -1,0 +1,2270 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for token/PropsRewardsLib.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">token/</a> PropsRewardsLib.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">99.25% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>133/134</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">94.74% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>72/76</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>31/31</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">99.35% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>154/155</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+697
+698
+699
+700
+701
+702
+703
+704
+705
+706
+707
+708
+709
+710
+711
+712
+713
+714
+715
+716
+717
+718
+719
+720
+721
+722
+723
+724
+725
+726
+727
+728
+729
+730
+731
+732
+733
+734
+735
+736</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">21×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">20×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">14×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">20×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">21×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">24×</span>
+<span class="cline-any cline-yes">24×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">16×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-yes">39×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">53×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">34×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">24×</span>
+<span class="cline-any cline-yes">24×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">41×</span>
+<span class="cline-any cline-yes">33×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">13×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">15×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.24;
+&nbsp;
+/**
+ * @title Props Rewards Library
+ * @dev Library to manage application and validators and parameters
+ **/
+library PropsRewardsLib {
+    /*
+    *  Events
+    */
+&nbsp;
+    /*
+    *  Storage
+    */
+&nbsp;
+    // The various parameters used by the contract
+    enum ParameterName { ApplicationRewardsPercent, ApplicationRewardsMaxVariationPercent, ValidatorMajorityPercent, ValidatorRewardsPercent}
+    enum RewardedEntityType { Application, Validator }
+&nbsp;
+    // Represents a parameter current, previous and time of change
+    struct Parameter {
+        uint256 currentValue;                   // current value in Pphm valid after timestamp
+        uint256 previousValue;                  // previous value in Pphm for use before timestamp
+        uint256 rewardsDay;                // timestamp of when the value was updated
+    }
+    // Represents application details
+    struct RewardedEntity {
+        bytes32 name;                           // Application name
+        address rewardsAddress;                 // address where rewards will be minted to
+        address sidechainAddress;               // address used on the sidechain
+        uint256 initializedState;               // A way to check if there's something in the map and whether already added to list
+        RewardedEntityType entityType;                // Type of rewarded entity
+    }
+&nbsp;
+    // Represents validators current and previous lists
+    struct RewardedEntityList {
+        mapping (address =&gt; bool) current;
+        mapping (address =&gt; bool) previous;
+        address[] currentList;
+        address[] previousList;
+        uint256 rewardsDay;
+    }
+&nbsp;
+    // Represents daily reward submissions and confimations
+    struct DailyRewards {
+        mapping (bytes32 =&gt; Submission) submissions;
+        bytes32[] submittedRewardHashes;
+        uint256 totalSupply;
+        bytes32 lastConfirmedRewardsHash;
+        uint256 lastRewardsDay;
+    }
+&nbsp;
+    struct Submission {
+        mapping (address =&gt; bool) validators;
+        address[] validatorsList;
+        uint256 confirmations;
+        uint256 finalized;
+        uint256 initializedState;               // A way to check if there's something in the map and whether already added to list
+    }
+&nbsp;
+&nbsp;
+    // represent the storage structures
+    struct Data {
+        // applications data
+        mapping (address =&gt; RewardedEntity) applications;
+        address[] applicationsList;
+        // validators data
+        mapping (address =&gt; RewardedEntity) validators;
+        address[] validatorsList;
+        // adjustable parameters data
+        mapping (uint256 =&gt; Parameter) parameters; // uint256 is the parameter enum index
+        // the participating validators
+        RewardedEntityList selectedValidators;
+        // the participating applications
+        RewardedEntityList selectedApplications;
+        // daily rewards submission data
+        DailyRewards dailyRewards;
+        uint256 minSecondsBetweenDays;
+        uint256 rewardsStartTimestamp;
+        uint256 maxTotalSupply;
+    }
+    /*
+    *  Modifiers
+    */
+    modifier onlyOneRewardsHashPerValidator(Data storage _self, bytes32 _rewardsHash) {
+        require(
+            !_self.dailyRewards.submissions[_rewardsHash].validators[msg.sender],
+            "Must be one submission per validator"
+        );
+         _;
+    }
+&nbsp;
+    modifier onlyExistingApplications(Data storage _self, address[] _entities) {
+        for (uint256 i = 0; i &lt; _entities.length; i++) {
+            require(
+                _self.applications[_entities[i]].initializedState == 1,
+                "Application must exist"
+            );
+        }
+        _;
+    }
+&nbsp;
+    modifier onlyExistingValidators(Data storage _self, address[] _entities) {
+        for (uint256 i = 0; i &lt; _entities.length; i++) {
+            require(
+                _self.validators[_entities[i]].initializedState == 1,
+                "Validator must exist"
+            );
+        }
+        _;
+    }
+&nbsp;
+    modifier onlySelectedValidators(Data storage _self, uint256 _rewardsDay) {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
+            <span class="missing-if-branch" title="else path not taken" >E</span>require (
+                _self.selectedValidators.current[msg.sender],
+                "Must be a current selected validator"
+            );
+        } else {
+            require (
+                _self.selectedValidators.previous[msg.sender],
+                "Must be a previous selected validator"
+            );
+        }
+        _;
+    }
+&nbsp;
+    modifier onlyValidRewardsDay(Data storage _self, uint256 _rewardsDay) {
+        require(
+            _currentRewardsDay(_self) == _rewardsDay,
+            "Must be for current day"
+        );
+         _;
+    }
+&nbsp;
+    modifier onlyValidFutureRewardsDay(Data storage _self, uint256 _rewardsDay) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+            _rewardsDay &gt;= _currentRewardsDay(_self),
+            "Must be future rewardsDay"
+        );
+         _;
+    }
+&nbsp;
+    modifier onlyValidAddresses(address _rewardsAddress, address _sidechainAddress) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+            _rewardsAddress != address(0) &amp;&amp;
+            _sidechainAddress != address(0),
+            "Must have valid rewards and sidechain addresses"
+        );
+        _;
+    }
+&nbsp;
+    /**
+    * @dev The function is called by validators with the calculation of the daily rewards
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the rewards day
+    * @param _rewardsHash bytes32 hash of the rewards data
+    */
+    function calculateValidatorRewards(
+        Data storage _self,
+        uint256 _rewardsDay,
+        bytes32 _rewardsHash,
+        bool _allValidators
+    )
+        public
+        view
+        returns (uint256)
+    {
+        uint256 numOfValidators;
+        if (_self.dailyRewards.submissions[_rewardsHash].finalized == 1)
+        {
+            if (_allValidators) {
+                numOfValidators = _requiredValidatorsForValidatorsRewards(_self, _rewardsDay);
+                if (numOfValidators &gt; _self.dailyRewards.submissions[_rewardsHash].confirmations) return 0;
+            } else {
+                numOfValidators = _self.dailyRewards.submissions[_rewardsHash].confirmations;
+            }
+            uint256 rewardPerValidator = _getValidatorRewardsDailyAmountPerValidator(_self, _rewardsDay, numOfValidators);
+            return rewardPerValidator;
+        }
+        return 0;
+    }
+&nbsp;
+    /**
+    * @dev The function is called by validators with the calculation of the daily rewards
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the rewards day
+    * @param _rewardsHash bytes32 hash of the rewards data
+    * @param _applications address[] array of application addresses getting the daily reward
+    * @param _amounts uint256[] array of amounts each app should get
+    * @param _currentTotalSupply uint256 current total supply
+    */
+    function calculateApplicationRewards(
+        Data storage _self,
+        uint256 _rewardsDay,
+        bytes32 _rewardsHash,
+        address[] _applications,
+        uint256[] _amounts,
+        uint256 _currentTotalSupply
+    )
+        public
+        onlyValidRewardsDay(_self, _rewardsDay)
+        onlyOneRewardsHashPerValidator(_self, _rewardsHash)
+        onlySelectedValidators(_self, _rewardsDay)
+        returns (uint256)
+    {
+        require(
+                _rewardHashIsvalid(_rewardsDay, _rewardsHash, _applications, _amounts),
+                "Reward Hash is invalid"
+        );
+        if (_self.dailyRewards.submissions[_rewardsHash].initializedState == 0) {
+            _self.dailyRewards.submissions[_rewardsHash].initializedState = 1;
+            _self.dailyRewards.submittedRewardHashes.push(_rewardsHash);
+        }
+        _self.dailyRewards.submissions[_rewardsHash].validators[msg.sender] = true;
+        _self.dailyRewards.submissions[_rewardsHash].validatorsList.push(msg.sender);
+        _self.dailyRewards.submissions[_rewardsHash].confirmations++;
+&nbsp;
+        if (_self.dailyRewards.submissions[_rewardsHash].confirmations == _requiredValidatorsForAppRewards(_self, _rewardsDay)) {
+            uint256 sum = _validateSubmittedData(_self, _applications, _amounts);
+            require(
+                sum &lt;= _getMaxAppRewardsDailyAmount(_self, _rewardsDay, _currentTotalSupply),
+                "Rewards data is invalid - exceed daily variation"
+            );
+            _finalizeDailyApplicationRewards(_self, _rewardsDay, _rewardsHash, _currentTotalSupply);
+            return sum;
+        }
+        return 0;
+    }
+&nbsp;
+    /**
+    * @dev Finalizes the state, rewards Hash, total supply and block timestamp for the day
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the reward day
+    * @param _rewardsHash bytes32 the daily reward hash
+    * @param _currentTotalSupply uint256 the current total supply
+    */
+    function _finalizeDailyApplicationRewards(Data storage _self, uint256 _rewardsDay, bytes32 _rewardsHash, uint256 _currentTotalSupply)
+        public
+        returns (bool)
+    {
+        _self.dailyRewards.totalSupply = _currentTotalSupply;
+        _self.dailyRewards.lastConfirmedRewardsHash = _rewardsHash;
+        _self.dailyRewards.lastRewardsDay = _rewardsDay;
+        _self.dailyRewards.submissions[_rewardsHash].finalized = 1;
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Get parameter's value
+    * @param _self Data pointer to storage
+    * @param _name ParameterName name of the parameter
+    * @param _rewardsDay uint256 the rewards day
+    */
+    function getParameterValue(
+        Data storage _self,
+        ParameterName _name,
+        uint256 _rewardsDay
+    )
+        public
+        view
+        returns (uint256)
+    {
+        if (_rewardsDay &gt;= _self.parameters[uint256(_name)].rewardsDay) {
+            return _self.parameters[uint256(_name)].currentValue;
+        } else {
+            return _self.parameters[uint256(_name)].previousValue;
+        }
+    }
+&nbsp;
+    /**
+    * @dev Allows the controller/owner to update rewards parameters
+    * @param _self Data pointer to storage
+    * @param _name ParameterName name of the parameter
+    * @param _value uint256 new value for the parameter
+    * @param _rewardsDay uint256 the rewards day
+    */
+    function updateParameter(
+        Data storage _self,
+        ParameterName _name,
+        uint256 _value,
+        uint256 _rewardsDay
+    )
+        public
+        onlyValidFutureRewardsDay(_self, _rewardsDay)
+        returns (bool)
+    {
+        if (_rewardsDay &lt;= _self.parameters[uint256(_name)].rewardsDay) {
+           _self.parameters[uint256(_name)].currentValue = _value;
+           _self.parameters[uint256(_name)].rewardsDay = _rewardsDay;
+        } else {
+            _self.parameters[uint256(_name)].previousValue = _self.parameters[uint256(_name)].currentValue;
+            _self.parameters[uint256(_name)].currentValue = _value;
+           _self.parameters[uint256(_name)].rewardsDay = _rewardsDay;
+        }
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Allows an application to add/update its details
+    * @param _self Data pointer to storage
+    * @param _entityType RewardedEntityType either application (0) or validator (1)
+    * @param _name bytes32 name of the app
+    * @param _rewardsAddress address an address for the app to receive the rewards
+    * @param _sidechainAddress address the address used for using the sidechain
+    */
+    function updateEntity(
+        Data storage _self,
+        RewardedEntityType _entityType,
+        bytes32 _name,
+        address _rewardsAddress,
+        address _sidechainAddress
+    )
+        public
+        onlyValidAddresses(_rewardsAddress, _sidechainAddress)
+        returns (bool)
+    {
+        if (_entityType == RewardedEntityType.Application) {
+            updateApplication(_self, _name, _rewardsAddress, _sidechainAddress);
+        } else {
+            updateValidator(_self, _name, _rewardsAddress, _sidechainAddress);
+        }
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Allows an application to add/update its details
+    * @param _self Data pointer to storage
+    * @param _name bytes32 name of the app
+    * @param _rewardsAddress address an address for the app to receive the rewards
+    * @param _sidechainAddress address the address used for using the sidechain
+    */
+    function updateApplication(
+        Data storage _self,
+        bytes32 _name,
+        address _rewardsAddress,
+        address _sidechainAddress
+    )
+        public
+        returns (uint256)
+    {
+        _self.applications[msg.sender].name = _name;
+        _self.applications[msg.sender].rewardsAddress = _rewardsAddress;
+        _self.applications[msg.sender].sidechainAddress = _sidechainAddress;
+        if (_self.applications[msg.sender].initializedState == 0) {
+            _self.applicationsList.push(msg.sender);
+            _self.applications[msg.sender].initializedState = 1;
+            _self.applications[msg.sender].entityType = RewardedEntityType.Application;
+        }
+        return uint256(RewardedEntityType.Application);
+    }
+&nbsp;
+    /**
+    * @dev Allows a validator to add/update its details
+    * @param _self Data pointer to storage
+    * @param _name bytes32 name of the validator
+    * @param _rewardsAddress address an address for the validator to receive the rewards
+    * @param _sidechainAddress address the address used for using the sidechain
+    */
+    function updateValidator(
+        Data storage _self,
+        bytes32 _name,
+        address _rewardsAddress,
+        address _sidechainAddress
+    )
+        public
+        returns (uint256)
+    {
+        _self.validators[msg.sender].name = _name;
+        _self.validators[msg.sender].rewardsAddress = _rewardsAddress;
+        _self.validators[msg.sender].sidechainAddress = _sidechainAddress;
+        if (_self.validators[msg.sender].initializedState == 0) {
+            _self.validatorsList.push(msg.sender);
+            _self.validators[msg.sender].initializedState = 1;
+            _self.validators[msg.sender].entityType = RewardedEntityType.Validator;
+        }
+        return uint256(RewardedEntityType.Validator);
+    }
+&nbsp;
+    /**
+    * @dev Set new validators list
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the rewards day from which the list should be active
+    * @param _validators address[] array of validators
+    */
+    function setValidators(
+        Data storage _self,
+        uint256 _rewardsDay,
+        address[] _validators
+    )
+        public
+        onlyValidFutureRewardsDay(_self, _rewardsDay)
+        onlyExistingValidators(_self, _validators)
+        returns (bool)
+    {
+&nbsp;
+        if (_self.selectedValidators.currentList.length == 0) { // first time the daily validators list is set
+            _updateCurrentEntityList(_self.selectedValidators, _validators);
+        } else {
+            if (_rewardsDay &gt; _self.selectedValidators.rewardsDay)
+                _updatePreviousEntityList(_self.selectedValidators);
+            _updateCurrentEntityList(_self.selectedValidators, _validators);
+        }
+        _self.selectedValidators.rewardsDay = _rewardsDay;
+        return true;
+    }
+&nbsp;
+   /**
+    * @dev Set new applications list
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the rewards day from which the list should be active
+    * @param _applications address[] array of applications
+    */
+    function setApplications(
+        Data storage _self,
+        uint256 _rewardsDay,
+        address[] _applications
+    )
+        public
+        onlyValidFutureRewardsDay(_self, _rewardsDay)
+        onlyExistingApplications(_self, _applications)
+        returns (bool)
+    {
+&nbsp;
+        if (_self.selectedApplications.currentList.length == 0) { // first time the daily validators list is set
+            _updateCurrentEntityList(_self.selectedApplications, _applications);
+        } else {
+            if (_rewardsDay &gt; _self.selectedApplications.rewardsDay)
+                _updatePreviousEntityList(_self.selectedApplications);
+            _updateCurrentEntityList(_self.selectedApplications, _applications);
+        }
+        _self.selectedApplications.rewardsDay = _rewardsDay;
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Get applications or validators list
+    * @param _self Data pointer to storage
+    * @param _entityType RewardedEntityType either application (0) or validator (1)
+    * @param _rewardsDay uint256 the reward day to determine which list to get
+    */
+    function getEntities(
+        Data storage _self,
+        RewardedEntityType _entityType,
+        uint256 _rewardsDay
+    )
+        public
+        view
+        returns (address[])
+    {
+        if (_entityType == RewardedEntityType.Application) {
+            if (_getSelectedRewardedEntityListType(_self.selectedApplications, _rewardsDay) == 0) {
+                return _self.selectedApplications.currentList;
+            } else {
+                return _self.selectedApplications.previousList;
+            }
+        } else {
+            if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
+                return _self.selectedValidators.currentList;
+            } else {
+                return _self.selectedValidators.previousList;
+            }
+        }
+    }
+&nbsp;
+    /**
+    * @dev Get which entity list to use. Current = 0, previous = 1
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
+    * @param _rewardsDay uint256 the reward day to determine which list to get
+    */
+    function _getSelectedRewardedEntityListType(RewardedEntityList _rewardedEntitylist, uint256 _rewardsDay)
+        internal
+        pure
+        returns (uint256)
+    {
+        if (_rewardsDay &gt;= _rewardedEntitylist.rewardsDay) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+&nbsp;
+    /**
+    * @dev Checks how many validators are needed for app rewards
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the reward day
+    * @param _currentTotalSupply uint256 current total supply
+    */
+    function _getMaxAppRewardsDailyAmount(
+        Data storage _self,
+        uint256 _rewardsDay,
+        uint256 _currentTotalSupply
+    )
+        public
+        view
+        returns (uint256)
+    {
+        return ((_self.maxTotalSupply - _currentTotalSupply) *
+        getParameterValue(_self, ParameterName.ApplicationRewardsPercent, _rewardsDay) *
+        getParameterValue(_self, ParameterName.ApplicationRewardsMaxVariationPercent, _rewardsDay)) / 1e16;
+    }
+&nbsp;
+&nbsp;
+    /**
+    * @dev Checks how many validators are needed for app rewards
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the reward day
+    * @param _numOfValidators uint256 number of validators
+    */
+    function _getValidatorRewardsDailyAmountPerValidator(
+        Data storage _self,
+        uint256 _rewardsDay,
+        uint256 _numOfValidators
+    )
+        public
+        view
+        returns (uint256)
+    {
+        return (((_self.maxTotalSupply - _self.dailyRewards.totalSupply) *
+        getParameterValue(_self, ParameterName.ValidatorRewardsPercent, _rewardsDay)) / 1e8) / _numOfValidators;
+    }
+&nbsp;
+    /**
+    * @dev Checks if app daily rewards amount is valid
+    * @param _self Data pointer to storage
+    * @param _applications address[] array of application addresses getting the daily reward
+    * @param _amounts uint256[] array of amounts each app should get
+    */
+    function _validateSubmittedData(
+        Data storage _self,
+        address[] _applications,
+        uint256[] _amounts
+    )
+        public
+        view
+        returns (uint256)
+    {
+        uint256 sum;
+        bool valid = true;
+        for (uint256 i = 0; i &lt; _amounts.length; i++) {
+             sum += _amounts[i];
+            if (_self.applications[_applications[i]].initializedState != 1) valid = false;
+        }
+        require(
+                sum &gt; 0 &amp;&amp; valid,
+                "Sum zero or none existing app submitted"
+        );
+        return sum;
+    }
+&nbsp;
+    /**
+    * @dev Checks if submitted data matches reward hash
+    * @param _rewardsDay uint256 the reward day
+    * @param _rewardsHash bytes32 hash of the rewards data
+    * @param _applications address[] array of application addresses getting the daily reward
+    * @param _amounts uint256[] array of amounts each app should get
+    */
+    function _rewardHashIsvalid(
+        uint256 _rewardsDay,
+        bytes32 _rewardsHash,
+        address[] _applications,
+        uint256[] _amounts
+    )
+        public
+        pure
+        returns (bool)
+    {
+        return keccak256(abi.encodePacked(_rewardsDay, _applications, _amounts)) == _rewardsHash;
+    }
+&nbsp;
+    /**
+    * @dev Checks how many validators are needed for app rewards
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the reward day
+    */
+    function _requiredValidatorsForValidatorsRewards(Data storage _self, uint256 _rewardsDay)
+        public
+        view
+        returns (uint256)
+    {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
+            return _self.selectedValidators.currentList.length;
+        } else {
+            return _self.selectedValidators.previousList.length;
+        }
+    }
+&nbsp;
+    /**
+    * @dev Checks how many validators are needed for app rewards
+    * @param _self Data pointer to storage
+    * @param _rewardsDay uint256 the reward day
+    */
+    function _requiredValidatorsForAppRewards(Data storage _self, uint256 _rewardsDay)
+        public
+        view
+        returns (uint256)
+    {
+        if (_getSelectedRewardedEntityListType(_self.selectedValidators, _rewardsDay) == 0) {
+            return ((_self.selectedValidators.currentList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _rewardsDay)) / 1e8)+1;
+        } else {
+            return ((_self.selectedValidators.previousList.length * getParameterValue(_self, ParameterName.ValidatorMajorityPercent, _rewardsDay)) / 1e8)+1;
+        }
+    }
+&nbsp;
+    /**
+    * @dev Get rewards day from block.timestamp
+    * @param _self Data pointer to storage
+    */
+    function _currentRewardsDay(Data storage _self)
+        public
+        view
+        returns (uint256)
+    {
+        //the the start time - floor timestamp to previous midnight divided by seconds in a day will give the rewards day number
+        if (_self.minSecondsBetweenDays &gt; 0) {
+            return ((block.timestamp - (block.timestamp % _self.minSecondsBetweenDays)) - _self.rewardsStartTimestamp) / _self.minSecondsBetweenDays;
+        } else {
+            return 0;
+        }
+    }
+&nbsp;
+    /**
+    * @dev Update current daily applications list.
+    * If new, push.
+    * If same size, replace
+    * If different size, delete, and then push.
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
+    * @param _entities address[] array of entities
+    */
+    //_updateCurrentEntityList(_rewardedEntitylist, _entities,_rewardedEntityType),
+    function _updateCurrentEntityList(
+        RewardedEntityList storage _rewardedEntitylist,
+        address[] _entities
+    )
+        internal
+        returns (bool)
+    {
+        bool emptyCurrentList = _rewardedEntitylist.currentList.length == 0;
+        if (!emptyCurrentList &amp;&amp; _rewardedEntitylist.currentList.length != _entities.length) {
+            _deleteCurrentEntityList(_rewardedEntitylist);
+            emptyCurrentList = true;
+        }
+&nbsp;
+        for (uint256 i = 0; i &lt; _entities.length; i++) {
+            if (emptyCurrentList) {
+                _rewardedEntitylist.currentList.push(_entities[i]);
+            } else {
+                _rewardedEntitylist.currentList[i] = _entities[i];
+            }
+            _rewardedEntitylist.current[_entities[i]] = true;
+        }
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Update previous daily list
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
+    */
+    function _updatePreviousEntityList(RewardedEntityList storage _rewardedEntitylist)
+        internal
+        returns (bool)
+    {
+        bool emptyPreviousList = _rewardedEntitylist.previousList.length == 0;
+        if (
+            !emptyPreviousList &amp;&amp;
+            _rewardedEntitylist.previousList.length != _rewardedEntitylist.currentList.length
+        ) {
+            _deletePreviousEntityList(_rewardedEntitylist);
+            emptyPreviousList = true;
+        }
+        for (uint256 i = 0; i &lt; _rewardedEntitylist.currentList.length; i++) {
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (emptyPreviousList) {
+                _rewardedEntitylist.previousList.push(_rewardedEntitylist.currentList[i]);
+            } else {
+<span class="cstat-no" title="statement not covered" >                _rewardedEntitylist.previousList[i] = _rewardedEntitylist.currentList[i]</span>;
+            }
+            _rewardedEntitylist.previous[_rewardedEntitylist.currentList[i]] = true;
+        }
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Delete existing values from the current list
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
+    */
+    function _deleteCurrentEntityList(RewardedEntityList storage _rewardedEntitylist)
+        internal
+        returns (bool)
+    {
+        for (uint256 i = 0; i &lt; _rewardedEntitylist.currentList.length ; i++) {
+             delete _rewardedEntitylist.current[_rewardedEntitylist.currentList[i]];
+        }
+        delete  _rewardedEntitylist.currentList;
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Delete existing values from the previous applications list
+    * @param _rewardedEntitylist RewardedEntityList pointer to storage
+    */
+    function _deletePreviousEntityList(RewardedEntityList storage _rewardedEntitylist)
+        internal
+        returns (bool)
+    {
+        for (uint256 i = 0; i &lt; _rewardedEntitylist.previousList.length ; i++) {
+            delete _rewardedEntitylist.previous[_rewardedEntitylist.previousList[i]];
+        }
+        delete _rewardedEntitylist.previousList;
+        return true;
+    }
+&nbsp;
+    /**
+    * @dev Deletes reward day submission data
+    * @param _self Data pointer to storage
+    */
+    function _resetDailyRewards(
+        Data storage _self
+    )
+        public
+        returns (bool)
+    {
+        bytes32[] memory rewardHashes = _self.dailyRewards.submittedRewardHashes;
+        for (uint256 i = 0; i &lt; rewardHashes.length; i++) {
+            for (uint256 j = 0; j &lt; _self.dailyRewards.submissions[rewardHashes[i]].validatorsList.length; j++) {
+                delete(
+                    _self.dailyRewards.submissions[rewardHashes[i]].validators[_self.dailyRewards.submissions[rewardHashes[i]].validatorsList[j]]
+                );
+            }
+            delete _self.dailyRewards.submissions[rewardHashes[i]].validatorsList;
+            _self.dailyRewards.submissions[rewardHashes[i]].confirmations = 0;
+            _self.dailyRewards.submissions[rewardHashes[i]].finalized = 0;
+            _self.dailyRewards.submissions[rewardHashes[i]].initializedState = 0;
+        }
+        delete _self.dailyRewards.submittedRewardHashes;
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun May 26 2019 16:25:16 GMT-0400 (EDT)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

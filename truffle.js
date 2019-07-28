@@ -15,8 +15,9 @@ module.exports = {
     test: {
       host: 'localhost',
       port: 8545,
-      network_id: '*',      
+      network_id: '5777',      
     },
+    
     rinkeby0: {
       provider() {
         if (!process.env.DEVOPS_PK0 || !process.env.DEVOPS_WALLET0) {
@@ -120,7 +121,7 @@ module.exports = {
       },
       network_id: '1',
       wallet_address: process.env.DEVOPS_WALLET2,
-      gas: utils.gasLimit('vestingContract'),
+      gas: utils.gasLimit('deployJurisdiction'),
       gasPrice: utils.gasPrice(),      
     },
     coverage: {

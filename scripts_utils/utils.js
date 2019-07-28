@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 const csv = require('fast-csv');
 const fs = require('fs');
 
-const gasPrice = () => 21 * (10 ** 9);
+const gasPrice = () => 20 * (10 ** 9);
 const gasLimit = (type) => {
   switch (type) {
     case 'attribute': // assign attribute to specific address
@@ -12,8 +12,10 @@ const gasLimit = (type) => {
       return 70000;
     case 'multisig':
       return 250000;
+    case 'setEntitiesViaMultisig':
+      return 600000;
     case 'deployJurisdiction':
-      return 5000000;
+      return 7473430;
     case 'addAttribute': // add attribute to jurisdiction contract
       return 150000;
     case 'addValidator': // add attribute to jurisdiction contract
@@ -24,6 +26,8 @@ const gasLimit = (type) => {
       return 60000;
     case 'vestingContract': // token vestion proxy (864753)
       return 1100000;
+    case 'rewardtest':
+        return 5000000;      
     default:
       return 100000;
   }

@@ -22,7 +22,7 @@ Use node version v8.11.1
 $ npm install --global zos
 
 # Install Ganache-cli globally:
-$ npm install --global ganache-cli
+$ npm install --global ganache-cli@v6.4.1
 
 # Install Truffle globally:
 $ npm install --global truffle@v4.1.12
@@ -45,13 +45,17 @@ $ zos add PropsToken
 $ npm run compile
 
 # Run ganache-cli
-$ npm run testrpc
+$ npm run ganache-cli
 
 # Run contracts test suite
 $ npm run test
 # If fails to bind due to mismatch versions run directly:
-$ NODE_ENV=test truffle test ./test/propstoken.test.js --network test
+$ NODE_ENV=test truffle test ./test/propstoken-0-rewards.test.js --network test
+$ NODE_ENV=test truffle test ./test/propstoken-1-main.test.js --network test
 ```
+
+### [Test Coverage](https://htmlpreview.github.io/?https://raw.githubusercontent.com/propsproject/props-token-distribution/feature/rewards-contracts/coverage/token/index.html)
+
 
 ### Deployment and Distribution
 
@@ -65,7 +69,8 @@ DEVOPS_PK1={private-key-of-proxy-contract-deployer-temp-owner}
 DEVOPS_WALLET1={wallet-of-proxy-contract-deployer-temp-owner}
 DEVOPS_PK2={private-key-of-temp-props-holder-until-distribution-finishes}
 DEVOPS_WALLET2={wallet-of-temp-props-holder-until-distribution-finishes}
-
+# For mainnet also 
+INFURA_KEY={infura-key-of-mainnet-account}
 ```
 
 ```bash
@@ -96,6 +101,28 @@ Compile and deploy the new logic contract using ```bash zos push```
 $ node scripts/upgrade/0_upgrade_via_multisig.js {test/rinkeby/mainnet} {multisig-address-contract-owner}
 ```
 Once enough multisig participants accept the upgrade the contract will be upgraded.
+
+### Rewards Contract Setup
+
+Located under [scripts/setup](scripts/setup) directory.
+Should be run from the controller or if controller is a multisig wallet as one of the participants in the multisig wallet.
+
+## setValidators
+Only after each validator has set themselves up using updateEntity method of the contract manually or by using [props-ethsync:setup-validator](https://github.com/propsproject/props-ethsync#validator-setup)
+```bash
+# Setting the active validators for next day using a multisig wallet (use multisig-wallet-address = none if the account running is the controller)
+$ node scripts/setup/0_set_validators.js {test/rinkeby/mainnet} {multisig-wallet-address} {validator1},{validator2},{validator3} {contract-address}
+```
+Once enough multisig participants accept the transactions the contract will be updated with new set of validators (per contract logic).
+
+## setApplications
+Only after each application has set themselves up using updateEntity method of the contract manually or by using [props-ethsync:setup-application](https://github.com/propsproject/props-ethsync/blob/master/lib/services/application_setup.ts)
+```bash
+# Setting the active applications for next day using a multisig wallet (use multisig-wallet-address = none if the account running is the controller)
+$ node scripts/setup/1_set_applications.js {test/rinkeby/mainnet} {multisig-wallet-address} {application1},{application2},{application3} {contract-address}
+```
+Once enough multisig participants accept the transactions the contract will be updated with new set of applications (per contract logic).
+
 
 ### Adjusting Gas Price and Gas Limits
 

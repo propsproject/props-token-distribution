@@ -22,8 +22,8 @@ if (typeof (multisigWalletForPropsTokenProxy) === 'undefined') {
   process.exit(0);
 }
 
-
-const zosData = JSON.parse(fs.readFileSync(`zos.${networkProvider}.json`, 'utf8'));
+const zosDataFileName = networkProvider === 'test' ? 'zos.dev-5777.json' : `zos.${networkProvider}.json`;
+const zosData = JSON.parse(fs.readFileSync(zosDataFileName, 'utf8'));
 const PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 const OldPropsTokenLogicContractAddress = zosData.proxies['PropsToken/PropsToken'][0].implementation;
 const NewPropsTokenLogicContractAddress = zosData.contracts.PropsToken.address;
@@ -32,7 +32,7 @@ if (OldPropsTokenLogicContractAddress === NewPropsTokenLogicContractAddress) {
   process.exit(0);
 }
 
-const multisigWalletABI = require('.MultiSigWallet.json');
+const multisigWalletABI = require('./MultiSigWallet.json');
 
 const upgradeMetadataFilename = `output/upgrades-${networkProvider}.json`;
 let upgradeData;
@@ -53,19 +53,26 @@ const upgradeDataEntry = {
 
 async function main() {
   // instantiate multisig wallet
-  networkInUse = `${networkProvider}1`;
-  const DevOps1MultiSigOwnerAddress = connectionConfig.networks[networkInUse].wallet_address;
-  const providerDevOps1 = connectionConfig.networks[networkInUse].provider();
-  web3 = new Web3(providerDevOps1);
+  let providerDevOps1;
+  let DevOps1MultiSigOwnerAddress;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
+  if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
+    providerDevOps1 = connectionConfig.networks[networkInUse].provider();
+    web3 = new Web3(providerDevOps1);
+  }
+  if (typeof (connectionConfig.networks[networkInUse].wallet_address) === 'undefined') {
+    web3 = new Web3(new Web3.providers.WebsocketProvider(`ws://${connectionConfig.networks[networkInUse].host}:${connectionConfig.networks[networkInUse].port}`));
+    accounts = await web3.eth.getAccounts();
+    // eslint-disable-next-line prefer-destructuring
+    DevOps1MultiSigOwnerAddress = accounts[2];
+  } else {
+    DevOps1MultiSigOwnerAddress = connectionConfig.networks[networkInUse].wallet_address;
+  }
   const multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
   const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
   // const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();
   const upgradeToEncoded = zos.encodeCall('upgradeTo', ['address'], [NewPropsTokenLogicContractAddress]);
-  console.log(`upgradeToEncoded=${upgradeToEncoded}`);  
-  // 0x3659cfe6000000000000000000000000d848527867b66b29f87708c3cc1d9c39bc56d340
-
-
-  // whitelist beneficianry
+  console.log(`upgradeToEncoded=${upgradeToEncoded}`);
   console.log(`Issuing upgradeTo to ${NewPropsTokenLogicContractAddress} via multisig wallet ${multisigWalletForPropsTokenProxy}`);
   // eslint-disable-next-line no-await-in-loop
   await multiSigContractInstance.methods.submitTransaction(

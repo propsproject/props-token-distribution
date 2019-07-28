@@ -1,11 +1,11 @@
 {
   "contracts": {
     "PropsToken": {
-      "address": "0xF066Adfa4CEAe6901b02b6517C0b4A0f3750D00b",
-      "constructorCode": "608060405234801561001057600080fd5b50613d05806100206000396000f300",
-      "bodyBytecodeHash": "f00969684d4571cde9d3e08921db4565dd6ad32dcc049a5361d07dd3a0ee3f01",
-      "localBytecodeHash": "86e1b6aa4db1913dddb64fe0c4bb5cee58d1be98a5041be66e85e0b0594859f9",
-      "deployedBytecodeHash": "86e1b6aa4db1913dddb64fe0c4bb5cee58d1be98a5041be66e85e0b0594859f9",
+      "address": "0xF8146b5796135FAa7929A5c0e91FD4BfCC01AB9E",
+      "constructorCode": "608060405234801561001057600080fd5b506157c680620000216000396000f300",
+      "bodyBytecodeHash": "a0ad65a569c798331506662daf886132f7a3e4a20816d1cfc436c25210c5f8eb",
+      "localBytecodeHash": "42c9b6e586056814748396ec2c9809eef6b90919673a079112fe946620a206f9",
+      "deployedBytecodeHash": "2c5e52836592ea300f3a1fc5800a15ce47ecc65683859eb59e42b35d4a49b245",
       "types": {
         "t_bool": {
           "id": "t_bool",
@@ -50,6 +50,304 @@
           "id": "t_address",
           "kind": "elementary",
           "label": "address"
+        },
+        "t_struct<PropsRewardsLib.Data>": {
+          "id": "t_struct<PropsRewardsLib.Data>",
+          "kind": "struct",
+          "label": "PropsRewardsLib.Data",
+          "members": [
+            {
+              "label": "applications",
+              "astId": 1583,
+              "type": "t_mapping<t_struct<PropsRewardsLib.RewardedEntity>>",
+              "src": "2506:48:3"
+            },
+            {
+              "label": "applicationsList",
+              "astId": 1586,
+              "type": "t_array:dyn<t_address>",
+              "src": "2564:26:3"
+            },
+            {
+              "label": "validators",
+              "astId": 1590,
+              "type": "t_mapping<t_struct<PropsRewardsLib.RewardedEntity>>",
+              "src": "2627:46:3"
+            },
+            {
+              "label": "validatorsList",
+              "astId": 1593,
+              "type": "t_array:dyn<t_address>",
+              "src": "2683:24:3"
+            },
+            {
+              "label": "parameters",
+              "astId": 1597,
+              "type": "t_mapping<t_struct<PropsRewardsLib.Parameter>>",
+              "src": "2755:41:3"
+            },
+            {
+              "label": "selectedValidators",
+              "astId": 1599,
+              "type": "t_struct<PropsRewardsLib.RewardedEntityList>",
+              "src": "2885:37:3"
+            },
+            {
+              "label": "selectedApplications",
+              "astId": 1601,
+              "type": "t_struct<PropsRewardsLib.RewardedEntityList>",
+              "src": "2974:39:3"
+            },
+            {
+              "label": "dailyRewards",
+              "astId": 1603,
+              "type": "t_struct<PropsRewardsLib.DailyRewards>",
+              "src": "3064:25:3"
+            },
+            {
+              "label": "minSecondsBetweenDays",
+              "astId": 1605,
+              "type": "t_uint256",
+              "src": "3099:29:3"
+            },
+            {
+              "label": "rewardsStartTimestamp",
+              "astId": 1607,
+              "type": "t_uint256",
+              "src": "3138:29:3"
+            },
+            {
+              "label": "maxTotalSupply",
+              "astId": 1609,
+              "type": "t_uint256",
+              "src": "3177:22:3"
+            },
+            {
+              "label": "lastValidatorsRewardsDay",
+              "astId": 1611,
+              "type": "t_uint256",
+              "src": "3209:32:3"
+            }
+          ]
+        },
+        "t_struct<PropsRewardsLib.RewardedEntity>": {
+          "id": "t_struct<PropsRewardsLib.RewardedEntity>",
+          "kind": "struct",
+          "label": "PropsRewardsLib.RewardedEntity",
+          "members": [
+            {
+              "label": "name",
+              "astId": 1525,
+              "type": "t_bytes32",
+              "src": "1012:12:3"
+            },
+            {
+              "label": "rewardsAddress",
+              "astId": 1527,
+              "type": "t_address",
+              "src": "1080:22:3"
+            },
+            {
+              "label": "sidechainAddress",
+              "astId": 1529,
+              "type": "t_address",
+              "src": "1171:24:3"
+            },
+            {
+              "label": "isInitializedState",
+              "astId": 1531,
+              "type": "t_bool",
+              "src": "1252:23:3"
+            },
+            {
+              "label": "entityType",
+              "astId": 1533,
+              "type": "t_enum<PropsRewardsLib.RewardedEntityType>",
+              "src": "1394:29:3"
+            }
+          ]
+        },
+        "t_bytes32": {
+          "id": "t_bytes32",
+          "kind": "elementary",
+          "label": "bytes32"
+        },
+        "t_enum<PropsRewardsLib.RewardedEntityType>": {
+          "id": "t_enum<PropsRewardsLib.RewardedEntityType>",
+          "kind": "enum",
+          "label": "PropsRewardsLib.RewardedEntityType",
+          "members": [
+            "Application",
+            "Validator"
+          ]
+        },
+        "t_mapping<t_struct<PropsRewardsLib.RewardedEntity>>": {
+          "id": "t_mapping<t_struct<PropsRewardsLib.RewardedEntity>>",
+          "valueType": "t_struct<PropsRewardsLib.RewardedEntity>",
+          "label": "mapping(key => PropsRewardsLib.RewardedEntity)",
+          "kind": "mapping"
+        },
+        "t_array:dyn<t_address>": {
+          "id": "t_array:dyn<t_address>",
+          "valueType": "t_address",
+          "length": "dyn",
+          "kind": "array",
+          "label": "address[]"
+        },
+        "t_struct<PropsRewardsLib.Parameter>": {
+          "id": "t_struct<PropsRewardsLib.Parameter>",
+          "kind": "struct",
+          "label": "PropsRewardsLib.Parameter",
+          "members": [
+            {
+              "label": "currentValue",
+              "astId": 1518,
+              "type": "t_uint256",
+              "src": "655:20:3"
+            },
+            {
+              "label": "previousValue",
+              "astId": 1520,
+              "type": "t_uint256",
+              "src": "750:21:3"
+            },
+            {
+              "label": "rewardsDay",
+              "astId": 1522,
+              "type": "t_uint256",
+              "src": "849:18:3"
+            }
+          ]
+        },
+        "t_mapping<t_struct<PropsRewardsLib.Parameter>>": {
+          "id": "t_mapping<t_struct<PropsRewardsLib.Parameter>>",
+          "valueType": "t_struct<PropsRewardsLib.Parameter>",
+          "label": "mapping(key => PropsRewardsLib.Parameter)",
+          "kind": "mapping"
+        },
+        "t_struct<PropsRewardsLib.RewardedEntityList>": {
+          "id": "t_struct<PropsRewardsLib.RewardedEntityList>",
+          "kind": "struct",
+          "label": "PropsRewardsLib.RewardedEntityList",
+          "members": [
+            {
+              "label": "current",
+              "astId": 1538,
+              "type": "t_mapping<t_bool>",
+              "src": "1564:33:3"
+            },
+            {
+              "label": "previous",
+              "astId": 1542,
+              "type": "t_mapping<t_bool>",
+              "src": "1607:34:3"
+            },
+            {
+              "label": "currentList",
+              "astId": 1545,
+              "type": "t_array:dyn<t_address>",
+              "src": "1651:21:3"
+            },
+            {
+              "label": "previousList",
+              "astId": 1548,
+              "type": "t_array:dyn<t_address>",
+              "src": "1682:22:3"
+            },
+            {
+              "label": "rewardsDay",
+              "astId": 1550,
+              "type": "t_uint256",
+              "src": "1714:18:3"
+            }
+          ]
+        },
+        "t_struct<PropsRewardsLib.DailyRewards>": {
+          "id": "t_struct<PropsRewardsLib.DailyRewards>",
+          "kind": "struct",
+          "label": "PropsRewardsLib.DailyRewards",
+          "members": [
+            {
+              "label": "submissions",
+              "astId": 1555,
+              "type": "t_mapping<t_struct<PropsRewardsLib.Submission>>",
+              "src": "1837:43:3"
+            },
+            {
+              "label": "submittedRewardsHashes",
+              "astId": 1558,
+              "type": "t_array:dyn<t_bytes32>",
+              "src": "1890:32:3"
+            },
+            {
+              "label": "totalSupply",
+              "astId": 1560,
+              "type": "t_uint256",
+              "src": "1932:19:3"
+            },
+            {
+              "label": "lastConfirmedRewardsHash",
+              "astId": 1562,
+              "type": "t_bytes32",
+              "src": "1961:32:3"
+            },
+            {
+              "label": "lastApplicationsRewardsDay",
+              "astId": 1564,
+              "type": "t_uint256",
+              "src": "2003:34:3"
+            }
+          ]
+        },
+        "t_struct<PropsRewardsLib.Submission>": {
+          "id": "t_struct<PropsRewardsLib.Submission>",
+          "kind": "struct",
+          "label": "PropsRewardsLib.Submission",
+          "members": [
+            {
+              "label": "validators",
+              "astId": 1569,
+              "type": "t_mapping<t_bool>",
+              "src": "2078:36:3"
+            },
+            {
+              "label": "validatorsList",
+              "astId": 1572,
+              "type": "t_array:dyn<t_address>",
+              "src": "2124:24:3"
+            },
+            {
+              "label": "confirmations",
+              "astId": 1574,
+              "type": "t_uint256",
+              "src": "2158:21:3"
+            },
+            {
+              "label": "finalizedStatus",
+              "astId": 1576,
+              "type": "t_uint256",
+              "src": "2189:23:3"
+            },
+            {
+              "label": "isInitializedState",
+              "astId": 1578,
+              "type": "t_bool",
+              "src": "2270:23:3"
+            }
+          ]
+        },
+        "t_mapping<t_struct<PropsRewardsLib.Submission>>": {
+          "id": "t_mapping<t_struct<PropsRewardsLib.Submission>>",
+          "valueType": "t_struct<PropsRewardsLib.Submission>",
+          "label": "mapping(key => PropsRewardsLib.Submission)",
+          "kind": "mapping"
+        },
+        "t_array:dyn<t_bytes32>": {
+          "id": "t_array:dyn<t_bytes32>",
+          "valueType": "t_bytes32",
+          "length": "dyn",
+          "kind": "array",
+          "label": "bytes32[]"
         }
       },
       "storage": [
@@ -57,113 +355,145 @@
           "contract": "Initializable",
           "path": "zos-lib/contracts/Initializable.sol",
           "label": "initialized",
-          "astId": 1728,
+          "astId": 4131,
           "type": "t_bool",
-          "src": "757:24:9"
+          "src": "757:24:11"
         },
         {
           "contract": "Initializable",
           "path": "zos-lib/contracts/Initializable.sol",
           "label": "initializing",
-          "astId": 1730,
+          "astId": 4133,
           "type": "t_bool",
-          "src": "876:25:9"
+          "src": "876:25:11"
         },
         {
           "contract": "Initializable",
           "path": "zos-lib/contracts/Initializable.sol",
           "label": "______gap",
-          "astId": 1779,
+          "astId": 4182,
           "type": "t_array:50<t_uint256>",
-          "src": "1891:29:9"
+          "src": "1891:29:11"
         },
         {
           "contract": "ERC20Detailed",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol",
           "label": "_name",
-          "astId": 1598,
+          "astId": 4001,
           "type": "t_string",
-          "src": "382:20:7"
+          "src": "382:20:9"
         },
         {
           "contract": "ERC20Detailed",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol",
           "label": "_symbol",
-          "astId": 1600,
+          "astId": 4003,
           "type": "t_string",
-          "src": "406:22:7"
+          "src": "406:22:9"
         },
         {
           "contract": "ERC20Detailed",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol",
           "label": "_decimals",
-          "astId": 1602,
+          "astId": 4005,
           "type": "t_uint8",
-          "src": "432:23:7"
+          "src": "432:23:9"
         },
         {
           "contract": "ERC20Detailed",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol",
           "label": "______gap",
-          "astId": 1654,
+          "astId": 4057,
           "type": "t_array:50<t_uint256>",
-          "src": "1002:29:7"
+          "src": "1002:29:9"
         },
         {
           "contract": "ERC20",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20.sol",
           "label": "_balances",
-          "astId": 1202,
+          "astId": 3605,
           "type": "t_mapping<t_uint256>",
-          "src": "491:46:6"
+          "src": "491:46:8"
         },
         {
           "contract": "ERC20",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20.sol",
           "label": "_allowed",
-          "astId": 1208,
+          "astId": 3611,
           "type": "t_mapping<t_uint256>",
-          "src": "542:66:6"
+          "src": "542:66:8"
         },
         {
           "contract": "ERC20",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20.sol",
           "label": "_totalSupply",
-          "astId": 1210,
+          "astId": 3613,
           "type": "t_uint256",
-          "src": "613:28:6"
+          "src": "613:28:8"
         },
         {
           "contract": "ERC20",
           "path": "openzeppelin-eth/contracts/token/ERC20/ERC20.sol",
           "label": "______gap",
-          "astId": 1587,
+          "astId": 3990,
           "type": "t_array:50<t_uint256>",
-          "src": "6993:29:6"
+          "src": "6993:29:8"
         },
         {
           "contract": "ERC865Token",
           "path": "contracts/token/ERC865Token.sol",
           "label": "hashedTxs",
-          "astId": 13,
+          "astId": 16,
           "type": "t_mapping<t_bool>",
-          "src": "429:34:0"
+          "src": "495:34:0"
         },
         {
           "contract": "PropsTimeBasedTransfers",
           "path": "contracts/token/PropsTimeBasedTransfers.sol",
           "label": "transfersStartTime",
-          "astId": 835,
+          "astId": 3307,
           "type": "t_uint256",
-          "src": "393:33:2"
+          "src": "388:33:4"
         },
         {
           "contract": "PropsTimeBasedTransfers",
           "path": "contracts/token/PropsTimeBasedTransfers.sol",
           "label": "canTransferBeforeStartTime",
-          "astId": 837,
+          "astId": 3309,
           "type": "t_address",
-          "src": "432:41:2"
+          "src": "427:41:4"
+        },
+        {
+          "contract": "PropsRewards",
+          "path": "contracts/token/PropsRewards.sol",
+          "label": "rewardsLibData",
+          "astId": 918,
+          "type": "t_struct<PropsRewardsLib.Data>",
+          "src": "1860:44:2"
+        },
+        {
+          "contract": "PropsRewards",
+          "path": "contracts/token/PropsRewards.sol",
+          "label": "maxTotalSupply",
+          "astId": 920,
+          "type": "t_uint256",
+          "src": "1910:29:2"
+        },
+        {
+          "contract": "PropsRewards",
+          "path": "contracts/token/PropsRewards.sol",
+          "label": "rewardsStartTimestamp",
+          "astId": 922,
+          "type": "t_uint256",
+          "src": "1945:36:2"
+        },
+        {
+          "contract": "PropsRewards",
+          "path": "contracts/token/PropsRewards.sol",
+          "label": "controller",
+          "astId": 924,
+          "type": "t_address",
+          "src": "1987:25:2"
         }
       ],
       "warnings": {
@@ -171,17 +501,36 @@
         "hasSelfDestruct": false,
         "hasDelegateCall": false,
         "hasInitialValuesInDeclarations": false,
-        "uninitializedBaseContracts": []
+        "uninitializedBaseContracts": [],
+        "storageUncheckedVars": [
+          {
+            "contract": "PropsRewards",
+            "path": "contracts/token/PropsRewards.sol",
+            "label": "rewardsLibData",
+            "astId": 918,
+            "type": "t_struct<PropsRewardsLib.Data>",
+            "src": "1860:44:2"
+          }
+        ],
+        "storageDiff": []
       }
     }
   },
-  "solidityLibs": {},
+  "solidityLibs": {
+    "PropsRewardsLib": {
+      "address": "0x293D63660b2aCbab8Ce6A5D358D10dAb3F046a7c",
+      "constructorCode": "613763610030600b82828239805160001a6073146000811461002057610022565bfe5b5030600052607381538281f300",
+      "bodyBytecodeHash": "47bd76bcaad4e04bc1fd3d4b648ee6902200937b0ea523a4ae273218f3dd9370",
+      "localBytecodeHash": "5c52f4f978f01e54ade999f09474ac98c879532db9f21be3483935292da30f33",
+      "deployedBytecodeHash": "5c52f4f978f01e54ade999f09474ac98c879532db9f21be3483935292da30f33"
+    }
+  },
   "proxies": {
     "PropsToken/PropsToken": [
       {
         "address": "0x6fe56C0bcdD471359019FcBC48863d6c3e9d4F41",
         "version": "0.1.0",
-        "implementation": "0xF066Adfa4CEAe6901b02b6517C0b4A0f3750D00b",
+        "implementation": "0x0096b986f603311bf62B735F507aC2a85B774c58",
         "admin": "0xce15b0f07775d192575e76724077423e4722f1b2"
       }
     ],

@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for token/openzeppelin-eth/contracts/introspection/ERC165Checker.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../../index.html">all files</a> / <a href="index.html">token/openzeppelin-eth/contracts/introspection/</a> ERC165Checker.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/11</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/4</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/5</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/12</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.24;
+&nbsp;
+&nbsp;
+/**
+ * @title ERC165Checker
+ * @dev Use `using ERC165Checker for address`; to include this library
+ * https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
+ */
+library ERC165Checker {
+  // As per the EIP-165 spec, no interface should ever match 0xffffffff
+  bytes4 private constant _InterfaceId_Invalid = 0xffffffff;
+&nbsp;
+  bytes4 private constant _InterfaceId_ERC165 = 0x01ffc9a7;
+  /**
+   * 0x01ffc9a7 ===
+   *   bytes4(keccak256('supportsInterface(bytes4)'))
+   */
+&nbsp;
+&nbsp;
+  /**
+   * @notice Query if a contract supports ERC165
+   * @param account The address of the contract to query for support of ERC165
+   * @return true if the contract at account implements ERC165
+   */
+<span class="fstat-no" title="function not covered" >  function supportsERC165(address account)</span>
+    internal
+    view
+    returns (bool)
+  {
+    // Any contract that implements ERC165 must explicitly indicate support of
+    // InterfaceId_ERC165 and explicitly indicate non-support of InterfaceId_Invalid
+<span class="cstat-no" title="statement not covered" >    return supportsERC165Interface(account, _InterfaceId_ERC165) &amp;&amp;</span>
+      !supportsERC165Interface(account, _InterfaceId_Invalid);
+  }
+&nbsp;
+  /**
+   * @notice Query if a contract implements an interface, also checks support of ERC165
+   * @param account The address of the contract to query for support of an interface
+   * @param interfaceId The interface identifier, as specified in ERC-165
+   * @return true if the contract at account indicates support of the interface with
+   * identifier interfaceId, false otherwise
+   * @dev Interface identification is specified in ERC-165.
+   */
+<span class="fstat-no" title="function not covered" >  function supportsInterface(address account, bytes4 interfaceId)</span>
+    internal
+    view
+    returns (bool)
+  {
+    // query support of both ERC165 as per the spec and support of _interfaceId
+<span class="cstat-no" title="statement not covered" >    return supportsERC165(account) &amp;&amp;</span>
+      supportsERC165Interface(account, interfaceId);
+  }
+&nbsp;
+  /**
+   * @notice Query if a contract implements interfaces, also checks support of ERC165
+   * @param account The address of the contract to query for support of an interface
+   * @param interfaceIds A list of interface identifiers, as specified in ERC-165
+   * @return true if the contract at account indicates support all interfaces in the
+   * interfaceIds list, false otherwise
+   * @dev Interface identification is specified in ERC-165.
+   */
+<span class="fstat-no" title="function not covered" >  function supportsInterfaces(address account, bytes4[] interfaceIds)</span>
+    internal
+    view
+    returns (bool)
+  {
+    // query support of ERC165 itself
+<span class="cstat-no" title="statement not covered" >    if (!supportsERC165(account)) {</span>
+<span class="cstat-no" title="statement not covered" >      return false;</span>
+    }
+&nbsp;
+    // query support of each interface in _interfaceIds
+<span class="cstat-no" title="statement not covered" >    for (uint256 i = 0; i &lt; interfaceIds.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >      if (!supportsERC165Interface(account, interfaceIds[i])) {</span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+      }
+    }
+&nbsp;
+    // all interfaces supported
+<span class="cstat-no" title="statement not covered" >    return true;</span>
+  }
+&nbsp;
+  /**
+   * @notice Query if a contract implements an interface, does not check ERC165 support
+   * @param account The address of the contract to query for support of an interface
+   * @param interfaceId The interface identifier, as specified in ERC-165
+   * @return true if the contract at account indicates support of the interface with
+   * identifier interfaceId, false otherwise
+   * @dev Assumes that account contains a contract that supports ERC165, otherwise
+   * the behavior of this method is undefined. This precondition can be checked
+   * with the `supportsERC165` method in this library.
+   * Interface identification is specified in ERC-165.
+   */
+<span class="fstat-no" title="function not covered" >  function supportsERC165Interface(address account, bytes4 interfaceId)</span>
+    private
+    view
+    returns (bool)
+  {
+    // success determines whether the staticcall succeeded and result determines
+    // whether the contract at account indicates support of _interfaceId
+<span class="cstat-no" title="statement not covered" >    (bool success, bool result) = callERC165SupportsInterface(</span>
+      account, interfaceId);
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return (success &amp;&amp; result);</span>
+  }
+&nbsp;
+  /**
+   * @notice Calls the function with selector 0x01ffc9a7 (ERC165) and suppresses throw
+   * @param account The address of the contract to query for support of an interface
+   * @param interfaceId The interface identifier, as specified in ERC-165
+   * @return success true if the STATICCALL succeeded, false otherwise
+   * @return result true if the STATICCALL succeeded and the contract at account
+   * indicates support of the interface with identifier interfaceId, false otherwise
+   */
+<span class="fstat-no" title="function not covered" >  function callERC165SupportsInterface(</span>
+    address account,
+    bytes4 interfaceId
+  )
+    private
+    view
+    returns (bool success, bool result)
+  {
+<span class="cstat-no" title="statement not covered" >    bytes memory encodedParams = abi.encodeWithSelector(</span>
+      _InterfaceId_ERC165,
+      interfaceId
+    );
+&nbsp;
+    // solium-disable-next-line security/no-inline-assembly
+    assembly {
+      let encodedParams_data := add(0x20, encodedParams)
+      let encodedParams_size := mload(encodedParams)
+&nbsp;
+      let output := mload(0x40)  // Find empty storage location using "free memory pointer"
+      mstore(output, 0x0)
+&nbsp;
+      success := staticcall(
+        30000,                 // 30k gas
+        account,              // To addr
+        encodedParams_data,
+        encodedParams_size,
+        output,
+        0x20                   // Outputs are 32 bytes long
+      )
+&nbsp;
+      result := mload(output)  // Load the result
+    }
+  }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun May 26 2019 12:59:19 GMT-0400 (EDT)
+</div>
+</div>
+<script src="../../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../../sorter.js"></script>
+</body>
+</html>

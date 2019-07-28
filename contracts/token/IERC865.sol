@@ -1,15 +1,12 @@
 pragma solidity ^0.4.24;
 
-import "zos-lib/contracts/Initializable.sol";
-import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
-
 /**
  * @title ERC865 Interface
  * @dev see https://github.com/ethereum/EIPs/issues/865
  *
  */
 
-contract IERC865 is Initializable, ERC20 {
+contract IERC865 {
 
     event TransferPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
     event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
