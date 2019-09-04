@@ -39,6 +39,7 @@ if (tokenContract.length > 0) {
   PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 }
 
+console.log('1');
 
 const multisigWalletABI = require('./MultiSigWallet.json');
 
@@ -50,7 +51,7 @@ try {
 } catch (error) {
   setupData = {};
 }
-
+console.log('2');
 if (typeof (setupData.steps) === 'undefined') {
   setupData.steps = [];
 }
@@ -61,6 +62,7 @@ const setupDataEntry = {
 
 async function main() {
   // instantiate multisig wallet
+  console.log('3');
   let providerDevOps1;
   let DevOps1MultiSigOwnerAddress;
   networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
@@ -78,15 +80,22 @@ async function main() {
   }
   let multiSigContractInstance;
   if (multisigWalletForPropsTokenProxy != 'none') {
+    console.log(`3.1 using multsigWallet >${multisigWalletForPropsTokenProxy}<`);
     multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
   }
-    
-  const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
+  let propsContractInstance;
+  console.log(`4 >${PropsTokenContractAddress}<`);  
+  try {
+    propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
+  } catch (e) {
+    console.log(`4 err ${JSON.stringify(e)}`);  
+  }
   // const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
   //get current rewards day
   //const rewardsStartVal = (await instance.methods.rewardsStartTimestamp().call());
   const rewardsTimestamp = await propsContractInstance.methods.rewardsStartTimestamp().call();
   const secondsInDay = networkProvider == 'mainnet' ? 86400 : 3600;
+  console.log(`5 ${rewardsTimestamp}, ${secondsInDay}`);
   const currentTimestamp = Math.floor(Date.now()/1000);
   // return (block.timestamp.sub(_self.rewardsStartTimestamp)).div(_self.minSecondsBetweenDays).add(1);
   const rewardsDay = Math.floor((currentTimestamp - rewardsTimestamp) / secondsInDay) + 1;

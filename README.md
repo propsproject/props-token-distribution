@@ -75,7 +75,7 @@ INFURA_KEY={infura-key-of-mainnet-account}
 
 ```bash
 # Deploy token, and initialize it
-$ node scripts/distribution/0_deploy_token.js {test/rinkeby/mainnet} {timestamp-from-which-transfers-are-available}
+$ node scripts/distribution/0_deploy_token.js {test/rinkeby/mainnet} 0 {secondsInDay} {rewardsBeginTimestamp}
 
 # Distribute to participants
 # CSV file should be built as: 
@@ -89,7 +89,7 @@ $ node scripts/distribution/5_validate_distribution.js {test/rinkeby/mainnet} gr
 
 # Finish distrubtion
 # The owner of the contract is moved to a designated multisig wallet and so do all props not distributed
-$ node scripts/distribution/6_finish_distribution.js {test/rinkeby/mainnet} {multisig-address-remaining-props} {multisig-address-contract-owner}
+$ node scripts/distribution/3_finish_distribution.js {test/rinkeby/mainnet} {multisig-address-remaining-props} {multisig-address-contract-owner}
 ```
 ### Contract Upgrades
 
