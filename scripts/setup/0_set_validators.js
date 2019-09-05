@@ -28,7 +28,7 @@ if (typeof (multisigWalletForPropsTokenProxy) === 'undefined') {
 
 if (validators.length == 0) {
   console.log('Must supply validators comma delimited list');
-  process.exit(0);  
+  process.exit(0);
 }
 let PropsTokenContractAddress;
 if (tokenContract.length > 0) {
@@ -63,7 +63,7 @@ async function main() {
   // instantiate multisig wallet
   let providerDevOps1;
   let DevOps1MultiSigOwnerAddress;
-  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}1`;
+  networkInUse = networkProvider === 'test' ? networkProvider : `${networkProvider}2`;
   if (typeof connectionConfig.networks[networkInUse].provider === 'function') {
     providerDevOps1 = connectionConfig.networks[networkInUse].provider();
     web3 = new Web3(providerDevOps1);
@@ -80,7 +80,7 @@ async function main() {
   if (multisigWalletForPropsTokenProxy != 'none') {
     multiSigContractInstance = new web3.eth.Contract(multisigWalletABI.abi, multisigWalletForPropsTokenProxy);
   }
-    
+
   const propsContractInstance = new web3.eth.Contract(propsTokenContractABI.abi, PropsTokenContractAddress);
   // const propsContractInstance = new web3.eth.Contract(proxyContractABI.abi, PropsTokenContractAddress);
   //get current rewards day
@@ -90,8 +90,8 @@ async function main() {
   const currentTimestamp = Math.floor(Date.now()/1000);
   // return (block.timestamp.sub(_self.rewardsStartTimestamp)).div(_self.minSecondsBetweenDays).add(1);
   const rewardsDay = Math.floor((currentTimestamp - rewardsTimestamp) / secondsInDay) + 1;
-  console.log(`Got rewardsTimestamp=${rewardsTimestamp}, secondsInDay=${secondsInDay}, currentTimestamp=${currentTimestamp}, rewardsDay=${rewardsDay}`);  
-  
+  console.log(`Got rewardsTimestamp=${rewardsTimestamp}, secondsInDay=${secondsInDay}, currentTimestamp=${currentTimestamp}, rewardsDay=${rewardsDay}`);
+
   const encodedData = await propsContractInstance.methods.setValidators(
     rewardsDay,
     validators
@@ -103,7 +103,7 @@ async function main() {
   if (multisigWalletForPropsTokenProxy === 'none') {
     await propsContractInstance.methods.setValidators(
       rewardsDay,
-      validators,      
+      validators,
     ).send({
       from: DevOps1MultiSigOwnerAddress,
       gas: utils.gasLimit('deployJurisdiction'),
@@ -118,7 +118,7 @@ async function main() {
       console.warn(`Error sending transaction:${JSON.stringify(error)}`);
     });
   } else {
-// const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();  
+// const upgradeToEncoded = await propsContractInstance.methods.upgradeTo(NewPropsTokenLogicContractAddress)encodeABI();
   // eslint-disable-next-line no-await-in-loop
   await multiSigContractInstance.methods.submitTransaction(
     PropsTokenContractAddress,
@@ -138,7 +138,7 @@ async function main() {
     console.warn(`Error sending multisig transaction:${error}`);
   });
   }
-  
+
 
   setupData.steps.push(setupDataEntry);
   fs.writeFile(

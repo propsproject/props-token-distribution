@@ -24,7 +24,7 @@ module.exports = {
           process.exit(1);
         } else {
           const pk = process.env.DEVOPS_PK0;
-          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/23485898ade84c7f9418c42a0d0195a6');
         }
         return false;
       },
@@ -38,7 +38,7 @@ module.exports = {
           process.exit(1);
         } else {
           const pk = process.env.DEVOPS_PK1;
-          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/23485898ade84c7f9418c42a0d0195a6');
         }
         return false;
       },
@@ -52,7 +52,7 @@ module.exports = {
           process.exit(1);
         } else {
           const pk = process.env.DEVOPS_PK2;
-          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/23485898ade84c7f9418c42a0d0195a6');
         }
         return false;
       },
@@ -66,7 +66,7 @@ module.exports = {
           process.exit(1);
         } else {
           const pk = process.env.DEVOPS_PK0;
-          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/23485898ade84c7f9418c42a0d0195a6');
         }
         return false;
       },
@@ -80,7 +80,7 @@ module.exports = {
           process.exit(1);
         } else {
           const pk = process.env.DEVOPS_PK1;
-          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/23485898ade84c7f9418c42a0d0195a6');
         }
         return false;
       },
@@ -94,7 +94,7 @@ module.exports = {
           process.exit(1);
         } else {
           const pk = process.env.DEVOPS_PK2;
-          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/bc1b11176a1e4aa98b607fea38eb4d43');
+          return new PrivateKeyProvider(pk, 'https://rinkeby.infura.io/v3/23485898ade84c7f9418c42a0d0195a6');
         }
         return false;
       },
