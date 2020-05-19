@@ -1,3 +1,5 @@
+console.log('start');
+
 const Web3 = require('web3');
 const zos = require('zos-lib');
 // const BigNumber = require('bignumber.js');
@@ -10,9 +12,12 @@ const utils = require('../../scripts_utils/utils');
 
 const networkProvider = process.argv[2];
 const multisigWalletForPropsTokenProxy = process.argv[3];
+console.log('multisigWalletForPropsTokenProxy:'+multisigWalletForPropsTokenProxy);
+console.log('applications:'+String(process.argv[4]).split(","));
 const applications = String(process.argv[4]).split(",");
+console.log('applications arr:'+JSON.stringify(applications));
 const tokenContract = process.argv[5];
-
+console.log('tokenContract:'+tokenContract);
 let networkInUse;
 let web3;
 
@@ -39,7 +44,7 @@ if (tokenContract.length > 0) {
   const zosData = JSON.parse(fs.readFileSync(zosDataFileName, 'utf8'));
   PropsTokenContractAddress = zosData.proxies['PropsToken/PropsToken'][0].address;
 }
-
+console.log('after zos');
 const multisigWalletABI = require('./MultiSigWallet.json');
 
 const setupMetadataFilename = `output/setup-${networkProvider}.json`;

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.16;
 
 import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol";
@@ -48,7 +48,7 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     uint256 totalSupply = 0.6 * 1e9 * (10 ** uint256(decimals));
 
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
-    PropsRewards.initializePostRewardsUpgrade1(_controller, _minSecondsBetweenDays, _rewardsStartTimestamp);
+    PropsRewards.updateController(_controller);
     _mint(_holder, totalSupply);
   }
 }

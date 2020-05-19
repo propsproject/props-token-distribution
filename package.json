@@ -5,11 +5,11 @@
   "scripts": {
     "tdd": "nodemon --watch contracts --watch test --exec 'truffle test --network test'",
     "ganache-cli": "ganache-cli -a 50 -p 8545 -m \"asset member awake bring mosquito lab sustain muscle elephant equip someone obvious\" > /dev/null &",
-    "compile": "truffle compile",
+    "compile": "truffle compile --evm-version istanbul",
     "test": "NODE_ENV=test truffle test ./test/*.test.js --network test --exit",
     "testrewards": "NODE_ENV=test truffle test ./test/propstoken-0-rewards.test.js --network test --exit",
     "coverage": "./node_modules/.bin/solidity-coverage",
-    "postinstall": "cp pending-contracts/openzeppelin-eth-modified/ERC20.sol node_modules/openzeppelin-eth/contracts/token/ERC20/ERC20.sol"
+    "__obsolete__postinstall": "cp pending-contracts/openzeppelin-eth-modified/ERC20.sol node_modules/openzeppelin-eth/contracts/token/ERC20/ERC20.sol"
   },
   "dependencies": {
     "aws-sdk": "^2.411.0",
@@ -19,7 +19,7 @@
     "fast-csv": "^2.4.1",
     "html-to-text": "^4.0.0",
     "mongodb": "^2.2.33",
-    "openzeppelin-eth": "2.0.2",
+    "openzeppelin-eth": "^2.2.0",
     "truffle-contract": "^2.0.5",
     "truffle-hdwallet-provider": "^1.0.2",
     "truffle-privatekey-provider": "^1.0.0",
