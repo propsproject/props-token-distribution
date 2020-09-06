@@ -49,6 +49,7 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
 
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
     PropsRewards.initializePostRewardsUpgrade1(_controller, _minSecondsBetweenDays, _rewardsStartTimestamp);
+    PropsRewards.initializePermitUpgrade("Props Token");
     _mint(_holder, totalSupply);
   }
 }

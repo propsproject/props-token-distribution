@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/math/SafeMath.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-eth/contracts/token/ERC20/SafeERC20.sol";
 import { PropsRewardsLib } from "./PropsRewardsLib.sol";
 
 /**
@@ -11,6 +12,7 @@ import { PropsRewardsLib } from "./PropsRewardsLib.sol";
  **/
 contract PropsRewards is Initializable, ERC20 {
     using SafeMath for uint256;
+    using SafeERC20 for ERC20;
     /*
     *  Events
     */
@@ -77,6 +79,12 @@ contract PropsRewards is Initializable, ERC20 {
     uint256 public rewardsStartTimestamp;
     address public controller; // controller entity
 
+    bytes32 public DOMAIN_SEPARATOR;
+    // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+    mapping(address => uint) public nonces;
+    uint256 public MY_CHAIN_ID;
+
     /*
     *  Modifiers
     */
@@ -86,6 +94,82 @@ contract PropsRewards is Initializable, ERC20 {
             "Must be the controller"
         );
         _;
+    }
+
+    /**
+    * @dev Initialize post separation of rewards contract upgrade
+    * @param _tokenName string token name
+    */
+    function initializePermitUpgrade(string memory _tokenName)
+        public
+        initializer
+    {
+        uint chainId;
+        string memory one = '1';
+        assembly {
+            chainId := chainId
+        }
+
+        MY_CHAIN_ID = chainId;
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
+                keccak256(bytes(_tokenName)),
+                keccak256(bytes(one)),
+                chainId,
+                address(this)
+            )
+        );
+    }
+
+    /**
+    * @dev Allows for approvals to be made via secp256k1 signatures
+    * @param _owner address owner
+    * @param _spender address spender
+    * @param _amount uint spender
+    * @param _deadline uint spender
+    * @param _v uint8 spender
+    * @param _r bytes32 spender
+    * @param _s bytes32 spender
+    */
+    function permit(
+            address _owner,
+            address _spender,
+            uint256 _amount,
+            uint _deadline,
+            uint8 _v,
+            bytes32 _r,
+            bytes32 _s
+        )
+        external
+    {
+        require(_deadline >= block.timestamp, "Permit Expired");
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                DOMAIN_SEPARATOR,
+                keccak256(abi.encode(PERMIT_TYPEHASH, _owner, _spender, _amount, nonces[_owner]++, _deadline))
+            )
+        );
+        address recoveredAddress = ecrecover(digest, _v, _r, _s);
+        require(recoveredAddress != address(0) && recoveredAddress == _owner, "Invalid Signature");
+        _approve(_owner, _spender, _amount);
+    }
+
+    
+    
+    /**
+    * @dev Reclaim all ERC20 compatible tokens
+    * @param _token ERC20 The address of the token contract    
+    */
+    function reclaimToken(ERC20 _token, address _to, uint256 _amount) 
+        external 
+        onlyController 
+    {
+        require(_to != address(0), "Must transfer to recipient");
+        uint256 balance = _token.balanceOf(this);
+        require(_amount <= balance, "Cannot transfer more than balance");
+        _token.safeTransfer(_to, _amount);
     }
 
     /**
