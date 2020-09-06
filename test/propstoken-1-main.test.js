@@ -17,6 +17,7 @@ const waitUntil = require('async-wait-until');
 const ethUtil = require('ethereumjs-util');
 const main = require('../scripts/tests/index.js').main;
 const utils = require('../scripts_utils/utils');
+const { assert } = require('chai');
 //const { soliditySha3 } = require('web3-utils');
 const { keccak256, defaultAbiCoder, toUtf8Bytes } = require('ethers').utils;
 
@@ -105,31 +106,56 @@ contract('main', (_accounts) => {
     it('DOMAIN_SEPARATOR is correct', async () => {
       const domainSeparator = await instance.methods.DOMAIN_SEPARATOR().call();
       const name = await instance.methods.name().call();
-      const chainId = await instance.methods.MY_CHAIN_ID().call();
-      // const chainId = 5777; // test chain id
-      console.log('test chainId='+chainId);// +', myChainId='+myChainId);
-      console.log('test domainSeparator='+domainSeparator);
-      console.log('test keccak256(toUtf8Bytes) 0 = '+keccak256(toUtf8Bytes('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)')));
-      console.log('test keccak256(toUtf8Bytes) 1 = '+keccak256(toUtf8Bytes(name)));
-      console.log('test keccak256(toUtf8Bytes) 2 = '+keccak256(toUtf8Bytes('1')));      
-      console.log('test encode = '+defaultAbiCoder.encode(['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],[keccak256(toUtf8Bytes('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)')),
-      keccak256(toUtf8Bytes(name)),keccak256(toUtf8Bytes('1')),chainId,instance.address]));
-
-      // console.log('test keccack256(encode) = '+keccak256(defaultAbiCoder.encode(['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],[keccak256(toUtf8Bytes('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)')),
-      // keccak256(toUtf8Bytes(name)),keccak256(toUtf8Bytes('1')),1,instance.address])));
+      const chainId = await instance.methods.MY_CHAIN_ID().call();      
       const actualResult = keccak256(defaultAbiCoder.encode(
         ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
         [keccak256(toUtf8Bytes('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)')),
         keccak256(toUtf8Bytes(name)),
         keccak256(toUtf8Bytes('1')),
         chainId,
-        instance.address]));
-      console.log('test actualRestul = '+actualResult);
-      
+        instance.address]));          
       assert.equal(domainSeparator, actualResult);
+    });    
+  });  
+  
+  describe('Reclaim Contract Tokens', async () => {
+    const amount = 1000;
+    let controllerBalance, transferResult, contractBalance, randomWalletBalance, controllerAddress;    
+    const tokenHolderAddress = web3.eth.accounts[3];
+    const randomWalletAddress = web3.eth.accounts[9];
+    it('Contract address can receive tokens', async () => {
+      controllerAddress = await instance.methods.controller().call(); // web3.eth.accounts[2];
+      controllerBalance = web3.fromWei(await instance.methods.balanceOf(controllerAddress).call());
+      transferResult = await instance.methods.transfer(instance.address, web3.toWei(amount)).send({ from:  tokenHolderAddress});
+      contractBalance = web3.fromWei(await instance.methods.balanceOf(instance.address).call());      
+      assert.equal(String(contractBalance), String(amount));      
+    });
+
+    it('Cannot be reclaimed by non controller', async () => {
+      try {
+        expect(await instance.methods.reclaimToken(instance.address, controllerAddress, web3.toWei(amount)).send({ from: randomWalletAddress })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });
+
+    it('Amount reclaimed cannot exceed balance', async () => {
+      try {
+        expect(await instance.methods.reclaimToken(instance.address, randomWalletAddress, web3.toWei(amount + 10)).send({ from: controllerAddress })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });
+
+    it('Reclaim works if done by controller', async () => {
+      const reclaimResult = await instance.methods.reclaimToken(instance.address, randomWalletAddress, web3.toWei(amount)).send({ from: controllerAddress })
+      randomWalletBalance = web3.fromWei(await instance.methods.balanceOf(randomWalletAddress).call());      
+      contractBalance = web3.fromWei(await instance.methods.balanceOf(instance.address).call());
+      assert.equal(String(randomWalletBalance), String(amount));
+      assert.equal(String(contractBalance), "0");      
     });
     
-  });   
+  });  
   
 //});
 
