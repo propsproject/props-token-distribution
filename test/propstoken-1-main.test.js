@@ -12,20 +12,59 @@ This file tests the following propstoken contract functionalities:
 /* eslint-disable no-undef */
 /* eslint-disable prefer-destructuring */
 global.timestamp = Math.floor(Date.now() / 1000) + 20; // now + 60 seconds to allow for further testing when not allowed
-const BigNumber = require('bignumber.js');
+// const { default: BigNumber__ } = require('BigNumber.js');
 const waitUntil = require('async-wait-until');
 const ethUtil = require('ethereumjs-util');
 const main = require('../scripts/tests/index.js').main;
 const utils = require('../scripts_utils/utils');
 const { assert } = require('chai');
 //const { soliditySha3 } = require('web3-utils');
-const { keccak256, defaultAbiCoder, toUtf8Bytes } = require('ethers').utils;
+const { keccak256, defaultAbiCoder, toUtf8Bytes, solidityPack, hexlify } = require('ethers').utils;
+const { BigNumber } = require('ethers');
+const { MaxUint256 } = require('ethers').constants;
 
 const formattedAddress = address => Buffer.from(ethUtil.stripHexPrefix(address), 'hex');
 const formattedInt = int => ethUtil.setLengthLeft(int, 32);
 const formattedBytes32 = bytes => ethUtil.addHexPrefix(bytes.toString('hex'));
 const hashedTightPacked = args => ethUtil.sha3(Buffer.concat(args));
 
+
+const getApprovalDigest = async (name, address, approvalObj, nonce, deadline, chainId) => {
+  const DOMAIN_SEPARATOR = getDomainSeparator(name, address, chainId);
+  const permitTypeHash = await instance.methods.PERMIT_TYPEHASH().call();
+  return keccak256(
+    solidityPack(
+      ['bytes1', 'bytes1', 'bytes32', 'bytes32'],
+      [
+        '0x19',
+        '0x01',
+        DOMAIN_SEPARATOR,
+        keccak256(
+          defaultAbiCoder.encode(
+            ['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256'],
+            [permitTypeHash, approvalObj.owner, approvalObj.spender, BigNumber.from(approvalObj.value), BigNumber.from(nonce), BigNumber.from(deadline)]
+          )
+        )
+      ]
+    )
+  )
+}
+
+
+const getDomainSeparator = function (name, tokenAddress, chainId) {
+  return keccak256(
+    defaultAbiCoder.encode(
+      ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
+      [
+        keccak256(toUtf8Bytes('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)')),
+        keccak256(toUtf8Bytes(name)),
+        keccak256(toUtf8Bytes('1')),
+        chainId,
+        tokenAddress
+      ]
+    )
+  )
+}
 
 let instance;
 contract('main', (_accounts) => {
@@ -50,18 +89,15 @@ contract('main', (_accounts) => {
     });
 
     it('Total Supply is correct', async () => {
-      const totalSupply = new BigNumber(await instance.methods.totalSupply().call());
-      const expectedTotalSupply = new BigNumber(0.6 * (10 ** 9) * (1 * 10 ** 18));
-      // console.log(`totalSupply=${totalSupply.toString()} expectedTotalSupply=${expectedTotalSupply.toString()}`);
-      const isEqual = totalSupply.isEqualTo(expectedTotalSupply);
-      assert.equal(isEqual, true);
+      const totalSupply = BigNumber.from(web3.fromWei(await instance.methods.totalSupply().call()));
+      const expectedTotalSupply = BigNumber.from(0.6 * (10 ** 9));      
+      assert.equal(totalSupply.toString(), expectedTotalSupply.toString());      
     });
 
     it('Total Supply owned by tokenHolder', async () => {
-      const totalSupply = new BigNumber(await instance.methods.totalSupply().call());
-      const tokenHolderBalance = await instance.methods.balanceOf(web3.eth.accounts[3]).call();
-      const isEqual = totalSupply.isEqualTo(tokenHolderBalance);
-      assert.equal(isEqual, true);
+      const totalSupply = BigNumber.from(await instance.methods.totalSupply().call());
+      const tokenHolderBalance = BigNumber.from(await instance.methods.balanceOf(web3.eth.accounts[3]).call());
+      assert.equal(totalSupply.toString(), tokenHolderBalance.toString());      
     });
 
   //   it('Transfer start time is correct', async () => {
@@ -98,6 +134,12 @@ contract('main', (_accounts) => {
   });
 
   describe('Uniswap Permit Tests', async () => {
+
+    let txRes;
+    const bob = { address: web3.eth.accounts[8], pk: 'f34381274ac5cca8a465209bdeafeed0274ddcf7ba1df080df772b73ccad032a' };      
+    const damien = { address: web3.eth.accounts[7], pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
+    const amount = 1000;
+
     it('PERMIT_TYPEHASH is correct', async () => {
       const permitTypeHash = await instance.methods.PERMIT_TYPEHASH().call();
       assert.equal(permitTypeHash, keccak256(toUtf8Bytes('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)')));
@@ -107,15 +149,51 @@ contract('main', (_accounts) => {
       const domainSeparator = await instance.methods.DOMAIN_SEPARATOR().call();
       const name = await instance.methods.name().call();
       const chainId = await instance.methods.MY_CHAIN_ID().call();      
-      const actualResult = keccak256(defaultAbiCoder.encode(
-        ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
-        [keccak256(toUtf8Bytes('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)')),
-        keccak256(toUtf8Bytes(name)),
-        keccak256(toUtf8Bytes('1')),
-        chainId,
-        instance.address]));          
-      assert.equal(domainSeparator, actualResult);
+      const expectedResult = getDomainSeparator(name, instance.address, chainId);      
+      assert.equal(domainSeparator, expectedResult);
     });    
+
+    it('Permit works', async () => {      
+      const name = await instance.methods.name().call();
+      const chainId = await instance.methods.MY_CHAIN_ID().call();      
+      const tokenHolderAddress = web3.eth.accounts[3];      
+      const nonce = await instance.methods.nonces(damien.address).call();
+      let transferResult = await instance.methods.transfer(bob.address, web3.toWei(amount)).send({ from:  tokenHolderAddress});
+      let tokenHolderBalance = web3.fromWei(await instance.methods.balanceOf(tokenHolderAddress).call());
+      let bobBalance = web3.fromWei(await instance.methods.balanceOf(bob.address).call());
+      const deadline = MaxUint256
+      // console.log(`getApprovalDigest(${name}),${instance.address},{${damien.address},${bob.address},${web3.toWei(amount/2)}}, ${nonce}, ${deadline}`);
+      const digest = await getApprovalDigest(name, instance.address, 
+        { owner: damien.address, spender: bob.address, value: web3.toWei(amount / 2) },
+        nonce,
+        deadline,
+        chainId
+      )
+  
+      const { v, r, s } = ethUtil.ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(damien.pk, 'hex'))
+      try {
+        txRes = await instance.methods.permit(damien.address, bob.address, web3.toWei(amount / 2), deadline, v, hexlify(r), hexlify(s)).send({ from: damien.address});
+      } catch (error) {
+        console.log(`Permit tx failed:${error}`);
+        //
+      }
+      // await expect(token.permit(damien.address, bob.address, amount/2, deadline, v, hexlify(r), hexlify(s)))
+      //   .to.emit(token, 'Approval')
+      //   .withArgs(wallet.address, other.address, TEST_AMOUNT)
+      const allowanceDamien = web3.fromWei(await instance.methods.allowance(damien.address, bob.address).call());
+      const nonceDamien = await instance.methods.nonces(damien.address).call();
+      // console.log(`allowanceDamien:${allowanceDamien}`);
+      // console.log(`nonceDamien:${nonceDamien}`);
+      assert.equal(allowanceDamien, String(amount / 2));
+      assert.equal(nonceDamien,'1');      
+    });
+    
+    it('Approval Event Emitted', async () => {
+      //Approval
+      assert.equal(String(txRes.events['Approval'].returnValues['1']).toLowerCase(),String(bob.address).toLowerCase());
+      assert.equal(String(txRes.events['Approval'].returnValues['0']).toLowerCase(),String(damien.address).toLowerCase());
+      assert.equal(Number(web3.fromWei(txRes.events['Approval'].returnValues['2'])), String(amount/2));      
+    });
   });  
   
   describe('Reclaim Contract Tokens', async () => {
