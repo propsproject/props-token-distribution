@@ -135,9 +135,10 @@ contract('main', (_accounts) => {
 
   describe('Uniswap Permit Tests', async () => {
 
-    let txRes;
+    let txRes, bobBalance, damienBalance, aliceBalance;
     const bob = { address: web3.eth.accounts[8], pk: 'f34381274ac5cca8a465209bdeafeed0274ddcf7ba1df080df772b73ccad032a' };      
     const damien = { address: web3.eth.accounts[7], pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
+    const alice = { address: web3.eth.accounts[9], pk: '5027f6ea1ab6cd9fe2bc5c2bbb07d5ec77524529964aafe0d02a76aabaa4917f' };
     const amount = 1000;
 
     it('PERMIT_TYPEHASH is correct', async () => {
@@ -153,14 +154,15 @@ contract('main', (_accounts) => {
       assert.equal(domainSeparator, expectedResult);
     });    
 
+    // in this scenario we have damien and bob funded with 1000 tokens
+    // damien is allowing bob to transfer half of this amount from his (damien) wallet
     it('Permit works', async () => {      
       const name = await instance.methods.name().call();
       const chainId = await instance.methods.MY_CHAIN_ID().call();      
       const tokenHolderAddress = web3.eth.accounts[3];      
-      const nonce = await instance.methods.nonces(damien.address).call();
-      let transferResult = await instance.methods.transfer(bob.address, web3.toWei(amount)).send({ from:  tokenHolderAddress});
-      let tokenHolderBalance = web3.fromWei(await instance.methods.balanceOf(tokenHolderAddress).call());
-      let bobBalance = web3.fromWei(await instance.methods.balanceOf(bob.address).call());
+      const nonce = await instance.methods.nonces(damien.address).call();      
+      await instance.methods.transfer(bob.address, web3.toWei(amount)).send({ from:  tokenHolderAddress});
+      await instance.methods.transfer(damien.address, web3.toWei(amount)).send({ from:  tokenHolderAddress});      
       const deadline = MaxUint256
       // console.log(`getApprovalDigest(${name}),${instance.address},{${damien.address},${bob.address},${web3.toWei(amount/2)}}, ${nonce}, ${deadline}`);
       const digest = await getApprovalDigest(name, instance.address, 
@@ -194,13 +196,41 @@ contract('main', (_accounts) => {
       assert.equal(String(txRes.events['Approval'].returnValues['0']).toLowerCase(),String(damien.address).toLowerCase());
       assert.equal(Number(web3.fromWei(txRes.events['Approval'].returnValues['2'])), String(amount/2));      
     });
+
+    // this scenario follows up on the permit function above
+    // damien allowed bob to transfer up {amount/2} tokens bob is now transferring 
+    it('TranferFrom fail if trying to transfer more than allowed', async () => {            
+      try {
+        expect(await instance.methods.transferFrom(damien.address, alice.address, web3.toWei(amount + 1)).send({ from: bob.address })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }      
+    });
+    // this scenario follows up on the permit function above
+    // damien allowed bob to transfer up {amount/2} tokens bob is now transferring 
+    it('Can use tranferFrom after permit with amount <= allowed', async () => {
+      bobBalance = web3.fromWei(await instance.methods.balanceOf(bob.address).call());
+      damienBalance = web3.fromWei(await instance.methods.balanceOf(damien.address).call());
+      aliceBalance = web3.fromWei(await instance.methods.balanceOf(alice.address).call());      
+      const oldBobBalance = bobBalance;
+      const oldDamienBalance = damienBalance;
+      const oldAliceBalance = aliceBalance;
+      const txRes = await instance.methods.transferFrom(damien.address, alice.address, web3.toWei(amount / 2)).send({ from: bob.address });
+      // console.log(`transferFrom event? ${JSON.stringify(txRes.events['Transfer'].returnValues)}`);      
+      bobBalance = web3.fromWei(await instance.methods.balanceOf(bob.address).call());
+      damienBalance = web3.fromWei(await instance.methods.balanceOf(damien.address).call());
+      aliceBalance = web3.fromWei(await instance.methods.balanceOf(alice.address).call());      
+      assert.equal(Number(aliceBalance), Number(oldAliceBalance) + (amount / 2));
+      assert.equal(Number(bobBalance), Number(oldBobBalance));
+      assert.equal(Number(damienBalance), Number(oldDamienBalance) - (amount / 2));
+    });
   });  
   
   describe('Reclaim Contract Tokens', async () => {
     const amount = 1000;
     let controllerBalance, transferResult, contractBalance, randomWalletBalance, controllerAddress;    
     const tokenHolderAddress = web3.eth.accounts[3];
-    const randomWalletAddress = web3.eth.accounts[9];
+    const randomWalletAddress = web3.eth.accounts[5];
     it('Contract address can receive tokens', async () => {
       controllerAddress = await instance.methods.controller().call(); // web3.eth.accounts[2];
       controllerBalance = web3.fromWei(await instance.methods.balanceOf(controllerAddress).call());
@@ -286,18 +316,18 @@ contract('main', (_accounts) => {
   //   });
   // });
 
-  const alice = { address: '0x1c77BCe3fAc2d7023aB3f9A6369c100FB8B6c7B5', pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
-  const bob = { address: web3.eth.accounts[8], pk: 'f34381274ac5cca8a465209bdeafeed0274ddcf7ba1df080df772b73ccad032a' };
-  const charlie = { address: web3.eth.accounts[9], pk: '5027f6ea1ab6cd9fe2bc5c2bbb07d5ec77524529964aafe0d02a76aabaa4917f' };
-  const damien = { address: web3.eth.accounts[7], pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
-  const to = bob.address;
-  const delegate = charlie.address;
-  const fee = 10;
-  const amount = 100;
-  const propsInWallet = 5000;
-  const alicePrivateKey = Buffer.from(alice.pk, 'hex');
-  let components;
-  let nonce;
+  // const alice = { address: '0x1c77BCe3fAc2d7023aB3f9A6369c100FB8B6c7B5', pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
+  // const bob = { address: web3.eth.accounts[8], pk: 'f34381274ac5cca8a465209bdeafeed0274ddcf7ba1df080df772b73ccad032a' };
+  // const charlie = { address: web3.eth.accounts[9], pk: '5027f6ea1ab6cd9fe2bc5c2bbb07d5ec77524529964aafe0d02a76aabaa4917f' };
+  // const damien = { address: web3.eth.accounts[7], pk: 'c79b0f20fac88d078d1ab0908fcafb31708e83a46fabfe7601d5b0d7bd5b2974' };
+  // const to = bob.address;
+  // const delegate = charlie.address;
+  // const fee = 10;
+  // const amount = 100;
+  // const propsInWallet = 5000;
+  // const alicePrivateKey = Buffer.from(alice.pk, 'hex');
+  // let components;
+  // let nonce;
   // describe('ERC865 compatible logic', async () => {
   //   it('Charlie transfers 100 tokens from Alice to Bob (fee=10)', async () => {
   //     // give alice some props
