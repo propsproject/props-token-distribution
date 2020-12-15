@@ -38,7 +38,8 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     address _holder,
     address _controller,
     uint256 _minSecondsBetweenDays,
-    uint256 _rewardsStartTimestamp
+    uint256 _rewardsStartTimestamp,
+    address _minter
   )
     public
     initializer
@@ -49,7 +50,7 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
 
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
     PropsRewards.initializePostRewardsUpgrade1(_controller, _minSecondsBetweenDays, _rewardsStartTimestamp);
-    PropsRewards.initializePermitUpgrade("Props Token");
+    PropsRewards.initializePermitUpgrade("Props Token",_minter);
     _mint(_holder, totalSupply);
   }
 }

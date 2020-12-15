@@ -78,6 +78,7 @@ contract PropsRewards is Initializable, ERC20 {
     uint256 public maxTotalSupply;
     uint256 public rewardsStartTimestamp;
     address public controller; // controller entity
+    address public minter; // minter entity e.g. props rewards contract
 
     bytes32 public DOMAIN_SEPARATOR;
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
@@ -99,11 +100,13 @@ contract PropsRewards is Initializable, ERC20 {
     /**
     * @dev Initialize post separation of rewards contract upgrade
     * @param _tokenName string token name
+    * @param _minter address minter address
     */
-    function initializePermitUpgrade(string memory _tokenName)
+    function initializePermitUpgrade(string memory _tokenName, address _minter)
         public
         initializer
     {
+        minter = _minter;
         uint chainId;
         string memory one = '1';
         assembly {
@@ -298,6 +301,35 @@ contract PropsRewards is Initializable, ERC20 {
         (
             _controller
         );
+    }
+
+    /**
+    * @dev Allows the controller/owner to update to new minter
+    * @param _minter address address of the new minter
+    */
+    function updateMinter(
+        address _minter
+    )
+        public
+        onlyController
+    {        
+        minter = _minter;
+    }
+
+    /**
+    * @dev Allows the minter to mint tokens to a given address
+    * @param _account address of the receiving account
+    * @param _amount uint256 how much to mint    
+    */
+    function mint(        
+        address _account,
+        uint256 _amount
+    )
+        public        
+    {
+        if (msg.sender != minter) {
+            _mint(_account, _amount);
+        }        
     }
 
     /**
