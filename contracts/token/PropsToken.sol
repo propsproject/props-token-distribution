@@ -30,15 +30,12 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
   /**
    * @dev Initializer function. Called only once when a proxy for the contract is created.
    * @param _holder address that will receive its initial supply and be able to transfer before transfers start time
-   * @param _controller address that will have controller functionality on rewards protocol
-   * @param _minSecondsBetweenDays uint256 seconds required to pass between consecutive rewards day
-   * @param _rewardsStartTimestamp uint256 day 0 timestamp
+   * @param _controller address that will have controller functionality on rewards protocol   
+   * @param _minter address that will have controller functionality on rewards protocol   
    */
   function initialize(
     address _holder,
-    address _controller,
-    uint256 _minSecondsBetweenDays,
-    uint256 _rewardsStartTimestamp,
+    address _controller,    
     address _minter
   )
     public
@@ -49,7 +46,7 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     uint256 totalSupply = 0.6 * 1e9 * (10 ** uint256(decimals));
 
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
-    PropsRewards.initializePostRewardsUpgrade1(_controller, _minSecondsBetweenDays, _rewardsStartTimestamp);
+    PropsRewards.initializePostRewardsUpgrade1(_controller);
     PropsRewards.initializePermitUpgrade("Props Token",_minter);
     _mint(_holder, totalSupply);
   }

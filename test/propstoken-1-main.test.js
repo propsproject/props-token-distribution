@@ -69,10 +69,13 @@ const getDomainSeparator = function (name, tokenAddress, chainId) {
 let instance;
 contract('main', (_accounts) => {
   before(async () => {
-    instance = await main(false);
+    instance = await main();
   });
 
   describe('Basic Setup Test', async () => {
+    const controllerAddress = _accounts[2];
+    const newControllerAddress = _accounts[4];
+
     it('Name should be correct', async () => {
       const name = await instance.methods.name().call();
       assert.equal(name, 'Props Token');
@@ -100,15 +103,34 @@ contract('main', (_accounts) => {
       assert.equal(totalSupply.toString(), tokenHolderBalance.toString());      
     });
 
-  //   it('Transfer start time is correct', async () => {
-  //     const transferStartTime = await instance.methods.transfersStartTime().call();
-  //     assert.equal(transferStartTime, global.timestamp);
-  //   });
+       
+    it('Controller is properly set', async () => {      
+      const currentController = await instance.methods.controller().call();
+      assert.equal(currentController.toLowerCase(), controllerAddress.toLowerCase());
+    });
 
-  //   it('Transfer start time exception address is correct', async () => {
-  //     const canTransferExceptionAddress = await instance.methods.canTransferBeforeStartTime().call();
-  //     assert.equal(String(canTransferExceptionAddress).toLowerCase(), String(web3.eth.accounts[3]).toLowerCase());
-  //   });
+    it('Controller can be changed by controller', async () => {
+      txRes = await instance.methods.updateController(newControllerAddress).send({ from: controllerAddress });      
+      const currentController = await instance.methods.controller().call();
+      assert.equal(currentController.toLowerCase(), newControllerAddress.toLowerCase());
+    });
+
+    it('ControllerUpdated Event Emitted', async () => {
+      assert.equal(String(txRes.events['ControllerUpdated'].returnValues['0']).toLowerCase(),String(newControllerAddress).toLowerCase());      
+    });
+
+    it('Controller cannot be changed by non controller', async () => {
+      try {
+        expect(await instance.methods.updateController(controllerAddress).send({ from: controllerAddress })).to.be.rejectedWith(Error);
+      } catch (error) {
+        //
+      }
+    });
+
+    it('Max Supply is properly set', async () => {      
+      maxTotalSupply = (await instance.methods.maxTotalSupply().call());
+      assert.equal(String(web3.fromWei(maxTotalSupply)), "1000000000");
+    });  
   });
 
   describe('ERC20 Tests', async () => {
