@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
-
+/*
+ THIS CONTRACT IS OBSOLETE AND REMAINS ONLY FOR UPGRADABILITY/STORAGE CONSIDERATIONS
+*/
 /**
  * @title ERC865 Interface
  * @dev see https://github.com/ethereum/EIPs/issues/865

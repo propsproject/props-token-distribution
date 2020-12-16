@@ -4,7 +4,7 @@ import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20Detailed.sol";
 import "./PropsTimeBasedTransfers.sol";
 import "./ERC865Token.sol";
-import "./PropsRewards.sol";
+import "./PropsTokenDetailed.sol";
 
 /**
  * @title PROPSToken
@@ -25,13 +25,13 @@ import "./PropsRewards.sol";
  */
 
 
-contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBasedTransfers, PropsRewards {
+contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBasedTransfers, PropsTokenDetailed {
 
   /**
    * @dev Initializer function. Called only once when a proxy for the contract is created.
    * @param _holder address that will receive its initial supply and be able to transfer before transfers start time
-   * @param _controller address that will have controller functionality on rewards protocol   
-   * @param _minter address that will have controller functionality on rewards protocol   
+   * @param _controller address that will have controller functionality on token   
+   * @param _minter address that will have mint functionality on token
    */
   function initialize(
     address _holder,
@@ -46,8 +46,8 @@ contract PropsToken is Initializable, ERC20Detailed, ERC865Token, PropsTimeBased
     uint256 totalSupply = 0.6 * 1e9 * (10 ** uint256(decimals));
 
     ERC20Detailed.initialize("Props Token", "PROPS", decimals);
-    PropsRewards.initializePostRewardsUpgrade1(_controller);
-    PropsRewards.initializePermitUpgrade("Props Token",_minter);
+    PropsTokenDetailed.initialize(_controller);
+    PropsTokenDetailed.initializePermitUpgrade("Props Token",_minter);
     _mint(_holder, totalSupply);
   }
 }

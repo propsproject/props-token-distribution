@@ -18,9 +18,9 @@ async function main() {
   
   console.log(`Creating an upgradeable instance of PropsToken... with creator=${creatorAddress}, controller=${controllerAddress}, holder=${tokenHolderAddress}, minter=${minterAddress}`);
   try {
-    MyLibrary = Contracts.getFromLocal("PropsRewardsLib")
-    const lib = await myProject.setImplementation(MyLibrary, "PropsRewardsLib");
-    PropsToken.link({ "PropsRewardsLib": lib.address });        
+    MyLibrary = Contracts.getFromLocal("PropsTokenLib")
+    const lib = await myProject.setImplementation(MyLibrary, "PropsTokenLib");
+    PropsToken.link({ "PropsTokenLib": lib.address });        
     const instance = await myProject.createProxy(PropsToken, { initArgs: [tokenHolderAddress, controllerAddress, minterAddress] });
     return instance;
   } catch (error) {

@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
-
+/*
+ THIS CONTRACT IS OBSOLETE AND REMAINS ONLY FOR UPGRADABILITY/STORAGE CONSIDERATIONS
+*/
 import "zos-lib/contracts/Initializable.sol";
 import "openzeppelin-eth/contracts/token/ERC20/ERC20.sol";
 // import { ECDSA } from "openzeppelin-eth/contracts/cryptography/ECDSA.sol";
