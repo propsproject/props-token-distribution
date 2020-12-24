@@ -163,7 +163,7 @@ contract PropsTokenDetailed is Initializable, ERC20 {
     )
         public
         onlyController
-    {        
+    {           
         minter = _minter;
     }
 
@@ -178,9 +178,9 @@ contract PropsTokenDetailed is Initializable, ERC20 {
     )
         public        
     {
-        if (msg.sender != minter) {
-            _mint(_account, _amount);
-        }        
+        require(msg.sender == minter, "Mint fn can be called only by minter");        
+        _mint(_account, _amount);
+          
     }
 
     /**

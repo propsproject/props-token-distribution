@@ -295,15 +295,11 @@ contract('main', (_accounts) => {
     const amount = 1000;
     let controllerBalance, transferResult, contractBalance, randomWalletBalance, prevRandomWalletBalance, controllerAddress;    
     const tokenHolderAddress = web3.eth.accounts[3];
-    const randomWalletAddress = web3.eth.accounts[8];
-    const minderAddress = web3.eth.accounts[4];
-    it('Contract address can receive tokens', async () => {
-      controllerAddress = await instance.methods.controller().call(); // web3.eth.accounts[2];
-      controllerBalance = web3.fromWei(await instance.methods.balanceOf(controllerAddress).call());
-      prevRandomWalletBalance = web3.fromWei(await instance.methods.balanceOf(randomWalletAddress).call());
-      transferResult = await instance.methods.transfer(instance.address, web3.toWei(amount)).send({ from:  tokenHolderAddress});
-      contractBalance = web3.fromWei(await instance.methods.balanceOf(instance.address).call());      
-      assert.equal(String(contractBalance), String(amount));      
+    const randomWalletAddress = web3.eth.accounts[5];
+    const minterAddress = web3.eth.accounts[4];    
+    it('Minter is setup correctly', async () => {      
+      const minterAddressOnChain = await instance.methods.minter().call(); // web3.eth.accounts[2];      
+      assert.equal(minterAddressOnChain.toLowerCase(), minterAddress.toLowerCase());      
     });
 
     it('Cannot mint by non minter address', async () => {
@@ -311,13 +307,20 @@ contract('main', (_accounts) => {
         expect(await instance.methods.mint(randomWalletAddress, web3.toWei(amount)).send({ from: randomWalletAddress })).to.be.rejectedWith(Error);
       } catch (error) {
         //
-      }
+      }      
     });
 
-    it('Mint works by minter', async () => {
-      await instance.methods.mint(randomWalletAddress, web3.toWei(amount)).send({ from: minderAddress })
+    it('Mint works by minter', async () => {      
+      prevRandomWalletBalance = web3.fromWei(await instance.methods.balanceOf(randomWalletAddress).call());
+      await instance.methods.mint(randomWalletAddress, web3.toWei(amount)).send({ from: minterAddress })
       randomWalletBalance = web3.fromWei(await instance.methods.balanceOf(randomWalletAddress).call());            
       assert.equal(String(randomWalletBalance), String(Number(amount)+Number(prevRandomWalletBalance)));
-    });    
+    });
+
+    it('Minter can be updated by controller', async () => {
+      await instance.methods.updateMinter(randomWalletAddress).send({ from: minterAddress })
+      const newMinterAddress = await instance.methods.minter().call();            
+      assert.equal(newMinterAddress.toLowerCase(), randomWalletAddress.toLowerCase());
+    });
   });
 });
