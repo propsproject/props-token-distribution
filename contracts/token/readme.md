@@ -12,7 +12,7 @@ Upgrade of props token contract for supporting Props protocol and minting reward
 - Participating validators: Coinbase, Peerstream and YouNow
 
 https://blog.openzeppelin.com/props-rewards-engine-contracts-audit/
-## March 2021
+### March 2021
 Upgrade of props token contract to support the upgraded Props Protocol.
 - Removed methods related to old protocol (storage remains)
 - Added minter roles for the Protocol’s L2 > L1 bridge
