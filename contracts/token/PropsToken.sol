@@ -35,13 +35,11 @@ contract PropsToken is
      * @dev Initializer function. Called only once when a proxy for the contract is created.
      * @param _holder address that will receive its initial supply and be able to transfer before transfers start time
      * @param _controller address that will have controller functionality on token
-     * @param _minter address that will have mint functionality on token
      */
-    function initialize(
-        address _holder,
-        address _controller,
-        address _minter
-    ) public initializer {
+    function initialize(address _holder, address _controller)
+        public
+        initializer
+    {
         uint8 decimals = 18;
         // total supply is 600,000,000 PROPS specified in AttoPROPS
         uint256 totalSupply = 0.6 * 1e9 * (10**uint256(decimals));

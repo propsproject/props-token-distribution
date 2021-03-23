@@ -27,7 +27,7 @@ contract PropsTokenDetailed is Initializable, ERC20 {
     uint256 public maxTotalSupply;
     uint256 public rewardsStartTimestamp; // OBSOLETE
     address public controller; // controller entity
-    mapping(address => bool) minters;
+    mapping(address => bool) public minters;
 
     bytes32 public DOMAIN_SEPARATOR;
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
@@ -57,7 +57,10 @@ contract PropsTokenDetailed is Initializable, ERC20 {
      * @dev Initialize post separation of rewards contract upgrade
      * @param _tokenName string token name
      */
-    function initializePermitUpgrade(string memory _tokenName) public initializer {
+    function initializePermitUpgrade(string memory _tokenName)
+        public
+        initializer
+    {
         uint256 chainId;
         string memory one = "1";
         assembly {
@@ -116,7 +119,10 @@ contract PropsTokenDetailed is Initializable, ERC20 {
                 )
             );
         address recoveredAddress = ecrecover(digest, _v, _r, _s);
-        require(recoveredAddress != address(0) && recoveredAddress == _owner, "Invalid Signature");
+        require(
+            recoveredAddress != address(0) && recoveredAddress == _owner,
+            "Invalid Signature"
+        );
         _approve(_owner, _spender, _amount);
     }
 
@@ -140,15 +146,14 @@ contract PropsTokenDetailed is Initializable, ERC20 {
      * @param _controller address address of the new controller
      */
     function updateController(address _controller) public onlyController {
-        require(_controller != address(0), "Controller cannot be the zero address");
+        require(
+            _controller != address(0),
+            "Controller cannot be the zero address"
+        );
         controller = _controller;
         emit ControllerUpdated(_controller);
     }
 
-    /**
-     * @dev Allows the controller/owner to update to new minter
-     * @param _minter address address of the new minter
-     */
     function addMinter(address _minter) public onlyController {
         minters[_minter] = true;
     }
@@ -158,13 +163,16 @@ contract PropsTokenDetailed is Initializable, ERC20 {
     }
 
     /**
-     * @dev Allows the minter to mint tokens to a given address
+     * @dev Allows minters to mint tokens to a given address
      * @param _account address of the receiving account
      * @param _amount uint256 how much to mint
      */
     function mint(address _account, uint256 _amount) public {
         require(minters[msg.sender], "Mint fn can be called only by minter");
-        require(totalSupply().add(_amount) <= maxTotalSupply, "Max total supply exceeded");
+        require(
+            totalSupply().add(_amount) <= maxTotalSupply,
+            "Max total supply exceeded"
+        );
         _mint(_account, _amount);
     }
 
@@ -174,7 +182,10 @@ contract PropsTokenDetailed is Initializable, ERC20 {
      * @param _decimals uint256 number of decimals used in total supply
      */
     function _initialize(address _controller, uint256 _decimals) internal {
-        require(maxTotalSupply == 0, "Initialize rewards upgrade1 can happen only once");
+        require(
+            maxTotalSupply == 0,
+            "Initialize rewards upgrade1 can happen only once"
+        );
         controller = _controller;
         // max total supply is 1,000,000,000 PROPS specified in AttoPROPS
         maxTotalSupply = 1 * 1e9 * (10**_decimals);
