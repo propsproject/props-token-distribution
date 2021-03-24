@@ -49,8 +49,6 @@ $ npm run ganache-cli
 
 # Run contracts test suite
 $ npm run test
-# If fails to bind due to mismatch versions run directly:
-$ NODE_ENV=test truffle test ./test/propstoken-0-rewards.test.js --network test
 $ NODE_ENV=test truffle test ./test/propstoken-1-main.test.js --network test
 ```
 
@@ -101,29 +99,6 @@ Compile and deploy the new logic contract using ```bash zos push```
 $ node scripts/upgrade/0_upgrade_via_multisig.js {test/rinkeby/mainnet} {multisig-address-contract-owner}
 ```
 Once enough multisig participants accept the upgrade the contract will be upgraded.
-
-### Rewards Contract Setup
-
-Located under [scripts/setup](scripts/setup) directory.
-Should be run from the controller or if controller is a multisig wallet as one of the participants in the multisig wallet.
-
-## setValidators
-Only after each validator has set themselves up using updateEntity method of the contract manually or by using [props-ethsync:setup-validator](https://github.com/propsproject/props-ethsync#validator-setup)
-```bash
-# Setting the active validators for next day using a multisig wallet (use multisig-wallet-address = none if the account running is the controller)
-$ node scripts/setup/0_set_validators.js {test/rinkeby/mainnet} {multisig-wallet-address} {validator1},{validator2},{validator3} {contract-address}
-```
-Once enough multisig participants accept the transactions the contract will be updated with new set of validators (per contract logic).
-
-## setApplications
-Only after each application has set themselves up using updateEntity method of the contract manually or by using [props-ethsync:setup-application](https://github.com/propsproject/props-ethsync/blob/master/lib/services/application_setup.ts)
-```bash
-# Setting the active applications for next day using a multisig wallet (use multisig-wallet-address = none if the account running is the controller)
-$ node scripts/setup/1_set_applications.js {test/rinkeby/mainnet} {multisig-wallet-address} {application1},{application2},{application3} {contract-address}
-```
-Once enough multisig participants accept the transactions the contract will be updated with new set of applications (per contract logic).
-
-
 ### Adjusting Gas Price and Gas Limits
 
 Located as gasPrice and gasLimit function in [scripts-utils/utils.js](scripts-utils/utils.js)
@@ -132,3 +107,24 @@ Located as gasPrice and gasLimit function in [scripts-utils/utils.js](scripts-ut
 
 [solidity]: https://solidity.readthedocs.io/en/develop/
 [truffle]: http://truffleframework.com/
+
+## History
+### March 2019
+Deployment and distribtion of token with ERC865 support for relays
+
+https://medium.com/@ZeppelinOrg/208e3b20d985
+### July 2019
+Upgrade of props token contract for supporting Props protocol and minting reward props to participating apps and validators.
+- Selected validators transact daily and agree upon daily app rewards to be minted based upon app’s user activity.
+- Apps can register themsleves with a rewards address
+- Controller can whitelist new apps
+- Parameters that control the rewards rate, and other settings controlled by Controller
+- Participating validators: Coinbase, Peerstream and YouNow
+
+https://blog.openzeppelin.com/props-rewards-engine-contracts-audit/
+### March 2021
+Upgrade of props token contract to support the upgraded Props Protocol.
+- Removed methods related to old protocol (storage remains)
+- Added minter roles for the Protocol’s L2 > L1 bridge
+- Added permit
+- Added reclaimTokens for tokens accidently transferred to contract
