@@ -1,14 +1,15 @@
 {
   "contractName": "PropsRewardsLib",
   "abi": [],
-  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582044158351db9ccff23dbdde35adf9c442b589825f73a2aa07ce952794d83179a30029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582044158351db9ccff23dbdde35adf9c442b589825f73a2aa07ce952794d83179a30029",
+  "metadata": "{\"compiler\":{\"version\":\"0.4.25+commit.59dbf8f1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{},\"title\":\"Props Rewards Library\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/george/Development/props/props-token-distribution/contracts/token/PropsRewardsLib.sol\":\"PropsRewardsLib\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/george/Development/props/props-token-distribution/contracts/token/PropsRewardsLib.sol\":{\"keccak256\":\"0x11a48db38730e0f1ad3c9384b8809dec94c6638123f0f469fc41e77cb5361001\",\"urls\":[\"bzzr://5951643984121b932ed18479eb3b0d2f34d11cd31ff230e779249eba30b3b01d\"]},\"openzeppelin-eth/contracts/math/SafeMath.sol\":{\"keccak256\":\"0xca27427124232a675642ba45303b78d5a36e1207ee222030ef249e11eba5a224\",\"urls\":[\"bzzr://013c67962737acca577ecd24e6b6c80f85b05fd03c1c75ab68f65a084f4b4cfd\"]}},\"version\":1}",
+  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820fcee4aabeb0e4689f9cb574729859976bbde43075802dd3a7ae987df58dcd57d0029",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820fcee4aabeb0e4689f9cb574729859976bbde43075802dd3a7ae987df58dcd57d0029",
   "sourceMap": "281:3063:3:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
   "deployedSourceMap": "281:3063:3:-;;;;;;;;",
   "source": "pragma solidity ^0.4.24;\n/*\n THIS CONTRACT IS OBSOLETE AND REMAINS ONLY FOR UPGRADABILITY/STORAGE CONSIDERATIONS\n*/\nimport \"openzeppelin-eth/contracts/math/SafeMath.sol\";\n\n/**\n * @title Props Rewards Library\n * @dev Library to manage application and validators and parameters\n **/\nlibrary PropsRewardsLib {\n    using SafeMath for uint256;\n    /*\n    *  Events\n    */\n\n    /*\n    *  Storage\n    */\n\n    // The various parameters used by the contract\n    enum ParameterName { ApplicationRewardsPercent, ApplicationRewardsMaxVariationPercent, ValidatorMajorityPercent, ValidatorRewardsPercent}\n    enum RewardedEntityType { Application, Validator }\n\n    // Represents a parameter current, previous and time of change\n    struct Parameter {\n        uint256 currentValue;                   // current value in Pphm valid after timestamp\n        uint256 previousValue;                  // previous value in Pphm for use before timestamp\n        uint256 rewardsDay;                     // timestamp of when the value was updated\n    }\n    // Represents application details\n    struct RewardedEntity {\n        bytes32 name;                           // Application name\n        address rewardsAddress;                 // address where rewards will be minted to\n        address sidechainAddress;               // address used on the sidechain\n        bool isInitializedState;                // A way to check if there's something in the map and whether it is already added to the list\n        RewardedEntityType entityType;          // Type of rewarded entity\n    }\n\n    // Represents validators current and previous lists\n    struct RewardedEntityList {\n        mapping (address => bool) current;\n        mapping (address => bool) previous;\n        address[] currentList;\n        address[] previousList;\n        uint256 rewardsDay;\n    }\n\n    // Represents daily rewards submissions and confirmations\n    struct DailyRewards {\n        mapping (bytes32 => Submission) submissions;\n        bytes32[] submittedRewardsHashes;\n        uint256 totalSupply;\n        bytes32 lastConfirmedRewardsHash;\n        uint256 lastApplicationsRewardsDay;\n    }\n\n    struct Submission {\n        mapping (address => bool) validators;\n        address[] validatorsList;\n        uint256 confirmations;\n        uint256 finalizedStatus;               // 0 - initialized, 1 - finalized\n        bool isInitializedState;               // A way to check if there's something in the map and whether it is already added to the list\n    }\n\n\n    // represent the storage structures\n    struct Data {\n        // applications data\n        mapping (address => RewardedEntity) applications;\n        address[] applicationsList;\n        // validators data\n        mapping (address => RewardedEntity) validators;\n        address[] validatorsList;\n        // adjustable parameters data\n        mapping (uint256 => Parameter) parameters; // uint256 is the parameter enum index\n        // the participating validators\n        RewardedEntityList selectedValidators;\n        // the participating applications\n        RewardedEntityList selectedApplications;\n        // daily rewards submission data\n        DailyRewards dailyRewards;\n        uint256 minSecondsBetweenDays;\n        uint256 rewardsStartTimestamp;\n        uint256 maxTotalSupply;\n        uint256 lastValidatorsRewardsDay;\n    }    \n}",
-  "sourcePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/PropsRewardsLib.sol",
+  "sourcePath": "/home/george/Development/props/props-token-distribution/contracts/token/PropsRewardsLib.sol",
   "ast": {
-    "absolutePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/PropsRewardsLib.sol",
+    "absolutePath": "/home/george/Development/props/props-token-distribution/contracts/token/PropsRewardsLib.sol",
     "exportedSymbols": {
       "PropsRewardsLib": [
         484
@@ -1326,1328 +1327,1383 @@
     "src": "0:3344:3"
   },
   "legacyAST": {
-    "absolutePath": "/Users/jretina/Programming/PROPSProject/props-token-distribution/contracts/token/PropsRewardsLib.sol",
-    "exportedSymbols": {
-      "PropsRewardsLib": [
-        484
-      ]
+    "attributes": {
+      "absolutePath": "/home/george/Development/props/props-token-distribution/contracts/token/PropsRewardsLib.sol",
+      "exportedSymbols": {
+        "PropsRewardsLib": [
+          484
+        ]
+      }
     },
-    "id": 485,
-    "nodeType": "SourceUnit",
-    "nodes": [
+    "children": [
       {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "^",
+            "0.4",
+            ".24"
+          ]
+        },
         "id": 375,
-        "literals": [
-          "solidity",
-          "^",
-          "0.4",
-          ".24"
-        ],
-        "nodeType": "PragmaDirective",
+        "name": "PragmaDirective",
         "src": "0:24:3"
       },
       {
-        "absolutePath": "openzeppelin-eth/contracts/math/SafeMath.sol",
-        "file": "openzeppelin-eth/contracts/math/SafeMath.sol",
+        "attributes": {
+          "SourceUnit": 777,
+          "absolutePath": "openzeppelin-eth/contracts/math/SafeMath.sol",
+          "file": "openzeppelin-eth/contracts/math/SafeMath.sol",
+          "scope": 485,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
         "id": 376,
-        "nodeType": "ImportDirective",
-        "scope": 485,
-        "sourceUnit": 777,
-        "src": "116:54:3",
-        "symbolAliases": [],
-        "unitAlias": ""
+        "name": "ImportDirective",
+        "src": "116:54:3"
       },
       {
-        "baseContracts": [],
-        "contractDependencies": [],
-        "contractKind": "library",
-        "documentation": "@title Props Rewards Library\n@dev Library to manage application and validators and parameters*",
-        "fullyImplemented": true,
-        "id": 484,
-        "linearizedBaseContracts": [
-          484
-        ],
-        "name": "PropsRewardsLib",
-        "nodeType": "ContractDefinition",
-        "nodes": [
+        "attributes": {
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "library",
+          "documentation": "@title Props Rewards Library\n@dev Library to manage application and validators and parameters*",
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            484
+          ],
+          "name": "PropsRewardsLib",
+          "scope": 485
+        },
+        "children": [
           {
+            "children": [
+              {
+                "attributes": {
+                  "contractScope": null,
+                  "name": "SafeMath",
+                  "referencedDeclaration": 776,
+                  "type": "library SafeMath"
+                },
+                "id": 377,
+                "name": "UserDefinedTypeName",
+                "src": "317:8:3"
+              },
+              {
+                "attributes": {
+                  "name": "uint256",
+                  "type": "uint256"
+                },
+                "id": 378,
+                "name": "ElementaryTypeName",
+                "src": "330:7:3"
+              }
+            ],
             "id": 379,
-            "libraryName": {
-              "contractScope": null,
-              "id": 377,
-              "name": "SafeMath",
-              "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 776,
-              "src": "317:8:3",
-              "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$776",
-                "typeString": "library SafeMath"
-              }
-            },
-            "nodeType": "UsingForDirective",
-            "src": "311:27:3",
-            "typeName": {
-              "id": 378,
-              "name": "uint256",
-              "nodeType": "ElementaryTypeName",
-              "src": "330:7:3",
-              "typeDescriptions": {
-                "typeIdentifier": "t_uint256",
-                "typeString": "uint256"
-              }
-            }
+            "name": "UsingForDirective",
+            "src": "311:27:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.ParameterName",
-            "id": 384,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.ParameterName",
+              "name": "ParameterName"
+            },
+            "children": [
               {
+                "attributes": {
+                  "name": "ApplicationRewardsPercent"
+                },
                 "id": 380,
-                "name": "ApplicationRewardsPercent",
-                "nodeType": "EnumValue",
+                "name": "EnumValue",
                 "src": "474:25:3"
               },
               {
+                "attributes": {
+                  "name": "ApplicationRewardsMaxVariationPercent"
+                },
                 "id": 381,
-                "name": "ApplicationRewardsMaxVariationPercent",
-                "nodeType": "EnumValue",
+                "name": "EnumValue",
                 "src": "501:37:3"
               },
               {
+                "attributes": {
+                  "name": "ValidatorMajorityPercent"
+                },
                 "id": 382,
-                "name": "ValidatorMajorityPercent",
-                "nodeType": "EnumValue",
+                "name": "EnumValue",
                 "src": "540:24:3"
               },
               {
+                "attributes": {
+                  "name": "ValidatorRewardsPercent"
+                },
                 "id": 383,
-                "name": "ValidatorRewardsPercent",
-                "nodeType": "EnumValue",
+                "name": "EnumValue",
                 "src": "566:23:3"
               }
             ],
-            "name": "ParameterName",
-            "nodeType": "EnumDefinition",
+            "id": 384,
+            "name": "EnumDefinition",
             "src": "453:137:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.RewardedEntityType",
-            "id": 387,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.RewardedEntityType",
+              "name": "RewardedEntityType"
+            },
+            "children": [
               {
+                "attributes": {
+                  "name": "Application"
+                },
                 "id": 385,
-                "name": "Application",
-                "nodeType": "EnumValue",
+                "name": "EnumValue",
                 "src": "621:11:3"
               },
               {
+                "attributes": {
+                  "name": "Validator"
+                },
                 "id": 386,
-                "name": "Validator",
-                "nodeType": "EnumValue",
+                "name": "EnumValue",
                 "src": "634:9:3"
               }
             ],
-            "name": "RewardedEntityType",
-            "nodeType": "EnumDefinition",
+            "id": 387,
+            "name": "EnumDefinition",
             "src": "595:50:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.Parameter",
-            "id": 394,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.Parameter",
+              "name": "Parameter",
+              "scope": 484,
+              "visibility": "public"
+            },
+            "children": [
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "currentValue",
+                  "scope": 394,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 388,
+                    "name": "ElementaryTypeName",
+                    "src": "745:7:3"
+                  }
+                ],
                 "id": 389,
-                "name": "currentValue",
-                "nodeType": "VariableDeclaration",
-                "scope": 394,
-                "src": "745:20:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 388,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "745:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "745:20:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "previousValue",
+                  "scope": 394,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 390,
+                    "name": "ElementaryTypeName",
+                    "src": "840:7:3"
+                  }
+                ],
                 "id": 391,
-                "name": "previousValue",
-                "nodeType": "VariableDeclaration",
-                "scope": 394,
-                "src": "840:21:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 390,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "840:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "840:21:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "rewardsDay",
+                  "scope": 394,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 392,
+                    "name": "ElementaryTypeName",
+                    "src": "939:7:3"
+                  }
+                ],
                 "id": 393,
-                "name": "rewardsDay",
-                "nodeType": "VariableDeclaration",
-                "scope": 394,
-                "src": "939:18:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 392,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "939:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "939:18:3"
               }
             ],
-            "name": "Parameter",
-            "nodeType": "StructDefinition",
-            "scope": 484,
-            "src": "718:309:3",
-            "visibility": "public"
+            "id": 394,
+            "name": "StructDefinition",
+            "src": "718:309:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.RewardedEntity",
-            "id": 405,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.RewardedEntity",
+              "name": "RewardedEntity",
+              "scope": 484,
+              "visibility": "public"
+            },
+            "children": [
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "name",
+                  "scope": 405,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "bytes32",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "bytes32",
+                      "type": "bytes32"
+                    },
+                    "id": 395,
+                    "name": "ElementaryTypeName",
+                    "src": "1102:7:3"
+                  }
+                ],
                 "id": 396,
-                "name": "name",
-                "nodeType": "VariableDeclaration",
-                "scope": 405,
-                "src": "1102:12:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_bytes32",
-                  "typeString": "bytes32"
-                },
-                "typeName": {
-                  "id": 395,
-                  "name": "bytes32",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "1102:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1102:12:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "rewardsAddress",
+                  "scope": 405,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "address",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "address",
+                      "type": "address"
+                    },
+                    "id": 397,
+                    "name": "ElementaryTypeName",
+                    "src": "1170:7:3"
+                  }
+                ],
                 "id": 398,
-                "name": "rewardsAddress",
-                "nodeType": "VariableDeclaration",
-                "scope": 405,
-                "src": "1170:22:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_address",
-                  "typeString": "address"
-                },
-                "typeName": {
-                  "id": 397,
-                  "name": "address",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "1170:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1170:22:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "sidechainAddress",
+                  "scope": 405,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "address",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "address",
+                      "type": "address"
+                    },
+                    "id": 399,
+                    "name": "ElementaryTypeName",
+                    "src": "1261:7:3"
+                  }
+                ],
                 "id": 400,
-                "name": "sidechainAddress",
-                "nodeType": "VariableDeclaration",
-                "scope": 405,
-                "src": "1261:24:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_address",
-                  "typeString": "address"
-                },
-                "typeName": {
-                  "id": 399,
-                  "name": "address",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "1261:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1261:24:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "isInitializedState",
+                  "scope": 405,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "bool",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "bool",
+                      "type": "bool"
+                    },
+                    "id": 401,
+                    "name": "ElementaryTypeName",
+                    "src": "1342:4:3"
+                  }
+                ],
                 "id": 402,
-                "name": "isInitializedState",
-                "nodeType": "VariableDeclaration",
-                "scope": 405,
-                "src": "1342:23:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_bool",
-                  "typeString": "bool"
-                },
-                "typeName": {
-                  "id": 401,
-                  "name": "bool",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "1342:4:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bool",
-                    "typeString": "bool"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1342:23:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "entityType",
+                  "scope": 405,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "enum PropsRewardsLib.RewardedEntityType",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "contractScope": null,
+                      "name": "RewardedEntityType",
+                      "referencedDeclaration": 387,
+                      "type": "enum PropsRewardsLib.RewardedEntityType"
+                    },
+                    "id": 403,
+                    "name": "UserDefinedTypeName",
+                    "src": "1484:18:3"
+                  }
+                ],
                 "id": 404,
-                "name": "entityType",
-                "nodeType": "VariableDeclaration",
-                "scope": 405,
-                "src": "1484:29:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_enum$_RewardedEntityType_$387",
-                  "typeString": "enum PropsRewardsLib.RewardedEntityType"
-                },
-                "typeName": {
-                  "contractScope": null,
-                  "id": 403,
-                  "name": "RewardedEntityType",
-                  "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 387,
-                  "src": "1484:18:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_RewardedEntityType_$387",
-                    "typeString": "enum PropsRewardsLib.RewardedEntityType"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1484:29:3"
               }
             ],
-            "name": "RewardedEntity",
-            "nodeType": "StructDefinition",
-            "scope": 484,
-            "src": "1070:486:3",
-            "visibility": "public"
+            "id": 405,
+            "name": "StructDefinition",
+            "src": "1070:486:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.RewardedEntityList",
-            "id": 422,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.RewardedEntityList",
+              "name": "RewardedEntityList",
+              "scope": 484,
+              "visibility": "public"
+            },
+            "children": [
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "current",
+                  "scope": 422,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "mapping(address => bool)",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "type": "mapping(address => bool)"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 406,
+                        "name": "ElementaryTypeName",
+                        "src": "1663:7:3"
+                      },
+                      {
+                        "attributes": {
+                          "name": "bool",
+                          "type": "bool"
+                        },
+                        "id": 407,
+                        "name": "ElementaryTypeName",
+                        "src": "1674:4:3"
+                      }
+                    ],
+                    "id": 408,
+                    "name": "Mapping",
+                    "src": "1654:25:3"
+                  }
+                ],
                 "id": 409,
-                "name": "current",
-                "nodeType": "VariableDeclaration",
-                "scope": 422,
-                "src": "1654:33:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
-                  "typeString": "mapping(address => bool)"
-                },
-                "typeName": {
-                  "id": 408,
-                  "keyType": {
-                    "id": 406,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1663:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "nodeType": "Mapping",
-                  "src": "1654:25:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
-                    "typeString": "mapping(address => bool)"
-                  },
-                  "valueType": {
-                    "id": 407,
-                    "name": "bool",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1674:4:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
-                    }
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1654:33:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "previous",
+                  "scope": 422,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "mapping(address => bool)",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "type": "mapping(address => bool)"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 410,
+                        "name": "ElementaryTypeName",
+                        "src": "1706:7:3"
+                      },
+                      {
+                        "attributes": {
+                          "name": "bool",
+                          "type": "bool"
+                        },
+                        "id": 411,
+                        "name": "ElementaryTypeName",
+                        "src": "1717:4:3"
+                      }
+                    ],
+                    "id": 412,
+                    "name": "Mapping",
+                    "src": "1697:25:3"
+                  }
+                ],
                 "id": 413,
-                "name": "previous",
-                "nodeType": "VariableDeclaration",
-                "scope": 422,
-                "src": "1697:34:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
-                  "typeString": "mapping(address => bool)"
-                },
-                "typeName": {
-                  "id": 412,
-                  "keyType": {
-                    "id": 410,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1706:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "nodeType": "Mapping",
-                  "src": "1697:25:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
-                    "typeString": "mapping(address => bool)"
-                  },
-                  "valueType": {
-                    "id": 411,
-                    "name": "bool",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1717:4:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
-                    }
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1697:34:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "currentList",
+                  "scope": 422,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "address[]",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "length": null,
+                      "type": "address[]"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 414,
+                        "name": "ElementaryTypeName",
+                        "src": "1741:7:3"
+                      }
+                    ],
+                    "id": 415,
+                    "name": "ArrayTypeName",
+                    "src": "1741:9:3"
+                  }
+                ],
                 "id": 416,
-                "name": "currentList",
-                "nodeType": "VariableDeclaration",
-                "scope": 422,
-                "src": "1741:21:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                  "typeString": "address[]"
-                },
-                "typeName": {
-                  "baseType": {
-                    "id": 414,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1741:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "id": 415,
-                  "length": null,
-                  "nodeType": "ArrayTypeName",
-                  "src": "1741:9:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                    "typeString": "address[]"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1741:21:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "previousList",
+                  "scope": 422,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "address[]",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "length": null,
+                      "type": "address[]"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 417,
+                        "name": "ElementaryTypeName",
+                        "src": "1772:7:3"
+                      }
+                    ],
+                    "id": 418,
+                    "name": "ArrayTypeName",
+                    "src": "1772:9:3"
+                  }
+                ],
                 "id": 419,
-                "name": "previousList",
-                "nodeType": "VariableDeclaration",
-                "scope": 422,
-                "src": "1772:22:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                  "typeString": "address[]"
-                },
-                "typeName": {
-                  "baseType": {
-                    "id": 417,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1772:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "id": 418,
-                  "length": null,
-                  "nodeType": "ArrayTypeName",
-                  "src": "1772:9:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                    "typeString": "address[]"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1772:22:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "rewardsDay",
+                  "scope": 422,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 420,
+                    "name": "ElementaryTypeName",
+                    "src": "1804:7:3"
+                  }
+                ],
                 "id": 421,
-                "name": "rewardsDay",
-                "nodeType": "VariableDeclaration",
-                "scope": 422,
-                "src": "1804:18:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 420,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "1804:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1804:18:3"
               }
             ],
-            "name": "RewardedEntityList",
-            "nodeType": "StructDefinition",
-            "scope": 484,
-            "src": "1618:211:3",
-            "visibility": "public"
+            "id": 422,
+            "name": "StructDefinition",
+            "src": "1618:211:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.DailyRewards",
-            "id": 436,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.DailyRewards",
+              "name": "DailyRewards",
+              "scope": 484,
+              "visibility": "public"
+            },
+            "children": [
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "submissions",
+                  "scope": 436,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "mapping(bytes32 => struct PropsRewardsLib.Submission)",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "type": "mapping(bytes32 => struct PropsRewardsLib.Submission)"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "bytes32",
+                          "type": "bytes32"
+                        },
+                        "id": 423,
+                        "name": "ElementaryTypeName",
+                        "src": "1936:7:3"
+                      },
+                      {
+                        "attributes": {
+                          "contractScope": null,
+                          "name": "Submission",
+                          "referencedDeclaration": 450,
+                          "type": "struct PropsRewardsLib.Submission"
+                        },
+                        "id": 424,
+                        "name": "UserDefinedTypeName",
+                        "src": "1947:10:3"
+                      }
+                    ],
+                    "id": 425,
+                    "name": "Mapping",
+                    "src": "1927:31:3"
+                  }
+                ],
                 "id": 426,
-                "name": "submissions",
-                "nodeType": "VariableDeclaration",
-                "scope": 436,
-                "src": "1927:43:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Submission_$450_storage_$",
-                  "typeString": "mapping(bytes32 => struct PropsRewardsLib.Submission)"
-                },
-                "typeName": {
-                  "id": 425,
-                  "keyType": {
-                    "id": 423,
-                    "name": "bytes32",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1936:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes32",
-                      "typeString": "bytes32"
-                    }
-                  },
-                  "nodeType": "Mapping",
-                  "src": "1927:31:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Submission_$450_storage_$",
-                    "typeString": "mapping(bytes32 => struct PropsRewardsLib.Submission)"
-                  },
-                  "valueType": {
-                    "contractScope": null,
-                    "id": 424,
-                    "name": "Submission",
-                    "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 450,
-                    "src": "1947:10:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Submission_$450_storage_ptr",
-                      "typeString": "struct PropsRewardsLib.Submission"
-                    }
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1927:43:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "submittedRewardsHashes",
+                  "scope": 436,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "bytes32[]",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "length": null,
+                      "type": "bytes32[]"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "bytes32",
+                          "type": "bytes32"
+                        },
+                        "id": 427,
+                        "name": "ElementaryTypeName",
+                        "src": "1980:7:3"
+                      }
+                    ],
+                    "id": 428,
+                    "name": "ArrayTypeName",
+                    "src": "1980:9:3"
+                  }
+                ],
                 "id": 429,
-                "name": "submittedRewardsHashes",
-                "nodeType": "VariableDeclaration",
-                "scope": 436,
-                "src": "1980:32:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
-                  "typeString": "bytes32[]"
-                },
-                "typeName": {
-                  "baseType": {
-                    "id": 427,
-                    "name": "bytes32",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1980:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes32",
-                      "typeString": "bytes32"
-                    }
-                  },
-                  "id": 428,
-                  "length": null,
-                  "nodeType": "ArrayTypeName",
-                  "src": "1980:9:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
-                    "typeString": "bytes32[]"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "1980:32:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "totalSupply",
+                  "scope": 436,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 430,
+                    "name": "ElementaryTypeName",
+                    "src": "2022:7:3"
+                  }
+                ],
                 "id": 431,
-                "name": "totalSupply",
-                "nodeType": "VariableDeclaration",
-                "scope": 436,
-                "src": "2022:19:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 430,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2022:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2022:19:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "lastConfirmedRewardsHash",
+                  "scope": 436,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "bytes32",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "bytes32",
+                      "type": "bytes32"
+                    },
+                    "id": 432,
+                    "name": "ElementaryTypeName",
+                    "src": "2051:7:3"
+                  }
+                ],
                 "id": 433,
-                "name": "lastConfirmedRewardsHash",
-                "nodeType": "VariableDeclaration",
-                "scope": 436,
-                "src": "2051:32:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_bytes32",
-                  "typeString": "bytes32"
-                },
-                "typeName": {
-                  "id": 432,
-                  "name": "bytes32",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2051:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2051:32:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "lastApplicationsRewardsDay",
+                  "scope": 436,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 434,
+                    "name": "ElementaryTypeName",
+                    "src": "2093:7:3"
+                  }
+                ],
                 "id": 435,
-                "name": "lastApplicationsRewardsDay",
-                "nodeType": "VariableDeclaration",
-                "scope": 436,
-                "src": "2093:34:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 434,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2093:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2093:34:3"
               }
             ],
-            "name": "DailyRewards",
-            "nodeType": "StructDefinition",
-            "scope": 484,
-            "src": "1897:237:3",
-            "visibility": "public"
+            "id": 436,
+            "name": "StructDefinition",
+            "src": "1897:237:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.Submission",
-            "id": 450,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.Submission",
+              "name": "Submission",
+              "scope": 484,
+              "visibility": "public"
+            },
+            "children": [
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "validators",
+                  "scope": 450,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "mapping(address => bool)",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "type": "mapping(address => bool)"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 437,
+                        "name": "ElementaryTypeName",
+                        "src": "2177:7:3"
+                      },
+                      {
+                        "attributes": {
+                          "name": "bool",
+                          "type": "bool"
+                        },
+                        "id": 438,
+                        "name": "ElementaryTypeName",
+                        "src": "2188:4:3"
+                      }
+                    ],
+                    "id": 439,
+                    "name": "Mapping",
+                    "src": "2168:25:3"
+                  }
+                ],
                 "id": 440,
-                "name": "validators",
-                "nodeType": "VariableDeclaration",
-                "scope": 450,
-                "src": "2168:36:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
-                  "typeString": "mapping(address => bool)"
-                },
-                "typeName": {
-                  "id": 439,
-                  "keyType": {
-                    "id": 437,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2177:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "nodeType": "Mapping",
-                  "src": "2168:25:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
-                    "typeString": "mapping(address => bool)"
-                  },
-                  "valueType": {
-                    "id": 438,
-                    "name": "bool",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2188:4:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
-                    }
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2168:36:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "validatorsList",
+                  "scope": 450,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "address[]",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "length": null,
+                      "type": "address[]"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 441,
+                        "name": "ElementaryTypeName",
+                        "src": "2214:7:3"
+                      }
+                    ],
+                    "id": 442,
+                    "name": "ArrayTypeName",
+                    "src": "2214:9:3"
+                  }
+                ],
                 "id": 443,
-                "name": "validatorsList",
-                "nodeType": "VariableDeclaration",
-                "scope": 450,
-                "src": "2214:24:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                  "typeString": "address[]"
-                },
-                "typeName": {
-                  "baseType": {
-                    "id": 441,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2214:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "id": 442,
-                  "length": null,
-                  "nodeType": "ArrayTypeName",
-                  "src": "2214:9:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                    "typeString": "address[]"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2214:24:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "confirmations",
+                  "scope": 450,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 444,
+                    "name": "ElementaryTypeName",
+                    "src": "2248:7:3"
+                  }
+                ],
                 "id": 445,
-                "name": "confirmations",
-                "nodeType": "VariableDeclaration",
-                "scope": 450,
-                "src": "2248:21:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 444,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2248:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2248:21:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "finalizedStatus",
+                  "scope": 450,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 446,
+                    "name": "ElementaryTypeName",
+                    "src": "2279:7:3"
+                  }
+                ],
                 "id": 447,
-                "name": "finalizedStatus",
-                "nodeType": "VariableDeclaration",
-                "scope": 450,
-                "src": "2279:23:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 446,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2279:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2279:23:3"
               },
               {
-                "constant": false,
-                "id": 449,
-                "name": "isInitializedState",
-                "nodeType": "VariableDeclaration",
-                "scope": 450,
-                "src": "2360:23:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_bool",
-                  "typeString": "bool"
+                "attributes": {
+                  "constant": false,
+                  "name": "isInitializedState",
+                  "scope": 450,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "bool",
+                  "value": null,
+                  "visibility": "internal"
                 },
-                "typeName": {
-                  "id": 448,
-                  "name": "bool",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2360:4:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bool",
-                    "typeString": "bool"
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "bool",
+                      "type": "bool"
+                    },
+                    "id": 448,
+                    "name": "ElementaryTypeName",
+                    "src": "2360:4:3"
                   }
-                },
-                "value": null,
-                "visibility": "internal"
+                ],
+                "id": 449,
+                "name": "VariableDeclaration",
+                "src": "2360:23:3"
               }
             ],
-            "name": "Submission",
-            "nodeType": "StructDefinition",
-            "scope": 484,
-            "src": "2140:358:3",
-            "visibility": "public"
+            "id": 450,
+            "name": "StructDefinition",
+            "src": "2140:358:3"
           },
           {
-            "canonicalName": "PropsRewardsLib.Data",
-            "id": 483,
-            "members": [
+            "attributes": {
+              "canonicalName": "PropsRewardsLib.Data",
+              "name": "Data",
+              "scope": 484,
+              "visibility": "public"
+            },
+            "children": [
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "applications",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "mapping(address => struct PropsRewardsLib.RewardedEntity)",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "type": "mapping(address => struct PropsRewardsLib.RewardedEntity)"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 451,
+                        "name": "ElementaryTypeName",
+                        "src": "2605:7:3"
+                      },
+                      {
+                        "attributes": {
+                          "contractScope": null,
+                          "name": "RewardedEntity",
+                          "referencedDeclaration": 405,
+                          "type": "struct PropsRewardsLib.RewardedEntity"
+                        },
+                        "id": 452,
+                        "name": "UserDefinedTypeName",
+                        "src": "2616:14:3"
+                      }
+                    ],
+                    "id": 453,
+                    "name": "Mapping",
+                    "src": "2596:35:3"
+                  }
+                ],
                 "id": 454,
-                "name": "applications",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "2596:48:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_address_$_t_struct$_RewardedEntity_$405_storage_$",
-                  "typeString": "mapping(address => struct PropsRewardsLib.RewardedEntity)"
-                },
-                "typeName": {
-                  "id": 453,
-                  "keyType": {
-                    "id": 451,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2605:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "nodeType": "Mapping",
-                  "src": "2596:35:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_mapping$_t_address_$_t_struct$_RewardedEntity_$405_storage_$",
-                    "typeString": "mapping(address => struct PropsRewardsLib.RewardedEntity)"
-                  },
-                  "valueType": {
-                    "contractScope": null,
-                    "id": 452,
-                    "name": "RewardedEntity",
-                    "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 405,
-                    "src": "2616:14:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_RewardedEntity_$405_storage_ptr",
-                      "typeString": "struct PropsRewardsLib.RewardedEntity"
-                    }
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2596:48:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "applicationsList",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "address[]",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "length": null,
+                      "type": "address[]"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 455,
+                        "name": "ElementaryTypeName",
+                        "src": "2654:7:3"
+                      }
+                    ],
+                    "id": 456,
+                    "name": "ArrayTypeName",
+                    "src": "2654:9:3"
+                  }
+                ],
                 "id": 457,
-                "name": "applicationsList",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "2654:26:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                  "typeString": "address[]"
-                },
-                "typeName": {
-                  "baseType": {
-                    "id": 455,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2654:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "id": 456,
-                  "length": null,
-                  "nodeType": "ArrayTypeName",
-                  "src": "2654:9:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                    "typeString": "address[]"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2654:26:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "validators",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "mapping(address => struct PropsRewardsLib.RewardedEntity)",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "type": "mapping(address => struct PropsRewardsLib.RewardedEntity)"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 458,
+                        "name": "ElementaryTypeName",
+                        "src": "2726:7:3"
+                      },
+                      {
+                        "attributes": {
+                          "contractScope": null,
+                          "name": "RewardedEntity",
+                          "referencedDeclaration": 405,
+                          "type": "struct PropsRewardsLib.RewardedEntity"
+                        },
+                        "id": 459,
+                        "name": "UserDefinedTypeName",
+                        "src": "2737:14:3"
+                      }
+                    ],
+                    "id": 460,
+                    "name": "Mapping",
+                    "src": "2717:35:3"
+                  }
+                ],
                 "id": 461,
-                "name": "validators",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "2717:46:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_address_$_t_struct$_RewardedEntity_$405_storage_$",
-                  "typeString": "mapping(address => struct PropsRewardsLib.RewardedEntity)"
-                },
-                "typeName": {
-                  "id": 460,
-                  "keyType": {
-                    "id": 458,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2726:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "nodeType": "Mapping",
-                  "src": "2717:35:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_mapping$_t_address_$_t_struct$_RewardedEntity_$405_storage_$",
-                    "typeString": "mapping(address => struct PropsRewardsLib.RewardedEntity)"
-                  },
-                  "valueType": {
-                    "contractScope": null,
-                    "id": 459,
-                    "name": "RewardedEntity",
-                    "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 405,
-                    "src": "2737:14:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_RewardedEntity_$405_storage_ptr",
-                      "typeString": "struct PropsRewardsLib.RewardedEntity"
-                    }
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2717:46:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "validatorsList",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "address[]",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "length": null,
+                      "type": "address[]"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "type": "address"
+                        },
+                        "id": 462,
+                        "name": "ElementaryTypeName",
+                        "src": "2773:7:3"
+                      }
+                    ],
+                    "id": 463,
+                    "name": "ArrayTypeName",
+                    "src": "2773:9:3"
+                  }
+                ],
                 "id": 464,
-                "name": "validatorsList",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "2773:24:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                  "typeString": "address[]"
-                },
-                "typeName": {
-                  "baseType": {
-                    "id": 462,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2773:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "id": 463,
-                  "length": null,
-                  "nodeType": "ArrayTypeName",
-                  "src": "2773:9:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
-                    "typeString": "address[]"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2773:24:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "parameters",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "mapping(uint256 => struct PropsRewardsLib.Parameter)",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "type": "mapping(uint256 => struct PropsRewardsLib.Parameter)"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 465,
+                        "name": "ElementaryTypeName",
+                        "src": "2854:7:3"
+                      },
+                      {
+                        "attributes": {
+                          "contractScope": null,
+                          "name": "Parameter",
+                          "referencedDeclaration": 394,
+                          "type": "struct PropsRewardsLib.Parameter"
+                        },
+                        "id": 466,
+                        "name": "UserDefinedTypeName",
+                        "src": "2865:9:3"
+                      }
+                    ],
+                    "id": 467,
+                    "name": "Mapping",
+                    "src": "2845:30:3"
+                  }
+                ],
                 "id": 468,
-                "name": "parameters",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "2845:41:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Parameter_$394_storage_$",
-                  "typeString": "mapping(uint256 => struct PropsRewardsLib.Parameter)"
-                },
-                "typeName": {
-                  "id": 467,
-                  "keyType": {
-                    "id": 465,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2854:7:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "nodeType": "Mapping",
-                  "src": "2845:30:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Parameter_$394_storage_$",
-                    "typeString": "mapping(uint256 => struct PropsRewardsLib.Parameter)"
-                  },
-                  "valueType": {
-                    "contractScope": null,
-                    "id": 466,
-                    "name": "Parameter",
-                    "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 394,
-                    "src": "2865:9:3",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Parameter_$394_storage_ptr",
-                      "typeString": "struct PropsRewardsLib.Parameter"
-                    }
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2845:41:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "selectedValidators",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "struct PropsRewardsLib.RewardedEntityList",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "contractScope": null,
+                      "name": "RewardedEntityList",
+                      "referencedDeclaration": 422,
+                      "type": "struct PropsRewardsLib.RewardedEntityList"
+                    },
+                    "id": 469,
+                    "name": "UserDefinedTypeName",
+                    "src": "2975:18:3"
+                  }
+                ],
                 "id": 470,
-                "name": "selectedValidators",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "2975:37:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_RewardedEntityList_$422_storage_ptr",
-                  "typeString": "struct PropsRewardsLib.RewardedEntityList"
-                },
-                "typeName": {
-                  "contractScope": null,
-                  "id": 469,
-                  "name": "RewardedEntityList",
-                  "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 422,
-                  "src": "2975:18:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_RewardedEntityList_$422_storage_ptr",
-                    "typeString": "struct PropsRewardsLib.RewardedEntityList"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "2975:37:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "selectedApplications",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "struct PropsRewardsLib.RewardedEntityList",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "contractScope": null,
+                      "name": "RewardedEntityList",
+                      "referencedDeclaration": 422,
+                      "type": "struct PropsRewardsLib.RewardedEntityList"
+                    },
+                    "id": 471,
+                    "name": "UserDefinedTypeName",
+                    "src": "3064:18:3"
+                  }
+                ],
                 "id": 472,
-                "name": "selectedApplications",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "3064:39:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_RewardedEntityList_$422_storage_ptr",
-                  "typeString": "struct PropsRewardsLib.RewardedEntityList"
-                },
-                "typeName": {
-                  "contractScope": null,
-                  "id": 471,
-                  "name": "RewardedEntityList",
-                  "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 422,
-                  "src": "3064:18:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_RewardedEntityList_$422_storage_ptr",
-                    "typeString": "struct PropsRewardsLib.RewardedEntityList"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "3064:39:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "dailyRewards",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "struct PropsRewardsLib.DailyRewards",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "contractScope": null,
+                      "name": "DailyRewards",
+                      "referencedDeclaration": 436,
+                      "type": "struct PropsRewardsLib.DailyRewards"
+                    },
+                    "id": 473,
+                    "name": "UserDefinedTypeName",
+                    "src": "3154:12:3"
+                  }
+                ],
                 "id": 474,
-                "name": "dailyRewards",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "3154:25:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_DailyRewards_$436_storage_ptr",
-                  "typeString": "struct PropsRewardsLib.DailyRewards"
-                },
-                "typeName": {
-                  "contractScope": null,
-                  "id": 473,
-                  "name": "DailyRewards",
-                  "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 436,
-                  "src": "3154:12:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_DailyRewards_$436_storage_ptr",
-                    "typeString": "struct PropsRewardsLib.DailyRewards"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "3154:25:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "minSecondsBetweenDays",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 475,
+                    "name": "ElementaryTypeName",
+                    "src": "3189:7:3"
+                  }
+                ],
                 "id": 476,
-                "name": "minSecondsBetweenDays",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "3189:29:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 475,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "3189:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "3189:29:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "rewardsStartTimestamp",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 477,
+                    "name": "ElementaryTypeName",
+                    "src": "3228:7:3"
+                  }
+                ],
                 "id": 478,
-                "name": "rewardsStartTimestamp",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "3228:29:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 477,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "3228:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "3228:29:3"
               },
               {
-                "constant": false,
+                "attributes": {
+                  "constant": false,
+                  "name": "maxTotalSupply",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 479,
+                    "name": "ElementaryTypeName",
+                    "src": "3267:7:3"
+                  }
+                ],
                 "id": 480,
-                "name": "maxTotalSupply",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "3267:22:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
-                },
-                "typeName": {
-                  "id": 479,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "3267:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  }
-                },
-                "value": null,
-                "visibility": "internal"
+                "name": "VariableDeclaration",
+                "src": "3267:22:3"
               },
               {
-                "constant": false,
-                "id": 482,
-                "name": "lastValidatorsRewardsDay",
-                "nodeType": "VariableDeclaration",
-                "scope": 483,
-                "src": "3299:32:3",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_uint256",
-                  "typeString": "uint256"
+                "attributes": {
+                  "constant": false,
+                  "name": "lastValidatorsRewardsDay",
+                  "scope": 483,
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "type": "uint256",
+                  "value": null,
+                  "visibility": "internal"
                 },
-                "typeName": {
-                  "id": 481,
-                  "name": "uint256",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "3299:7:3",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "uint256",
+                      "type": "uint256"
+                    },
+                    "id": 481,
+                    "name": "ElementaryTypeName",
+                    "src": "3299:7:3"
                   }
-                },
-                "value": null,
-                "visibility": "internal"
+                ],
+                "id": 482,
+                "name": "VariableDeclaration",
+                "src": "3299:32:3"
               }
             ],
-            "name": "Data",
-            "nodeType": "StructDefinition",
-            "scope": 484,
-            "src": "2545:793:3",
-            "visibility": "public"
+            "id": 483,
+            "name": "StructDefinition",
+            "src": "2545:793:3"
           }
         ],
-        "scope": 485,
+        "id": 484,
+        "name": "ContractDefinition",
         "src": "281:3063:3"
       }
     ],
+    "id": 485,
+    "name": "SourceUnit",
     "src": "0:3344:3"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+    "version": "0.4.25+commit.59dbf8f1.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.1",
-  "updatedAt": "2021-03-24T07:35:19.700Z"
+  "schemaVersion": "3.3.4",
+  "updatedAt": "2021-04-02T09:51:14.567Z",
+  "devdoc": {
+    "methods": {},
+    "title": "Props Rewards Library"
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }

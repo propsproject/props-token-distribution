@@ -61,11 +61,14 @@ contract PropsRewards is Initializable, ERC20 {
         public
         initializer
     {
-        uint256 chainId;
+        // We hardcode the chain id
+        uint256 chainId = 1;
         string memory one = "1";
-        assembly {
-            chainId := chainId
-        }
+
+        // Solidity 0.4 does not support chain ids
+        // assembly {
+        //     chainId := chainid()
+        // }
 
         MY_CHAIN_ID = chainId;
         DOMAIN_SEPARATOR = keccak256(
