@@ -31,6 +31,8 @@ module.exports = {
       },
       network_id: '4',
       wallet_address: process.env.DEVOPS_WALLET0,
+      gas: utils.gasLimit('deployJurisdiction'),
+      gasPrice: utils.gasPrice(),
     },
     rinkeby1: {
       provider() {
@@ -45,6 +47,8 @@ module.exports = {
       },
       network_id: '4',
       wallet_address: process.env.DEVOPS_WALLET1,
+      gas: utils.gasLimit('deployJurisdiction'),
+      gasPrice: utils.gasPrice(),
     },
     rinkeby2: {
       provider() {
@@ -124,6 +128,48 @@ module.exports = {
       gas: utils.gasLimit('deployJurisdiction'),
       gasPrice: utils.gasPrice(),      
     },
+    poastaging0: {
+      provider() {
+        if (!process.env.DEVOPS_PK0 || !process.env.DEVOPS_WALLET0) {
+          console.log('Must provide environment variable DEVOPS_PK0 and DEVOPS_WALLET0 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK0;
+          return new PrivateKeyProvider(pk, 'http://54.145.137.146:8540');
+        }
+        return false;
+      },
+      network_id: '8995',
+      wallet_address: process.env.DEVOPS_WALLET0,
+    },
+    poastaging1: {
+      provider() {
+        if (!process.env.DEVOPS_PK1 || !process.env.DEVOPS_WALLET1) {
+          console.log('Must provide environment variable DEVOPS_PK1 and DEVOPS_WALLET1 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK1;
+          return new PrivateKeyProvider(pk, 'http://54.145.137.146:8540');
+        }
+        return false;
+      },
+      network_id: '8995',
+      wallet_address: process.env.DEVOPS_WALLET1,
+    },
+    poastaging2: {
+      provider() {
+        if (!process.env.DEVOPS_PK2 || !process.env.DEVOPS_WALLET2) {
+          console.log('Must provide environment variable DEVOPS_PK2 and DEVOPS_WALLET2 when running in this network');
+          process.exit(1);
+        } else {
+          const pk = process.env.DEVOPS_PK2;
+          return new PrivateKeyProvider(pk, 'http://54.145.137.146:8540');
+        }
+        return false;
+      },
+      network_id: '8995',
+      wallet_address: process.env.DEVOPS_WALLET2,
+    },
     coverage: {
       host: 'localhost',
       network_id: '*',
@@ -134,11 +180,19 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: '0.4.25',
+      version: '0.5.16',
       optimizer: {
         enabled: false,
         runs: 500,
       },
+      evmVersion: 'istanbul',
+      settings: {
+        optimizer: {
+          enabled: false,
+          runs: 500,
+        },
+        evmVersion: 'istanbul',
+      }
     },
   },
 };

@@ -209,7 +209,9 @@ async function main() {
             if (throwErrorBeforeCreation) {
               throw new Error('Testing a throw error before vesting contract creation');
             }
-            const tokenVestingProxyContractAddress = await execSync(cmd).toString().replace(/\n$/, '');
+            let tokenVestingProxyContractAddress = await execSync(cmd).toString().replace(/\n$/, '');
+            let regex1 = /.*(0x.*)/g;
+            tokenVestingProxyContractAddress = tokenVestingProxyContractAddress.match(regex1)[0];            
             if (throwErrorAfterCreation) {
               throw new Error('Testing a throw error after vesting contract creation');              
             }            
